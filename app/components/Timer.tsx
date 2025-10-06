@@ -19,19 +19,23 @@ function FlipCard({ value, label }: { value: number; label: string }) {
   }, [value, prevValue]);
 
   return (
-    <div className="relative w-28 sm:w-32 h-24 perspective-1000">
+    <motion.div
+      className="relative w-28 sm:w-32 h-24 perspective-1000"
+      animate={flipping ? { scale: [1, 0.98, 1] } : { scale: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+    >
       {/* --- Cały kafelek --- */}
       <div className="relative w-full h-full rounded-2xl shadow-lg">
-        {/* --- Górna połowa (poprzednia wartość) --- */}
+        {/* --- Górna połowa --- */}
         <div className="absolute top-0 left-0 w-full h-1/2 overflow-hidden rounded-t-2xl bg-white/90 border-b border-[#841D30] flex items-end justify-center">
-          <span className="text-4xl font-bold text-[#4E0113] leading-none translate-y-1/2">
+          <span className="text-5xl font-bold text-[#4E0113] leading-none translate-y-1/2">
             {flipping ? value : prevValue}
           </span>
         </div>
 
-        {/* --- Dolna połowa (aktualna wartość) --- */}
+        {/* --- Dolna połowa --- */}
         <div className="absolute bottom-0 left-0 w-full h-1/2 overflow-hidden rounded-b-2xl bg-white/80 flex items-start justify-center">
-          <span className="text-4xl font-bold text-[#4E0113] leading-none -translate-y-1/2">
+          <span className="text-5xl font-bold text-[#4E0113] leading-none -translate-y-1/2">
             {flipping ? prevValue : value}
           </span>
         </div>
@@ -43,44 +47,55 @@ function FlipCard({ value, label }: { value: number; label: string }) {
               {/* Klapka górna (stara wartość spada) */}
               <motion.div
                 key="flip-top"
-                initial={{ rotateX: 0 }}
-                animate={{ rotateX: -90 }}
+                initial={{ rotateX: 0, boxShadow: "0 0 0 rgba(0,0,0,0)" }}
+                animate={{
+                  rotateX: -90,
+                  boxShadow: "0 10px 20px rgba(0,0,0,0.2)",
+                }}
                 transition={{ duration: 0.3, ease: "easeIn" }}
-                className="absolute top-0 left-0 w-full h-1/2 origin-bottom bg-white/90 border-b border-[#841D30] overflow-hidden rounded-t-2xl flex items-end justify-center"
+                className="absolute top-0 left-0 w-full h-1/2 origin-bottom bg-white border-b border-[#841D30] overflow-hidden rounded-t-2xl flex items-end justify-center"
                 style={{ backfaceVisibility: "hidden" }}
               >
-                <span className="text-4xl font-bold text-[#4E0113] leading-none translate-y-1/2">
+                <span className="text-5xl font-bold text-[#4E0113] leading-none translate-y-1/2">
                   {prevValue}
                 </span>
+                {/* Lekki cień pod klapką */}
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
               </motion.div>
 
               {/* Klapka dolna (nowa wartość podnosi się) */}
               <motion.div
                 key="flip-bottom"
-                initial={{ rotateX: 90 }}
-                animate={{ rotateX: 0 }}
-                transition={{ duration: 0.3, ease: "easeOut", delay: 0.3 }}
-                className="absolute bottom-0 left-0 w-full h-1/2 origin-top bg-white/80 overflow-hidden rounded-b-2xl flex items-start justify-center"
+                initial={{
+                  rotateX: 90,
+                  boxShadow: "0 -10px 20px rgba(0,0,0,0.3)",
+                }}
+                animate={{ rotateX: 0, boxShadow: "0 0 0 rgba(0,0,0,0)" }}
+                transition={{
+                  duration: 0.3,
+                  ease: "easeOut",
+                  delay: 0.3,
+                }}
+                className="absolute bottom-0 left-0 w-full h-1/2 origin-top bg-white overflow-hidden rounded-b-2xl flex items-start justify-center"
                 style={{ backfaceVisibility: "hidden" }}
               >
-                <span className="text-4xl font-bold text-[#4E0113] leading-none -translate-y-1/2">
+                <span className="text-5xl font-bold text-[#4E0113] leading-none -translate-y-1/2">
                   {value}
                 </span>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
               </motion.div>
             </>
           )}
         </AnimatePresence>
       </div>
 
-      {/* --- Etykieta pod kafelkiem --- */}
+      {/* --- Etykieta --- */}
       <p className="text-[#841D30] text-sm sm:text-base mt-2 text-center font-medium">
         {label}
       </p>
-    </div>
+    </motion.div>
   );
 }
-
-
 
 export default function Timer() {
   const [now, setNow] = useState(new Date());

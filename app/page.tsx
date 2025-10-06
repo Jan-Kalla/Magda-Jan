@@ -10,13 +10,22 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function Home() {
   const [now, setNow] = useState(new Date());
   const [mounted, setMounted] = useState(false);
+  const [activeImage, setActiveImage] = useState(0);
 
   useEffect(() => {
     setMounted(true);
     const timer = setInterval(() => {
       setNow(new Date());
     }, 1000);
-    return () => clearInterval(timer);
+
+    const imageInterval = setInterval(() => {
+      setActiveImage((prev) => (prev === 0 ? 1 : 0));
+    }, 8000); 
+
+    return () => {
+      clearInterval(timer);
+      clearInterval(imageInterval);
+    };
   }, []);
 
   if (!mounted) return null;
@@ -128,10 +137,64 @@ export default function Home() {
       {/* === Sekcja z licznikiem === */}
       <Timer />
 
-      {/* Dalsza zawartość */}
-      <section className="relative z-10 bg-gradient-to-b from-[#FAD6C8] to-[#4E0113] h-[100vh] flex items-center justify-center text-white text-2xl md:text-3xl">
-        w dół ➡️
-      </section>
+{/* === Sekcja z kościołem i mapą === */}
+<section className="relative z-10 bg-gradient-to-b from-[#FAD6C8] to-[#A46C6E] px-8 py-20 flex flex-col lg:flex-row items-stretch gap-12 text-[#4E0113]">
+
+  {/* Tekst po lewej */}
+  <div className="flex-1 flex flex-col justify-center text-lg md:text-xl leading-relaxed text-center lg:text-right">
+    <p><strong>Kościół pw. św. Piotra i Pawła</strong></p>
+    <p>ul. Staromiejska 95, 43-190 Mikołów</p>
+    <p>Uroczystość rozpocznie się <strong>19 lipca 2026 o godzinie 12:00</strong></p>
+  </div>
+
+  {/* Zdjęcie po prawej – pełna wysokość sekcji */}
+  <div className="relative flex-1 h-[1200px] lg:h-auto min-h-[1000px] overflow-hidden rounded-xl shadow-lg">
+    <AnimatePresence mode="sync">
+      <motion.div
+        key={activeImage}
+        initial={{ opacity: 0, scale: 1 }}
+        animate={{ opacity: 1, scale: 1.4 }}
+        exit={{ opacity: 0 }}
+        transition={{
+          opacity: { duration: 1 },
+          scale: { duration: 8, ease: "linear" }
+        }}
+        className="absolute inset-0"
+      >
+        <Image
+          src={activeImage === 0 ? "/fotki/kosciol1.jpg" : "/fotki/kosciol2.jpg"}
+          alt="Kościół"
+          fill
+          className="object-cover object-center"
+        />
+      </motion.div>
+    </AnimatePresence>
+  </div>
+</section>
+
+{/* === Mapa i przycisk === */}
+<section className="relative z-10 bg-gradient-to-b from-[#A46C6E] to-[#4E0113] px-8 pb-20 flex flex-col items-center gap-8 text-[#4E0113]">
+  <div className="w-full max-w-5xl h-96 rounded-xl overflow-hidden shadow-lg">
+    <iframe
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2567.435861597826!2d18.8195421!3d50.2111077!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4716cb485ab357c1%3A0xfc642914f2d6cac0!2sKo%C5%9Bci%C3%B3%C5%82%20Rzymskokatolicki%20pw.%20%C5%9Bw.%20Piotra%20i%20Paw%C5%82a!5e0!3m2!1spl!2spl!4v1696600000000!5m2!1spl!2spl"
+      width="100%"
+      height="100%"
+      style={{ border: 0 }}
+      allowFullScreen
+      loading="lazy"
+      referrerPolicy="no-referrer-when-downgrade"
+    />
+  </div>
+
+<a
+  href="https://www.google.com/maps/place/Kościół+Rzymskokatolicki+pw.+św.+Piotra+i+Pawła/@50.208576,18.8218448,17z/data=!4m6!3m5!1s0x4716cb485ab357c1:0xfc642914f2d6cac0!8m2!3d50.208576!4d18.8218448!16s%2Fg%2F122qyybm"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="mt-6 px-6 py-3 bg-[#75897D] text-[#4E0113] rounded-full text-lg hover:bg-[#FAD6C8] transition"
+>
+  Otwórz w Google Maps
+</a>
+</section>
     </>
   );
 }
