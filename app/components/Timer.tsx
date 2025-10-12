@@ -44,14 +44,11 @@ function FlipCard({ value, label }: { value: number; label: string }) {
         <AnimatePresence>
           {flipping && (
             <>
-              {/* Klapka górna (stara wartość spada) */}
+              {/* Klapka górna */}
               <motion.div
                 key="flip-top"
-                initial={{ rotateX: 0, boxShadow: "0 0 0 rgba(0,0,0,0)" }}
-                animate={{
-                  rotateX: -90,
-                  boxShadow: "0 10px 20px rgba(0,0,0,0.2)",
-                }}
+                initial={{ rotateX: 0 }}
+                animate={{ rotateX: -90 }}
                 transition={{ duration: 0.3, ease: "easeIn" }}
                 className="absolute top-0 left-0 w-full h-1/2 origin-bottom bg-white border-b border-[#841D30] overflow-hidden rounded-t-2xl flex items-end justify-center"
                 style={{ backfaceVisibility: "hidden" }}
@@ -59,30 +56,20 @@ function FlipCard({ value, label }: { value: number; label: string }) {
                 <span className="text-5xl font-bold text-[#4E0113] leading-none translate-y-1/2">
                   {prevValue}
                 </span>
-                {/* Lekki cień pod klapką */}
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
               </motion.div>
 
-              {/* Klapka dolna (nowa wartość podnosi się) */}
+              {/* Klapka dolna */}
               <motion.div
                 key="flip-bottom"
-                initial={{
-                  rotateX: 90,
-                  boxShadow: "0 -10px 20px rgba(0,0,0,0.3)",
-                }}
-                animate={{ rotateX: 0, boxShadow: "0 0 0 rgba(0,0,0,0)" }}
-                transition={{
-                  duration: 0.3,
-                  ease: "easeOut",
-                  delay: 0.3,
-                }}
+                initial={{ rotateX: 90 }}
+                animate={{ rotateX: 0 }}
+                transition={{ duration: 0.3, ease: "easeOut", delay: 0.3 }}
                 className="absolute bottom-0 left-0 w-full h-1/2 origin-top bg-white overflow-hidden rounded-b-2xl flex items-start justify-center"
                 style={{ backfaceVisibility: "hidden" }}
               >
                 <span className="text-5xl font-bold text-[#4E0113] leading-none -translate-y-1/2">
                   {value}
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
               </motion.div>
             </>
           )}
@@ -99,10 +86,24 @@ function FlipCard({ value, label }: { value: number; label: string }) {
 
 export default function Timer() {
   const [now, setNow] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState<string | null>(null);
+
   const targetDate = new Date("2026-07-19T12:00:00+02:00");
 
   useEffect(() => {
-    const interval = setInterval(() => setNow(new Date()), 1000);
+    const update = () => {
+      setNow(new Date());
+      setCurrentTime(
+        new Date().toLocaleTimeString("pl-PL", {
+          timeZone: "Europe/Warsaw",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        })
+      );
+    };
+    update();
+    const interval = setInterval(update, 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -147,12 +148,7 @@ export default function Timer() {
       >
         Aktualna godzina w Polsce:{" "}
         <span className="text-[#75897D] bg-white/70 px-2 py-1 rounded-lg">
-          {new Date().toLocaleTimeString("pl-PL", {
-            timeZone: "Europe/Warsaw",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-          })}
+          {currentTime ?? "--:--:--"}
         </span>
       </motion.div>
 

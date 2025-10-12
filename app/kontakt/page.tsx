@@ -4,13 +4,27 @@ import Navbar from "@/app/components/Navbar";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Mail, Phone, Heart, Send } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { useGuest } from "@/app/context/GuestContext";
 
 export default function ContactPage() {
-  const pathname = usePathname();
+  const { guest, loading } = useGuest();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-[#FAD6C8] text-[#4E0113]">
+        <p>Ładowanie...</p>
+      </div>
+    );
+  }
+
   return (
-    <div key={pathname}>
+    <div>
       <Navbar />
+      {guest && (
+        <p className="text-center text-[#FAD6C8] mb-4">
+          Witaj ponownie, {guest.first_name}! 💐
+        </p>
+      )}
 
       <section className="relative min-h-screen bg-gradient-to-b from-[#FAD6C8] to-[#4E0113] flex flex-col items-center justify-center text-white px-8 py-20">
         {/* Nagłówek */}
@@ -25,11 +39,10 @@ export default function ContactPage() {
 
         {/* Kontener na dwa profile */}
         <div className="flex flex-col md:flex-row items-center justify-center md:justify-between w-full max-w-3xl px-6 gap-20 lg:gap-32 xl:gap-48">
-
           {/* === Profil Jana === */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             className="flex flex-col items-center text-center"
           >
@@ -60,7 +73,7 @@ export default function ContactPage() {
           {/* === Profil Magdy === */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="flex flex-col items-center text-center"
           >
@@ -102,12 +115,12 @@ export default function ContactPage() {
         </motion.h2>
 
         {/* Adresy pocztowe */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="flex flex-col md:flex-row items-center justify-center md:justify-between w-full max-w-2xl px-6 gap-20 lg:gap-32 xl:gap-48 text-[#FBE4DA]/90"
-          >
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="flex flex-col md:flex-row items-center justify-center md:justify-between w-full max-w-2xl px-6 gap-20 lg:gap-32 xl:gap-48 text-[#FBE4DA]/90"
+        >
           <div className="text-center">
             <Send className="mx-auto mb-3 text-[#FBE4DA]" size={36} />
             <p className="font-semibold text-lg">Jan Kalla</p>
