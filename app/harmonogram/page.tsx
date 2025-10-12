@@ -1,25 +1,84 @@
 "use client";
 
 import Navbar from "@/app/components/Navbar";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+const images = [
+  "/fotki/Szwajcaria1.jpg",
+  "/fotki/Szwajcaria2.jpg",
+];
 
 export default function HarmonogramPage() {
+    const [current, setCurrent] = useState(0);
+
+      // automatyczne przesuwanie co 5 sekund
+      useEffect(() => {
+        const timer = setInterval(() => {
+          nextSlide();
+        }, 5000);
+        return () => clearInterval(timer);
+      }, [current]);
+
+      const prevSlide = () => {
+        setCurrent((prev) => (prev - 1 + images.length) % images.length);
+      };
+
+      const nextSlide = () => {
+        setCurrent((prev) => (prev + 1) % images.length);
+      };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FAD6C8] to-[#4E0113]">
       <Navbar />
+    {/* Sekcja zdjęcia + opis lokalu */}
+    <section className="flex flex-col md:flex-row items-center md:items-start justify-center gap-10 max-w-6xl mx-auto px-6 py-16">
+      {/* Lewa kolumna – slider */}
+      <div className="w-full md:w-1/2 relative h-64 md:h-96 overflow-hidden rounded-xl shadow-lg">
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={current}
+            src={images[current]}
+            alt="Sala weselna Stara Szwajcaria"
+            className="w-full h-full object-cover"
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0, transition: { duration: 0.9 } }}
+            exit={{ opacity: 0, x: -100, transition: { duration: 0.5 } }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+          />
+        </AnimatePresence>
 
-      {/* Sekcja opisu lokalu */}
-      <section className="py-16 px-6 text-center text-[#4E0113]">
+        {/* Strzałki */}
+        <button
+          onClick={prevSlide}
+          className="absolute top-1/2 left-2 -translate-y-1/2 bg-[#4E0113]/70 text-white p-2 rounded-full hover:bg-[#4E0113]"
+        >
+          <ChevronLeft size={24} />
+        </button>
+        <button
+          onClick={nextSlide}
+          className="absolute top-1/2 right-2 -translate-y-1/2 bg-[#4E0113]/70 text-white p-2 rounded-full hover:bg-[#4E0113]"
+        >
+          <ChevronRight size={24} />
+        </button>
+      </div>
+
+      {/* Prawa kolumna – opis */}
+      <div className="w-full md:w-1/2 text-[#4E0113]">
         <h1 className="text-4xl font-bold mb-6">
           Stara Szwajcaria – Gliwice
         </h1>
-        <p className="max-w-3xl mx-auto text-lg opacity-90">
-          Stara Szwajcaria lorem ipsum fifa rafa fifa rafa, wiszcy dobrze wiemy co oni tam mają. 
-          Czy my to w ogóle musimy przedstawiać? 
-          No nie no wiadomo, wypadało by, trzeba czymś zaintrygować gości.
-          Powiemy coś o parku, placu zabaw, ale też o dużej sali dla dzieci i może o dwóchsalach do żarcia i tańców.
+        <p className="text-lg leading-relaxed">
+          Stara Szwajcaria lorem ipsum fifa rafa fifa rafa, wszyscy dobrze wiemy co oni tam mają. 
+          Czy my to w ogóle musimy przedstawiać?
         </p>
-      </section>
+        <p className="mt-4 text-lg leading-relaxed">
+          No nie no wiadomo, wypadałoby, trzeba czymś zaintrygować gości.
+          Powiemy coś o parku, placu zabaw, ale też o dużej sali dla dzieci i może o dwóch salach do żarcia i tańców.
+        </p>
+      </div>
+    </section>
 
 {/* Mapka w większym okienku */}
 <div className="flex justify-center my-10">
@@ -44,19 +103,19 @@ export default function HarmonogramPage() {
         </h2>
         <ul className="space-y-6 text-lg">
           <li>
-            <span className="font-semibold">15:00</span> – Ceremonia w kościele pw. ...
+            <span className="font-semibold">14:00</span> – Powitanie gości w Starej Szwajcarii
           </li>
           <li>
-            <span className="font-semibold">16:30</span> – Powitanie gości w Starej Szwajcarii
+            <span className="font-semibold">16:30</span> – Sztuczka z krabem
           </li>
           <li>
-            <span className="font-semibold">17:00</span> – Uroczysty obiad
+            <span className="font-semibold">17:00</span> – Chujnia z grzybnią
           </li>
           <li>
-            <span className="font-semibold">19:00</span> – Pierwszy taniec
+            <span className="font-semibold">19:00</span> – Drugi taniec
           </li>
           <li>
-            <span className="font-semibold">20:00</span> – Zabawa do białego rana 🎉
+            <span className="font-semibold">20:00</span> – Proszę państwa! Jan będzie jeść jak koń 🎉🐎
           </li>
         </ul>
       </section>
