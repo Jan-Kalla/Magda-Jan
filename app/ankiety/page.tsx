@@ -35,23 +35,11 @@ export default function MealSurveyPage() {
         .from("relations")
         .select("child:child_id (id, first_name, last_name)")
         .eq("parent_id", guest.id);
-
+      
       if (!error && data) {
         // data = [{ child: { id, first_name, last_name }}, ...]
         const kids = data.map((row) => row.child);
         setChildren(kids);
-
-        // opcjonalnie: pobierz aktualne wybory dzieci z meal_choices
-        const { data: choices } = await supabase
-          .from("meal_choices")
-          .select("guest_id, main_course")
-          .in("guest_id", kids.map((c) => c.id));
-
-        if (choices) {
-          const map: Record<number, string> = {};
-          choices.forEach((c) => (map[c.guest_id] = c.main_course));
-          setChildrenChoices(map);
-        }
       }
     };
 
