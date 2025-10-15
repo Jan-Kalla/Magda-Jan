@@ -10,7 +10,7 @@ const supabase = createClient(
 );
 
 export type Guest = {
-  id: number;
+  id: number;          // bigint z tabeli guests
   first_name: string;
   last_name: string;
   code: string;
@@ -22,6 +22,7 @@ type GuestContextType = {
   loading: boolean;
   loginWithCode: (code: string) => Promise<boolean>;
   logout: () => void;
+  refreshGuest: () => Promise<void>;
 };
 
 const GuestContext = createContext<GuestContextType>({
@@ -29,6 +30,7 @@ const GuestContext = createContext<GuestContextType>({
   loading: true,
   loginWithCode: async () => false,
   logout: () => {},
+  refreshGuest: async () => {},
 });
 
 export const GuestProvider = ({ children }: { children: React.ReactNode }) => {
@@ -76,13 +78,29 @@ export const GuestProvider = ({ children }: { children: React.ReactNode }) => {
     return false;
   };
 
+  // === Odświeżenie danych gościa z bazy ===
+  const refreshGuest = async () => {
+    if (!guest) return;
+    const { data, error } = await supabase
+      .from("guests")
+      .select("*")
+      .eq("id", guest.id)
+      .single();
+
+    if (!error && data) {
+      setGuest(data);
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem("guestCode");
     setGuest(null);
   };
 
   return (
-    <GuestContext.Provider value={{ guest, loading, loginWithCode, logout }}>
+    <GuestContext.Provider
+      value={{ guest, loading, loginWithCode, logout, refreshGuest }}
+    >
       {children}
     </GuestContext.Provider>
   );
