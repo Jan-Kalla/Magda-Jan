@@ -15,6 +15,7 @@ export default function Navbar() {
     { label: "Galeria", href: "/galeria", protected: true },
     { label: "Harmonogram wesela", href: "/harmonogram", protected: true },
     { label: "Ankiety", href: "/ankiety", protected: true },
+    { label: "Rywalizacja", href: "/rywalizacja", protected: true },
     { label: "Kontakt", href: "/kontakt" },
   ];
 

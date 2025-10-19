@@ -8,11 +8,16 @@ import SurveyResults from "@/app/components/SurveyResults";
 
 const mainCourses = [
   { name: "Rolada śląska z modrą kapustą i kluskami śląskimi", img: "/fotki/rolada.jpg" },
-  { name: "Roladki drobiowe z serem feta i szpinakiem", img: "/fotki/roladki.webp" },
-  { name: "Udziec z Indyka z brukselką i frytkami z batatów", img: "/fotki/udziec.jpg" },
-  { name: "Pieczony pstrąg w ziołach", img: "/fotki/pstrag.jpeg" },
-  { name: "Opcja wegańska: Kopytka podsmażane ze szparagami", img: "/fotki/vege.jpg" },
-  { name: "Opcja wegetariańska: Pierogi z serem kozim i gruszką" },
+  { name: "Roladki drobiowe z serem feta i szpinakiem owinięte w boczku z gratiną ziemniaczaną i marchewką glazurowaną", img: "/fotki/roladki.webp" },
+  { name: "Udziec z Indyka z brukselką grillowaną z miodem balsamicznym i frytkami z batatów", img: "/fotki/udziec.jpg" },
+  { name: "Pieczony pstrąg w ziołach z opiekanymi batatami i mixem sałat", img: "/fotki/pstrag.jpeg" },
+  { name: "Opcja wegetariańska: Pieróg z farszem z pieczarek i kaszy gryczanej"},
+  { name: "Opcja wegetariańska: Pierogi z serem kozim i gruszką"},
+  { name: "Opcja wegetariańska: Risotto ze szpinakiem i selerem naciowym"},
+  { name: "Opcja wegetariańska: Gonoccki ze szpinakiem i suszonymi pomidorami"},
+  { name: "Opcja wegańska: Kopytka podsmażane ze szparagami", img: "/fotki/vege.jpg"},
+  { name: "Opcja wegańska: Gołąbki z soczewicą i grzybami"},
+  { name: "Opcja wegańska: Pierogi ze szpinakiem"},
 ];
 
 export default function MealSurveyPage() {
