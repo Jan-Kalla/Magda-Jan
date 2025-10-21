@@ -12,14 +12,23 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
+// --- Stan gry ---
 let field: (string | null)[][] = createEmptyField();
 let activePiece: Piece = randomPiece();
 let score = 0;
 let gameOverCallback: ((score: number) => void) | null = null;
+let levelCallback: ((level: number) => void) | null = null;
+let scoreCallback: ((score: number) => void) | null = null;
+
 let isGameOver = false;
 let gameOverFrame = 0;
 let nextPieces: Piece[] = [randomPiece(), randomPiece()];
+let isPaused = false;
 
+let level = 1;
+let linesClearedTotal = 0;
+
+// --- Pomocnicze ---
 function createEmptyField(): (string | null)[][] {
   return Array.from({ length: NO_ROWS }, () => Array(NO_COLS).fill(null));
 }
@@ -53,44 +62,88 @@ function spawnPiece() {
   }
 }
 
+// --- API stanu ---
+export function getLevel() {
+  return level;
+}
+
+export function getScore() {
+  return score;
+}
+
+export function togglePause() {
+  isPaused = !isPaused;
+}
+
+export function getIsPaused() {
+  return isPaused;
+}
+
+export function getIsGameOver() {
+  return isGameOver;
+}
+
 export function getNextPieces() {
   return nextPieces;
 }
 
-// === Czyszczenie linii ===
+export function setLevelCallback(cb: (level: number) => void) {
+  levelCallback = cb;
+}
+
+export function setGameOverCallback(cb: (score: number) => void) {
+  gameOverCallback = cb;
+}
+
+export function setScoreCallback(cb: (score: number) => void) {
+  scoreCallback = cb;
+}
+
+// --- Czyszczenie linii i punktacja / awans poziomu ---
 function clearLines() {
   let linesCleared = 0;
 
   for (let y = NO_ROWS - 1; y >= 0; y--) {
     if (field[y].every((cell) => cell !== null)) {
-      // usuń pełną linię
       field.splice(y, 1);
-      // dodaj pustą linię na górze
       field.unshift(Array(NO_COLS).fill(null));
       linesCleared++;
-      y++; // sprawdź ponownie ten sam wiersz (bo spadły nowe)
+      y++; // sprawdź ponownie tę samą wysokość po "opadnięciu" wierszy
     }
   }
 
   if (linesCleared > 0) {
-    // klasyczne punktowanie Tetrisa (proste)
-    const points = [0, 100, 300, 500, 800];
-    score += points[linesCleared] ?? linesCleared * 200;
+    // klasyczny system: 1/2/3/4 linie → 40/100/300/1200 punktów × level
+    const basePoints = [0, 40, 100, 300, 1200];
+    score += (basePoints[linesCleared] ?? 0) * level;
+
+    if (scoreCallback) scoreCallback(score);
+
+    // awans co 10 linii całkowitych
+    linesClearedTotal += linesCleared;
+    const nextLevelThreshold = level * 1;
+    if (linesClearedTotal >= nextLevelThreshold) {
+      level++;
+      if (levelCallback) levelCallback(level);
+    }
   }
 }
 
-// === Sterowanie ===
+// --- Sterowanie ---
 export function moveLeft() {
+  if (isGameOver || isPaused) return;
   const moved = activePiece.positions.map((p) => ({ x: p.x - 1, y: p.y }));
   if (!hasCollision(moved)) activePiece.positions = moved;
 }
 
 export function moveRight() {
+  if (isGameOver || isPaused) return;
   const moved = activePiece.positions.map((p) => ({ x: p.x + 1, y: p.y }));
   if (!hasCollision(moved)) activePiece.positions = moved;
 }
 
 export function softDrop() {
+  if (isGameOver || isPaused) return;
   const moved = activePiece.positions.map((p) => ({ x: p.x, y: p.y + 1 }));
   if (!hasCollision(moved)) {
     activePiece.positions = moved;
@@ -101,6 +154,7 @@ export function softDrop() {
 }
 
 export function rotate() {
+  if (isGameOver || isPaused) return;
   if (activePiece.type === "O") return;
   const center = activePiece.positions[activePiece.center];
   const rotated = activePiece.positions.map(({ x, y }) => {
@@ -114,6 +168,7 @@ export function rotate() {
 }
 
 export function hardDrop() {
+  if (isGameOver || isPaused) return;
   let moved = activePiece.positions.map((p) => ({ x: p.x, y: p.y }));
   while (true) {
     const next = moved.map((p) => ({ x: p.x, y: p.y + 1 }));
@@ -125,10 +180,10 @@ export function hardDrop() {
   spawnPiece();
 }
 
-// === Aktualizacja gry ===
+// --- Aktualizacja gry ---
 export function tick() {
-  if (isGameOver) {
-    gameOverFrame++;
+  if (isGameOver || isPaused) {
+    gameOverFrame++; // używane do animacji overlayów
     return;
   }
   softDrop();
@@ -139,18 +194,20 @@ export function restartGame() {
   score = 0;
   isGameOver = false;
   gameOverFrame = 0;
-  nextPieces = [randomPiece(), randomPiece()]; // reset preview queue
+
+  // reset kolejki i aktywnego klocka
+  nextPieces = [randomPiece(), randomPiece()];
   activePiece = nextPieces.shift()!;
   nextPieces.push(randomPiece());
+
+  // reset poziomu i liczników
+  level = 1;
+  linesClearedTotal = 0;
+  if (levelCallback) levelCallback(level);
+  if (scoreCallback) scoreCallback(score);
 }
 
-
-export function setGameOverCallback(cb: (score: number) => void) {
-  gameOverCallback = cb;
-}
-
-
-// === Renderowanie ===
+// --- Renderowanie ---
 export function render(ctx: CanvasRenderingContext2D) {
   ctx.fillStyle = "white";
   ctx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -171,11 +228,6 @@ export function render(ctx: CanvasRenderingContext2D) {
     renderPiece(activePiece, ctx, BLOCK_SIZE);
   }
 
-  // wynik
-  ctx.fillStyle = "black";
-  ctx.font = "20px Arial";
-  ctx.fillText(`Score: ${score}`, 10, 20);
-
   // komunikat Game Over
   if (isGameOver) {
     const alpha = Math.min(1, gameOverFrame / 60); // fade-in przez 1s
@@ -190,5 +242,15 @@ export function render(ctx: CanvasRenderingContext2D) {
     ctx.font = "20px Arial";
     ctx.fillStyle = "black";
     ctx.fillText("Press Enter to restart", WIDTH / 2, HEIGHT / 2 + 40);
+  }
+
+  // overlay pauzy
+  if (isPaused && !isGameOver) {
+    ctx.fillStyle = "rgba(0,0,0,0.5)";
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.fillStyle = "white";
+    ctx.font = "bold 36px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("PAUSED", WIDTH / 2, HEIGHT / 2);
   }
 }

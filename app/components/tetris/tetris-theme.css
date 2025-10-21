@@ -1,0 +1,39 @@
+/* === Animowane gradientowe tło === */
+.bg-animated {
+  background: linear-gradient(270deg, #0d0d0d, #1a1a1a, #0d0d0d);
+  background-size: 600% 600%;
+  animation: gradientShift 20s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* === Subtelna faktura (pikselowa siatka) === */
+.bg-texture {
+  background-color: #111;
+  background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* === Karty (score, level, ranking) === */
+.panel-card {
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 2px solid #4E0113;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 10px rgba(78, 1, 19, 0.6);
+  padding: 1rem;
+  text-align: center;
+  color: #fff;
+}
+
+/* === Canvas (plansza i preview) === */
+.tetris-canvas {
+  border: 4px solid #4E0113;
+  background-color: #111;
+  background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.8);
+}
