@@ -18,6 +18,8 @@ export function useMealSurvey() {
   const [results, setResults] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [plusOne, setPlusOne] = useState<{ firstName: string; lastName: string } | null>(null);
+
 
   // === Pobierz dzieci ===
   useEffect(() => {

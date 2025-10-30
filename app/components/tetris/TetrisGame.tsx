@@ -165,12 +165,8 @@ return () => {
 }, [guest]);
 
 return (
-  <div
-    className="flex flex-col items-center w-full min-h-screen p-6"
-    style={{
-      background: "linear-gradient(to bottom, #FAD6C8, #4E0113)",
-    }}
-  >
+<div className="no-scroll flex flex-col items-center w-full min-h-screen p-6"
+     style={{ background: "linear-gradient(to bottom, #FAD6C8, #4E0113)" }}>
     {/* Nagłówek */}
     <div className="flex flex-col md:flex-row gap-8 justify-center items-start w-full max-w-5xl">
       {/* Plansza gry */}
