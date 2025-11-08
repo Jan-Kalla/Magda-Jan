@@ -58,7 +58,7 @@ export default function GuestPage() {
       <Navbar />
 
       {/* === Sekcja logowania z tłem === */}
-      <div className="relative bg-[#FAD6C8] -mt-4 pb-4">
+      <div className="relative bg-[#FAD6C8] -mt-4 pb-">
         <AnimatePresence>
           {!guest && (
             <motion.section

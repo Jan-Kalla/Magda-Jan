@@ -28,6 +28,9 @@ let isPaused = false;
 let level = 1;
 let linesClearedTotal = 0;
 
+let pieceLockCb: (() => void) | null = null;
+let lineClearCb: ((count: number) => void) | null = null;
+
 // --- Pomocnicze ---
 function createEmptyField(): (string | null)[][] {
   return Array.from({ length: NO_ROWS }, () => Array(NO_COLS).fill(null));
@@ -49,8 +52,16 @@ function freezePiece(piece: Piece) {
       field[p.y][p.x] = piece.color;
     }
   });
-  clearLines(); // po zamrożeniu sprawdzamy linie
+
+  console.log("freezePiece called"); // 👈 sprawdź w konsoli
+  if (pieceLockCb) {
+    console.log("pieceLockCb fired");
+    pieceLockCb();
+  }
+
+  clearLines();
 }
+
 
 function spawnPiece() {
   activePiece = nextPieces.shift()!; // weź pierwszy z kolejki
@@ -99,6 +110,14 @@ export function setScoreCallback(cb: (score: number) => void) {
   scoreCallback = cb;
 }
 
+export function setPieceLockCallback(cb: () => void) {
+  pieceLockCb = cb;
+}
+
+export function setLineClearCallback(cb: (count: number) => void) {
+  lineClearCb = cb;
+}
+
 // --- Czyszczenie linii i punktacja / awans poziomu ---
 function clearLines() {
   let linesCleared = 0;
@@ -113,6 +132,9 @@ function clearLines() {
   }
 
   if (linesCleared > 0) {
+    console.log("clearLines fired", linesCleared);
+    if (lineClearCb) lineClearCb(linesCleared);
+
     // klasyczny system: 1/2/3/4 linie → 40/100/300/1200 punktów × level
     const basePoints = [0, 40, 100, 300, 1200];
     score += (basePoints[linesCleared] ?? 0) * level;
@@ -121,7 +143,7 @@ function clearLines() {
 
     // awans co 10 linii całkowitych
     linesClearedTotal += linesCleared;
-    const nextLevelThreshold = level * 1;
+    const nextLevelThreshold = level * 10;
     if (linesClearedTotal >= nextLevelThreshold) {
       level++;
       if (levelCallback) levelCallback(level);

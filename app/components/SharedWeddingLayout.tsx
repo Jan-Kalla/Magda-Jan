@@ -8,10 +8,39 @@ import MapSection from "./MapSection";
 import Image from "next/image";
 import { useGuest } from "@/app/context/GuestContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState } from "react";
 
 export default function SharedWeddingLayout({ showNavbar = true }: { showNavbar?: boolean }) {
-  const { guest, loading, logout } = useGuest();
+  const { guest, loading } = useGuest();
+  const [ready, setReady] = useState(false);
 
+  // małe opóźnienie, żeby wszystko się zdążyło załadować
+  useEffect(() => {
+    if (!loading) {
+      const t = setTimeout(() => setReady(true), 300);
+      return () => clearTimeout(t);
+    }
+  }, [loading]);
+
+  // ekran ładowania
+  if (loading || !ready) {
+    return (
+      <>
+        {showNavbar && <Navbar />}
+        <div className="flex items-center justify-center h-screen bg-[#FAD6C8] text-[#4E0113] text-lg">
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ repeat: Infinity, duration: 1, repeatType: "reverse" }}
+          >
+            Ładowanie strony...
+          </motion.p>
+        </div>
+      </>
+    );
+  }
+
+  // dopiero teraz renderujemy całość
   return (
     <>
       {showNavbar && <Navbar />}
@@ -25,11 +54,9 @@ export default function SharedWeddingLayout({ showNavbar = true }: { showNavbar?
           className="object-cover"
         />
       </div>
-
-
       {/* Powitanie gościa */}
       <AnimatePresence>
-        {!loading && guest && (
+        {guest && (
           <div className="relative z-10 w-full bg-[#FAD6C8] py-8 flex justify-center mt-16">
             <motion.div
               key="welcome-box"

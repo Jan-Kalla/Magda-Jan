@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
-
+import { motion, easeOut  } from "framer-motion";
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -13,7 +13,6 @@ interface PlusOneSelectorProps {
   parentGuestId?: number;
 }
 
-// generator kodu 6‑znakowego
 function generateCode(length = 6) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let result = "";
@@ -23,7 +22,6 @@ function generateCode(length = 6) {
   return result;
 }
 
-// sprawdza unikalność kodu w bazie
 async function generateUniqueCode() {
   for (let i = 0; i < 5; i++) {
     const code = generateCode(6);
@@ -39,6 +37,22 @@ async function generateUniqueCode() {
   throw new Error("Nie udało się wygenerować unikalnego kodu");
 }
 
+// Animation variants
+const container = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.12 } },
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 40 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: easeOut }, // ✅ poprawne
+  },
+};
+
+
 export default function PlusOneSelector({
   canBringPlusOne,
   parentGuestId,
@@ -49,7 +63,6 @@ export default function PlusOneSelector({
   const [savedPlusOne, setSavedPlusOne] = useState<{ firstName: string; lastName: string; code: string } | null>(null);
   const [declined, setDeclined] = useState(false);
 
-  // pobieranie decyzji i ewentualnej osoby towarzyszącej
   useEffect(() => {
     const fetchDecision = async () => {
       if (!parentGuestId) return;
@@ -67,18 +80,18 @@ export default function PlusOneSelector({
         .eq("id", parentGuestId)
         .maybeSingle();
 
-      if (!error && data) {
-        setDecisionMade(data.plus_one_decision_made);
-        if (data.plus_ones && data.plus_ones.length > 0) {
-          setSavedPlusOne({
-            firstName: data.plus_ones[0].first_name,
-            lastName: data.plus_ones[0].last_name,
-            code: data.plus_ones[0].code,
-          });
-        } else if (data.plus_one_decision_made) {
-          setDeclined(true);
-        }
+    if (!error && data) {
+      setDecisionMade(data.plus_one_decision_made);
+      if (data.plus_ones && data.plus_ones.length > 0) {
+        setSavedPlusOne({
+          firstName: data.plus_ones[0].first_name,
+          lastName: data.plus_ones[0].last_name,
+          code: data.plus_ones[0].code,
+        });
+      } else if (data.plus_one_decision_made) {
+        setDeclined(true);
       }
+    }
     };
     fetchDecision();
   }, [parentGuestId]);
@@ -140,7 +153,6 @@ export default function PlusOneSelector({
         return;
       }
 
-      // oznacz decyzję jako podjętą
       await supabase
         .from("guests")
         .update({ plus_one_decision_made: true })
@@ -161,52 +173,83 @@ export default function PlusOneSelector({
   };
 
   return (
-    <div className="mt-10">
-      <h2 className="text-2xl font-bold text-[#4E0113] mb-4 text-center">
+  <motion.div
+    className="mt-16 mb-20 flex flex-col items-center justify-center text-center"
+    variants={container}
+    initial="hidden"
+    animate="visible"
+  >
+      <motion.h2
+        variants={fadeUp}
+        className="text-3xl font-bold text-[#4E0113] mb-8"
+      >
         Osoba towarzysząca
-      </h2>
+      </motion.h2>
 
-      {/* Jeśli decyzja już podjęta */}
+      {!decisionMade && (
+        <motion.div variants={fadeUp} className="max-w-2xl">
+          <h3 className="text-2xl font-semibold text-[#4E0113] mb-4">
+            Wybór osoby towarzyszącej
+          </h3>
+          <p className="text-gray-800 mb-2">
+            Możesz zdecydować, czy chcesz przyjść na wesele z osobą towarzyszącą.
+          </p>
+          <p className="text-gray-800 mb-2">
+            Prosimy, abyś dobrze przemyślał tę decyzję – masz na to czas do miesiąca przed weselem.
+          </p>
+          <p className="text-red-600 font-medium">
+            Pamiętaj: raz podjętej decyzji nie można cofnąć.
+          </p>
+        </motion.div>
+      )}
+
       {decisionMade ? (
-        <div className="text-center">
+        <motion.div variants={fadeUp} className="mt-8">
           {declined ? (
-            <p>Zdecydowałeś, że nie przychodzisz z osobą towarzyszącą.</p>
+            <p className="text-lg font-medium text-gray-700">
+              Zdecydowałeś, że nie przychodzisz z osobą towarzyszącą.
+            </p>
           ) : savedPlusOne ? (
             <div>
-              <p>Osoba towarzysząca została wybrana:</p>
-              <p className="font-bold">
+              <p className="text-lg text-gray-700 mb-2">Osoba towarzysząca została wybrana:</p>
+              <p className="text-2xl font-bold text-[#4E0113] mb-2">
                 {savedPlusOne.firstName} {savedPlusOne.lastName}
               </p>
-              <p>
+              <p className="text-gray-700">
                 Kod dostępu:{" "}
-                <span className="font-mono">{savedPlusOne.code}</span>
+                <span className="font-mono font-semibold text-green-700">
+                  {savedPlusOne.code}
+                </span>
               </p>
             </div>
           ) : (
-            <p>Decyzja została już podjęta.</p>
+            <p className="text-lg text-gray-700">Decyzja została już podjęta.</p>
           )}
-        </div>
+        </motion.div>
       ) : (
         <>
-          <div className="flex justify-center gap-6 mb-4">
+          <motion.div variants={fadeUp} className="flex justify-center gap-8 mt-8">
             <button
               type="button"
               onClick={() => setPlusOneData({ firstName: "", lastName: "" })}
-              className="px-6 py-2 rounded-lg font-semibold bg-[#4E0113] text-white"
+              className="px-10 py-4 rounded-lg font-semibold bg-[#4E0113] text-white shadow-lg hover:bg-[#6b1326] transition"
             >
               Tak
             </button>
             <button
               type="button"
               onClick={handleDecline}
-              className="px-6 py-2 rounded-lg font-semibold bg-gray-200"
+              className="px-10 py-4 rounded-lg font-semibold bg-gray-200 text-gray-800 shadow-lg hover:bg-gray-300 transition"
             >
               Nie
             </button>
-          </div>
+          </motion.div>
 
           {plusOneData && (
-            <div className="flex flex-col gap-4 max-w-md mx-auto">
+            <motion.div
+              variants={fadeUp}
+              className="flex flex-col gap-4 max-w-md mx-auto mt-8"
+            >
               <input
                 type="text"
                 placeholder="Imię"
@@ -214,7 +257,7 @@ export default function PlusOneSelector({
                 onChange={(e) =>
                   setPlusOneData({ ...plusOneData, firstName: e.target.value })
                 }
-                className="border rounded-lg p-3"
+                className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#4E0113]"
               />
               <input
                 type="text"
@@ -223,21 +266,21 @@ export default function PlusOneSelector({
                 onChange={(e) =>
                   setPlusOneData({ ...plusOneData, lastName: e.target.value })
                 }
-                className="border rounded-lg p-3"
+                className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#4E0113]"
               />
 
               <button
                 type="button"
                 onClick={handleSave}
                 disabled={loading}
-                className="bg-[#4E0113] text-white py-2 rounded-lg shadow hover:bg-[#6b1326] transition disabled:opacity-60"
+                className="bg-[#4E0113] text-white py-3 rounded-lg shadow-lg hover:bg-[#6b1326] transition disabled:opacity-60 font-semibold"
               >
                 {loading ? "Zapisywanie..." : "Zatwierdź"}
               </button>
-            </div>
+            </motion.div>
           )}
         </>
       )}
-    </div>
+    </motion.div>
   );
 }

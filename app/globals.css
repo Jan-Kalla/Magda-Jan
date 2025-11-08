@@ -30,3 +30,7 @@ body {
   touch-action: none;
   height: 100%;
 }
+
+button {
+  cursor: pointer;
+}

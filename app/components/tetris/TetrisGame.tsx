@@ -1,20 +1,22 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { 
-  tick, 
-  render, 
-  moveLeft, 
-  moveRight, 
-  rotate, 
-  softDrop, 
-  hardDrop, 
+import {
+  tick,
+  render,
+  moveLeft,
+  moveRight,
+  rotate,
+  softDrop,
+  hardDrop,
   setGameOverCallback,
   restartGame,
   togglePause,
   getLevel,
   setLevelCallback,
   setScoreCallback,
-  getIsGameOver 
+  getIsGameOver,
+  setPieceLockCallback,
+  setLineClearCallback,
 } from "./gameLogic";
 import { useGuest } from "@/app/context/GuestContext";
 import { createClient } from "@supabase/supabase-js";
@@ -23,7 +25,7 @@ import NextPieces from "./NextPieces";
 import MobileControls from "./MobileControls";
 import PauseButton from "./PauseButton";
 import "./tetris-theme.css";
-
+import { sounds, playHitAlternating } from "./sounds";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,180 +34,206 @@ const supabase = createClient(
 
 const WIDTH = 300;
 const HEIGHT = 600;
-const BASE_DROP_INTERVAL = 1000; // ms
+const BASE_DROP_INTERVAL = 1000;
 const SPEED_FACTOR = 0.85;
 
+const DAS = 150;
+const ARR = 40;
 
 export default function TetrisGame() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const { guest } = useGuest();
+
   const [lastScore, setLastScore] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [levelState, setLevelState] = useState(getLevel());
-  setLevelCallback((lvl) => setLevelState(lvl));
-  
-    // 🔑 DAS/ARR refs muszą być tutaj, na najwyższym poziomie komponentu
+  const [scoreState, setScoreState] = useState(0);
+
   const keysDown = useRef<{ [key: string]: boolean }>({});
   const lastMoveTime = useRef(0);
   const dasTriggered = useRef(false);
-  const [scoreState, setScoreState] = useState(0);
+
+  const animationIdRef = useRef<number | null>(null);
+  const lastDropRef = useRef<number>(performance.now());
+
+  // Odblokowanie audio po pierwszej interakcji
+  useEffect(() => {
+    const unlockAudio = () => {
+      try {
+        sounds.hit1.mute(true);
+        sounds.hit1.play();
+        sounds.hit1.stop();
+        sounds.hit1.mute(false);
+      } catch {}
+      window.removeEventListener("click", unlockAudio);
+      window.removeEventListener("keydown", unlockAudio);
+      window.removeEventListener("touchstart", unlockAudio);
+    };
+    window.addEventListener("click", unlockAudio);
+    window.addEventListener("keydown", unlockAudio);
+    window.addEventListener("touchstart", unlockAudio);
+    return () => {
+      window.removeEventListener("click", unlockAudio);
+      window.removeEventListener("keydown", unlockAudio);
+      window.removeEventListener("touchstart", unlockAudio);
+    };
+  }, []);
 
   useEffect(() => {
-  setIsMobile("ontouchstart" in window);
+    setIsMobile("ontouchstart" in window);
+
+    setLevelCallback((lvl) => setLevelState(lvl));
     setScoreCallback((s) => setScoreState(s));
-  const canvas = canvasRef.current;
-  if (!canvas) return;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
 
-  // game over callback (overwrites previous)
-  setGameOverCallback(async (score) => {
-    setLastScore(score);
-    if (!guest) return;
+    // Dźwięk: zamrożenie klocka (naprzemiennie)
+    setPieceLockCallback(() => {
+      playHitAlternating();
+    });
 
-    const { data: existing } = await supabase
-      .from("tetris_scores")
-      .select("id, score")
-      .eq("guest_id", guest.id)
-      .single();
+    // Dźwięk: czyszczenie linii
+    setLineClearCallback(() => {
+      sounds.line.play();
+    });
 
-    if (!existing) {
-      await supabase.from("tetris_scores").insert({ guest_id: guest.id, score });
-    } else if (score > existing.score) {
-      await supabase.from("tetris_scores").update({ score }).eq("id", existing.id);
-    }
-  });
-// konfiguracja DAS/ARR
-const DAS = 150; // ms opóźnienia po pierwszym ruchu
-const ARR = 40;  // ms między kolejnymi przesunięciami
+    // Game over: dźwięk + zapis wyniku
+    setGameOverCallback(async (score) => {
+      sounds.gameover.play();
+      setLastScore(score);
+      if (!guest) return;
 
-// stan klawiszy
+      const currentLevel = getLevel();
 
-const handleKeyDown = (e: KeyboardEvent) => {
-  if (["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", " "].includes(e.key) || e.code === "Space") {
-    e.preventDefault(); // blokuje scrollowanie strony
-  }
-  if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-    if (!keysDown.current[e.key]) {
-      keysDown.current[e.key] = true;
-      // natychmiastowe pierwsze przesunięcie
-      if (e.key === "ArrowLeft") moveLeft();
-      if (e.key === "ArrowRight") moveRight();
-      lastMoveTime.current = performance.now();
-      dasTriggered.current = false;
-    }
-  }
+      const { data: existing } = await supabase
+        .from("tetris_scores")
+        .select("id, score, level")
+        .eq("guest_id", guest.id)
+        .single();
 
-  if (e.key === "ArrowDown") softDrop();
-  if (e.key === "ArrowUp") rotate();
-  if (e.code === "Space") hardDrop();
-  if (e.key === "Escape") togglePause();
-  if (e.key === "Enter" && getIsGameOver()) {
-    restartGame();
-    lastDrop = performance.now();
-  }
-};
-
-const handleKeyUp = (e: KeyboardEvent) => {
-  if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-    keysDown.current[e.key] = false;
-  }
-};
-
-window.addEventListener("keydown", handleKeyDown);
-window.addEventListener("keyup", handleKeyUp);
-
-let lastDrop = performance.now();
-let animationId: number;
-
-const loop = (time: number) => {
-  const currentLevel = getLevel();
-  const interval = Math.max(
-  100,
-  BASE_DROP_INTERVAL * Math.pow(SPEED_FACTOR, currentLevel - 1)
-);
-
-  // grawitacja
-  while (time - lastDrop >= interval) {
-    tick();
-    lastDrop += interval;
-  }
-
-  // auto przesuwanie (DAS/ARR)
-  if (keysDown.current["ArrowLeft"] || keysDown.current["ArrowRight"]) {
-    const key = keysDown.current["ArrowLeft"] ? "ArrowLeft" : "ArrowRight";
-    if (!dasTriggered.current) {
-      if (time - lastMoveTime.current >= DAS) {
-        if (key === "ArrowLeft") moveLeft();
-        if (key === "ArrowRight") moveRight();
-        lastMoveTime.current = time;
-        dasTriggered.current = true;
+      if (!existing) {
+        await supabase.from("tetris_scores").insert({ guest_id: guest.id, score, level: currentLevel });
+      } else if (score > existing.score) {
+        await supabase
+          .from("tetris_scores")
+          .update({ score, level: currentLevel })
+          .eq("id", existing.id);
       }
-    } else {
-      if (time - lastMoveTime.current >= ARR) {
-        if (key === "ArrowLeft") moveLeft();
-        if (key === "ArrowRight") moveRight();
-        lastMoveTime.current = time;
+    });
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", " "].includes(e.key) || e.code === "Space") {
+        e.preventDefault();
       }
-    }
-  }
+      if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+        if (!keysDown.current[e.key]) {
+          keysDown.current[e.key] = true;
+          if (e.key === "ArrowLeft") moveLeft();
+          if (e.key === "ArrowRight") moveRight();
+          lastMoveTime.current = performance.now();
+          dasTriggered.current = false;
+        }
+      }
+      if (e.key === "ArrowDown") softDrop();
+      if (e.key === "ArrowUp") rotate();
+      if (e.code === "Space") hardDrop();
+      if (e.key === "Escape") togglePause();
+      if (e.key === "Enter" && getIsGameOver()) {
+        restartGame();
+        lastDropRef.current = performance.now();
+      }
+    };
 
-  render(ctx);
-  animationId = requestAnimationFrame(loop);
-};
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+        keysDown.current[e.key] = false;
+      }
+    };
 
-animationId = requestAnimationFrame(loop);
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
 
-return () => {
-  window.removeEventListener("keydown", handleKeyDown);
-  window.removeEventListener("keyup", handleKeyUp);
-  cancelAnimationFrame(animationId);
-};
+    const loop = (time: number) => {
+      const currentLevel = getLevel();
+      const interval = Math.max(100, BASE_DROP_INTERVAL * Math.pow(SPEED_FACTOR, currentLevel - 1));
 
-}, [guest]);
+      while (time - lastDropRef.current >= interval) {
+        tick();
+        lastDropRef.current += interval;
+      }
 
-return (
-<div className="no-scroll flex flex-col items-center w-full min-h-screen p-6"
-     style={{ background: "linear-gradient(to bottom, #FAD6C8, #4E0113)" }}>
-    {/* Nagłówek */}
-    <div className="flex flex-col md:flex-row gap-8 justify-center items-start w-full max-w-5xl">
-      {/* Plansza gry */}
-      <div className="flex flex-col items-center mx-auto">
-        <canvas
-          ref={canvasRef}
-          width={WIDTH}
-          height={HEIGHT}
-          className="tetris-canvas rounded-lg"
-        />
+      if (keysDown.current["ArrowLeft"] || keysDown.current["ArrowRight"]) {
+        const key = keysDown.current["ArrowLeft"] ? "ArrowLeft" : "ArrowRight";
+        if (!dasTriggered.current) {
+          if (time - lastMoveTime.current >= DAS) {
+            if (key === "ArrowLeft") moveLeft();
+            if (key === "ArrowRight") moveRight();
+            lastMoveTime.current = time;
+            dasTriggered.current = true;
+          }
+        } else {
+          if (time - lastMoveTime.current >= ARR) {
+            if (key === "ArrowLeft") moveLeft();
+            if (key === "ArrowRight") moveRight();
+            lastMoveTime.current = time;
+          }
+        }
+      }
 
-        {isMobile && <MobileControls />}
-        {isMobile && <PauseButton />}
-      </div>
+      render(ctx);
+      animationIdRef.current = requestAnimationFrame(loop);
+    };
 
-      {/* Panel boczny */}
-      <div className="flex flex-col items-center gap-4">
-        <NextPieces />
+    animationIdRef.current = requestAnimationFrame(loop);
 
-        <div className="panel-card w-40 mt-4">
-          <p className="text-sm text-gray-300">Score</p>
-          <p className="text-2xl font-bold">{scoreState}</p>
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+      if (animationIdRef.current) cancelAnimationFrame(animationIdRef.current);
+    };
+  }, [guest]);
+
+  return (
+    <div
+      className="no-scroll flex flex-col items-center w-full min-h-screen p-6"
+      style={{ background: "linear-gradient(to bottom, #FAD6C8, #4E0113)" }}
+    >
+      <div className="flex flex-col md:flex-row gap-8 justify-center items-start w-full max-w-5xl">
+        <div className="flex flex-col items-center mx-auto">
+          <canvas
+            ref={canvasRef}
+            width={WIDTH}
+            height={HEIGHT}
+            className="tetris-canvas rounded-lg"
+          />
+          {isMobile && <MobileControls />}
+          {isMobile && <PauseButton />}
         </div>
 
-        <div className="panel-card w-40 mt-4">
-          <p className="text-sm text-gray-300">Level</p>
-          <p className="text-lg font-semibold">{levelState}</p>
-        </div>
+        <div className="flex flex-col items-center gap-4">
+          <NextPieces />
 
-        {lastScore !== null && (
-          <div className="panel-card w-60 mt-4">
-            <p className="text-lg font-semibold mb-2">Twój wynik: {lastScore}</p>
-            <TetrisLeaderboard />
+          <div className="panel-card w-40 mt-4">
+            <p className="text-sm text-gray-300">Score</p>
+            <p className="text-2xl font-bold">{scoreState}</p>
           </div>
-        )}
+
+          <div className="panel-card w-40 mt-4">
+            <p className="text-sm text-gray-300">Level</p>
+            <p className="text-lg font-semibold">{levelState}</p>
+          </div>
+
+          {lastScore !== null && (
+            <div className="panel-card w-100 mt-4">
+              <p className="text-lg font-semibold mb-2">Twój wynik: {lastScore}</p>
+              <TetrisLeaderboard />
+            </div>
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
-
-
+  );
 }
