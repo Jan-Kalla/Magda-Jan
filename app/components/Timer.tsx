@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { events } from "../data/events";
 
 function FlipCard({ value, label }: { value: number; label: string }) {
   const [prevValue, setPrevValue] = useState(value);
@@ -77,7 +78,7 @@ function FlipCard({ value, label }: { value: number; label: string }) {
       </div>
 
       {/* --- Etykieta --- */}
-      <p className="text-[#841D30] text-sm sm:text-base mt-2 text-center font-medium">
+      <p className="text-[#FBE4DA] text-sm sm:text-base mt-2 text-center font-medium">
         {label}
       </p>
     </motion.div>
@@ -120,6 +121,10 @@ export default function Timer() {
     { label: "sekund", value: seconds },
   ];
 
+    const matchingEvent = events
+    .filter((e) => e.durationDays >= days)
+    .sort((a, b) => a.durationDays - b.durationDays)[0];
+
   return (
     <section className="relative w-full min-h-screen flex flex-col items-center justify-center p-8 text-center text-white overflow-hidden">
       <div
@@ -161,6 +166,14 @@ export default function Timer() {
           <FlipCard key={unit.label} value={unit.value} label={unit.label} />
         ))}
       </div>
+
+      {/* --- Wydarzenie pod timerem --- */}
+      {matchingEvent && (
+        <p className="mt-8 text-lg md:text-xl text-[#FBE4DA] font-semibold max-w-xl">
+          Do naszego ślubu zostało już mniej czasu niż {" "}
+          {matchingEvent.name} 
+        </p>
+      )}
     </section>
   );
 }
