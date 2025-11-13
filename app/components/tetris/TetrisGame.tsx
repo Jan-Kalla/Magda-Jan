@@ -23,7 +23,6 @@ import { createClient } from "@supabase/supabase-js";
 import TetrisLeaderboard from "./TetrisLeaderBoard";
 import NextPieces from "./NextPieces";
 import MobileControls from "./MobileControls";
-import PauseButton from "./PauseButton";
 import "./tetris-theme.css";
 import { sounds, playHitAlternating } from "./sounds";
 
@@ -85,17 +84,14 @@ export default function TetrisGame() {
     setLevelCallback((lvl) => setLevelState(lvl));
     setScoreCallback((s) => setScoreState(s));
 
-    // Dźwięk: zamrożenie klocka (naprzemiennie)
     setPieceLockCallback(() => {
       playHitAlternating();
     });
 
-    // Dźwięk: czyszczenie linii
     setLineClearCallback(() => {
       sounds.line.play();
     });
 
-    // Game over: dźwięk + zapis wyniku
     setGameOverCallback(async (score) => {
       sounds.gameover.play();
       setLastScore(score);
@@ -201,8 +197,28 @@ export default function TetrisGame() {
       className="no-scroll flex flex-col items-center w-full min-h-screen p-6"
       style={{ background: "linear-gradient(to bottom, #FAD6C8, #4E0113)" }}
     >
-      <div className="flex flex-col md:flex-row gap-8 justify-center items-start w-full max-w-5xl">
-        <div className="flex flex-col items-center mx-auto">
+      {/* Wrapper: trzy kolumny */}
+      <div className="flex flex-row gap-6 justify-center items-start w-full max-w-5xl">
+        {/* Lewa kolumna: Score + Level */}
+        <div className="flex flex-col items-center gap-4">
+          <div className="panel-card w-32">
+            <p className="text-sm text-gray-300">Score</p>
+            <p className="text-2xl font-bold">{scoreState}</p>
+          </div>
+          <div className="panel-card w-32">
+            <p className="text-sm text-gray-300">Level</p>
+            <p className="text-lg font-semibold">{levelState}</p>
+          </div>
+            {lastScore !== null && (
+            <div className="panel-card w-40 mt-4">
+              <p className="text-lg font-semibold mb-2">Twój wynik: {lastScore}</p>
+              <TetrisLeaderboard />
+            </div>
+          )}
+        </div>
+
+        {/* Środek: Plansza */}
+        <div className="flex flex-col items-center">
           <canvas
             ref={canvasRef}
             width={WIDTH}
@@ -210,28 +226,11 @@ export default function TetrisGame() {
             className="tetris-canvas rounded-lg"
           />
           {isMobile && <MobileControls />}
-          {isMobile && <PauseButton />}
         </div>
 
+        {/* Prawa kolumna: Next pieces + leaderboard */}
         <div className="flex flex-col items-center gap-4">
           <NextPieces />
-
-          <div className="panel-card w-40 mt-4">
-            <p className="text-sm text-gray-300">Score</p>
-            <p className="text-2xl font-bold">{scoreState}</p>
-          </div>
-
-          <div className="panel-card w-40 mt-4">
-            <p className="text-sm text-gray-300">Level</p>
-            <p className="text-lg font-semibold">{levelState}</p>
-          </div>
-
-          {lastScore !== null && (
-            <div className="panel-card w-100 mt-4">
-              <p className="text-lg font-semibold mb-2">Twój wynik: {lastScore}</p>
-              <TetrisLeaderboard />
-            </div>
-          )}
         </div>
       </div>
     </div>

@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@supabase/supabase-js": "^2.74.0",
     "framer-motion": "^12.23.22",
     "howler": "^2.2.4",

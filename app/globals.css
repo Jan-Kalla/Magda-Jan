@@ -34,3 +34,10 @@ body {
 button {
   cursor: pointer;
 }
+
+.control-btn {
+  @apply flex items-center justify-center w-14 h-14 rounded-full 
+         bg-gradient-to-br from-[#841D30] to-[#4E0113] text-white 
+         shadow-lg active:scale-95 transition-transform;
+}
+

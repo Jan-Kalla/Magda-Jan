@@ -1,14 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useGuest } from "@/app/context/GuestContext";
 import { usePathname } from "next/navigation";
+import { Bars3Icon } from "@heroicons/react/24/solid";
+import { togglePause } from "@/app/components/tetris/gameLogic"; // dostosuj ścieżkę do gameLogic
+
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const update = () => setIsMobile(window.innerWidth < 768); // md breakpoint
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+  return isMobile;
+}
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { guest, logout } = useGuest();
-  const pathname = usePathname(); // <-- aktualna ścieżka
+  const pathname = usePathname();
+  const isMobile = useIsMobile();
 
   const navItems = [
     { label: "Strona główna", href: "/" },
@@ -20,6 +34,19 @@ export default function Navbar() {
   ];
 
   const visibleItems = navItems.filter((item) => !item.protected || guest);
+
+  const handleMenuClick = () => {
+    // Otwórz/zamknij mobilne menu
+    setIsOpen((prev) => !prev);
+    // Na mobilu dodatkowo pauzuj grę
+    if (isMobile) {
+      try {
+        togglePause();
+      } catch {
+        // jeśli gameLogic nie jest załadowany w tym widoku, ignorujemy
+      }
+    }
+  };
 
   return (
     <nav className="fixed top-0 left-0 w-full bg-[#4E0113] text-white shadow-md z-50">
@@ -45,7 +72,7 @@ export default function Navbar() {
                     className={`absolute left-0 -bottom-1 h-[2px] bg-[#FAD6C8] transition-all duration-300 ${
                       isActive ? "w-full" : "w-0 group-hover:w-full"
                     }`}
-                  ></span>
+                  />
                 </Link>
               </li>
             );
@@ -65,10 +92,11 @@ export default function Navbar() {
 
         {/* Mobile toggle */}
         <button
-          className="md:hidden focus:outline-none"
-          onClick={() => setIsOpen(!isOpen)}
+          className="md:hidden focus:outline-none p-2 rounded-lg bg-[#841D30] hover:bg-[#9b3042] transition"
+          onClick={handleMenuClick}
+          aria-label="Otwórz menu"
         >
-          <span className="material-icons text-3xl">menu</span>
+          <Bars3Icon className="w-7 h-7 text-white" />
         </button>
       </div>
 
