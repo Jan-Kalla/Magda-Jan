@@ -33,6 +33,7 @@ function useIsMobile() {
   return isMobile;
 }
 
+
 export default function MobileControls() {
   const isMobile = useIsMobile();
   const isGameOver = getIsGameOver();
@@ -41,11 +42,12 @@ export default function MobileControls() {
 
   return (
     <div
-      className="flex flex-col items-center w-full min-h-screen p-4"
+      className="flex flex-col items-center w-full min-h-screen p-4 overflow-hidden"
       style={{ background: "linear-gradient(to bottom, #FAD6C8, #4E0113)" }}
     >
+
       {/* Środek: NextPieces po lewej, plansza w środku, ScorePanel po prawej */}
-      <div className="flex flex-row items-start justify-center gap-4 w-full max-w-md mb-4">
+     <div className="flex flex-row items-start justify-center gap-4 w-full px-2">
         <NextPieces />
         <TetrisGame />
         <div className="w-28">

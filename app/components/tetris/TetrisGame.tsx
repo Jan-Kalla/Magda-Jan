@@ -196,7 +196,12 @@ export default function TetrisGame({ mobileLayout }: { mobileLayout?: React.Reac
 
   return (
     <div className="flex flex-col items-center">
-      <canvas ref={canvasRef} width={WIDTH} height={HEIGHT} className="tetris-canvas rounded-lg" />
+      <canvas
+        ref={canvasRef}
+        width={WIDTH}
+        height={HEIGHT}
+        className="tetris-canvas rounded-lg aspect-[5/10] max-w-full"
+      />
       {mobileLayout}
     </div>
   );
