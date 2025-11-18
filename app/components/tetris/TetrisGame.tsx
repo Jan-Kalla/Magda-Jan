@@ -14,6 +14,10 @@ import {
   getIsGameOver,
   setPieceLockCallback,
   setLineClearCallback,
+  // DODANE:
+  getLevel,
+  setLevelCallback,
+  setScoreCallback,
 } from "./gameLogic";
 import { useGuest } from "@/app/context/GuestContext";
 import { createClient } from "@supabase/supabase-js";
@@ -27,8 +31,8 @@ const supabase = createClient(
 
 const WIDTH = 300;
 const HEIGHT = 600;
-const BASE_DROP_INTERVAL = 1000;
-const SPEED_FACTOR = 0.85;
+const BASE_DROP_INTERVAL = 1000; // 1s na levelu 1
+const SPEED_FACTOR = 0.85;       // -15% czasu ⇒ +15% prędkości na level
 const DAS = 150;
 const ARR = 40;
 
@@ -66,22 +70,49 @@ export default function TetrisGame({ mobileLayout }: { mobileLayout?: React.Reac
   }, []);
 
   useEffect(() => {
+    // Callbacki zdarzeń z logiki gry
     setPieceLockCallback(() => playHitAlternating());
     setLineClearCallback(() => sounds.line.play());
+
+    // Reset timera opadania po każdym awansie levelu
+    setLevelCallback(() => {
+      lastDropRef.current = performance.now();
+    });
+
+    // Opcjonalnie: możesz tu reagować na score (np. dla HUD), ale nie musimy nic robić
+    setScoreCallback(() => {});
+
     setGameOverCallback(async (score) => {
       sounds.gameover.play();
       if (!guest) return;
-      const currentLevel = 1; // możesz pobrać getLevel jeśli chcesz
+
+      const currentLevel = getLevel();
+
       const { data: existing } = await supabase
         .from("tetris_scores")
         .select("id, score, level")
         .eq("guest_id", guest.id)
         .single();
+
       if (!existing) {
         await supabase.from("tetris_scores").insert({ guest_id: guest.id, score, level: currentLevel });
-      } else if (score > existing.score) {
-        await supabase.from("tetris_scores").update({ score, level: currentLevel }).eq("id", existing.id);
+      } else {
+        const improvedScore = score > (existing.score ?? 0);
+        const improvedLevel = currentLevel > (existing.level ?? 0);
+
+        if (improvedScore || improvedLevel) {
+          await supabase
+            .from("tetris_scores")
+            .update({
+              score: improvedScore ? score : existing.score,
+              level: improvedLevel ? currentLevel : existing.level,
+            })
+            .eq("id", existing.id);
+        }
       }
+
+      // 🔔 powiadom leaderboard o zmianie
+      window.dispatchEvent(new Event("scoresUpdated"));
     });
 
     const canvas = canvasRef.current;
@@ -122,11 +153,17 @@ export default function TetrisGame({ mobileLayout }: { mobileLayout?: React.Reac
     window.addEventListener("keyup", handleKeyUp);
 
     const loop = (time: number) => {
-      const interval = Math.max(100, BASE_DROP_INTERVAL * Math.pow(SPEED_FACTOR, 0));
+      // Interwał opadania zależny od aktualnego levelu
+      const currentLevel = getLevel();
+      const interval = Math.max(100, BASE_DROP_INTERVAL * Math.pow(SPEED_FACTOR, currentLevel - 1));
+
+      // Opadanie klocka (może wykonać kilka ticków jeśli rama trwała długo)
       while (time - lastDropRef.current >= interval) {
         tick();
         lastDropRef.current += interval;
       }
+
+      // DAS/ARR dla przesuwania w bok
       if (keysDown.current["ArrowLeft"] || keysDown.current["ArrowRight"]) {
         const key = keysDown.current["ArrowLeft"] ? "ArrowLeft" : "ArrowRight";
         if (!dasTriggered.current) {
@@ -144,6 +181,7 @@ export default function TetrisGame({ mobileLayout }: { mobileLayout?: React.Reac
           }
         }
       }
+
       render(ctx);
       animationIdRef.current = requestAnimationFrame(loop);
     };

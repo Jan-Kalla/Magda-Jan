@@ -12,7 +12,7 @@ export default function ResponsiveTetrisLayout() {
 
         {/* Plansza w centrum */}
         <div className="flex flex-col items-center w-full md:w-auto">
-          <TetrisGame mobileLayout={<div className="flex md:hidden w-full justify-center"><MobileControls /></div>} />
+          <TetrisGame/>
         </div>
 
         {/* Prawa kolumna */}

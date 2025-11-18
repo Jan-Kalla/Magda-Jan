@@ -12,16 +12,27 @@ const medalIcons = ["🥇", "🥈", "🥉"];
 export default function TetrisLeaderboard() {
   const [scores, setScores] = useState<any[]>([]);
 
+  const fetchScores = async () => {
+    const { data } = await supabase
+      .from("tetris_scores")
+      .select("score, level, guest:guest_id (first_name, last_name)")
+      .order("score", { ascending: false })
+      .limit(10);
+    if (data) setScores(data);
+  };
+
   useEffect(() => {
-    const fetchScores = async () => {
-      const { data } = await supabase
-        .from("tetris_scores")
-        .select("score, level, guest:guest_id (first_name, last_name)")
-        .order("score", { ascending: false })
-        .limit(10);
-      if (data) setScores(data);
-    };
     fetchScores();
+
+    // nasłuchuj eventu z TetrisGame
+    const handler = () => {
+      fetchScores();
+    };
+    window.addEventListener("scoresUpdated", handler);
+
+    return () => {
+      window.removeEventListener("scoresUpdated", handler);
+    };
   }, []);
 
   return (
@@ -43,17 +54,12 @@ export default function TetrisLeaderboard() {
                 : "bg-[#4E0113]/30"
             }`}
           >
-            {/* Miejsce */}
             <div className="text-2xl font-bold text-white w-10 text-center shrink-0">
               {medalIcons[i] || `${i + 1}.`}
             </div>
-
-            {/* Imię i nazwisko */}
             <div className="font-semibold text-white flex-1 px-4 break-words">
               {row.guest.first_name} {row.guest.last_name}
             </div>
-
-            {/* Wynik i poziom */}
             <div className="flex gap-8 text-white text-sm font-medium shrink-0">
               <span>Score: {row.score}</span>
               <span>Level: {row.level}</span>

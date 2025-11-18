@@ -18,11 +18,14 @@ export default function ScorePanel() {
   }, []);
 
   return (
-    <div className="panel-card w-28 text-center">
+    <div className="panel-card text-center 
+                    w-32 md:w-64 
+                    w-24 sm:w-28 md:w-64 
+                    py-6 flex flex-col justify-center">
       <p className="text-sm text-gray-300">Score</p>
-      <p className="text-xl font-bold">{score}</p>
-      <p className="text-sm text-gray-300 mt-2">Level</p>
-      <p className="text-lg font-semibold">{level}</p>
+      <p className="text-2xl font-bold">{score}</p>
+      <p className="text-sm text-gray-300 mt-4">Level</p>
+      <p className="text-xl font-semibold">{level}</p>
     </div>
   );
 }

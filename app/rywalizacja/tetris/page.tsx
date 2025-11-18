@@ -8,8 +8,9 @@ export default function TetrisPage() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // proste wykrywanie mobile
-    setIsMobile("ontouchstart" in window || window.innerWidth < 768);
+    const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
+    const mobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(ua.toLowerCase());
+    setIsMobile(mobile);
   }, []);
 
   return (

@@ -127,29 +127,28 @@ function clearLines() {
       field.splice(y, 1);
       field.unshift(Array(NO_COLS).fill(null));
       linesCleared++;
-      y++; // sprawdź ponownie tę samą wysokość po "opadnięciu" wierszy
+      y++; // sprawdź ponownie po "opadnięciu" wierszy
     }
   }
 
   if (linesCleared > 0) {
-    console.log("clearLines fired", linesCleared);
     if (lineClearCb) lineClearCb(linesCleared);
 
-    // klasyczny system: 1/2/3/4 linie → 40/100/300/1200 punktów × level
+    // klasyczne punkty × level
     const basePoints = [0, 40, 100, 300, 1200];
     score += (basePoints[linesCleared] ?? 0) * level;
-
     if (scoreCallback) scoreCallback(score);
 
-    // awans co 10 linii całkowitych
+    // awans co 1 linię dla testów
+    //////////////////////////////////////// TEST /////////////////////////////////
     linesClearedTotal += linesCleared;
-    const nextLevelThreshold = level * 10;
-    if (linesClearedTotal >= nextLevelThreshold) {
+    while (linesClearedTotal >= level * 1) {
       level++;
       if (levelCallback) levelCallback(level);
     }
   }
 }
+
 
 // --- Sterowanie ---
 export function moveLeft() {
