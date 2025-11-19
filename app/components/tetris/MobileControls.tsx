@@ -64,7 +64,7 @@ export default function MobileControls() {
       {/* Plansza z bocznymi panelami (wrap dla małych ekranów, działa także w poziomie) */}
      <div className="flex flex-row items-start justify-center gap-3 w-full max-w-full overflow-x-auto">
         {/* NextPieces po lewej (kompaktowe) */}
-        <div className="flex flex-col items-center w-20">
+        <div className="flex flex-col items-center">
           <NextPieces />
         </div>
 
@@ -85,7 +85,7 @@ export default function MobileControls() {
       </div>
 
       {/* Przyciski mobilne pod planszą */}
-      <div className="mt-4 flex flex-col items-center gap-4 w-full max-w-xs">
+      <div className="mt-4 flex flex-col items-center gap-4 w-full max-w-xs pl-12">
         {/* Pierwszy rząd: Left / Rotate / Right */}
         <div className="grid grid-cols-3 gap-4 w-full">
           <button onClick={moveLeft} className="control-btn">
