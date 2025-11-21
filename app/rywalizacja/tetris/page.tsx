@@ -20,7 +20,7 @@ export default function TetrisPage() {
         className="min-h-screen w-full pt-0 md:pt-[112px] px-4"
         style={{ background: "linear-gradient(to bottom, #FAD6C8, #4E0113)" }}
       >
-        <h1 className="text-3xl font-bold text-[#4E0113] mb-6 text-center">Tetris</h1>
+        <h1 className="text-3xl font-bold text-[#4E0113] text-center">Tetris</h1>
         {isMobile ? <MobileTetrisLayout /> : <ResponsiveTetrisLayout />}
       </div>
     </>

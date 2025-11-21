@@ -29,14 +29,9 @@ export default function NextPieces() {
           const minX = Math.min(...piece.positions.map(p => p.x));
           const minY = Math.min(...piece.positions.map(p => p.y));
 
-          // domyślne przesunięcie (centrowanie)
           let offsetX = 1;
           let offsetY = 1;
-
-          // specjalny przypadek dla klocka I (1x4)
-          if (piece.type === "I") {
-            offsetX = 2; // przesuwamy o 1 w prawo względem reszty
-          }
+          if (piece.type === "I") offsetX = 2;
 
           renderPiece(
             {
@@ -58,21 +53,19 @@ export default function NextPieces() {
     renderPreviews();
   }, []);
 
-return (
-  <div className="flex flex-col items-center">
-    <p className="font-semibold text-[#4E0113] mb-2">Następne</p>
-    <div className="flex flex-col gap-4">
-      {canvasRefs.map((ref, idx) => (
-    <canvas
-      key={idx}
-      ref={ref}
-      width={PREVIEW_SIZE * BLOCK_SIZE}
-      height={PREVIEW_SIZE * BLOCK_SIZE}
-      className="tetris-canvas rounded"
-    />
-      ))}
+  return (
+    <div className="flex flex-col items-center">
+      <div className="flex flex-row sm:flex-row md:flex-col gap-4 justify-center md:items-center">
+        {canvasRefs.map((ref, idx) => (
+          <canvas
+            key={idx}
+            ref={ref}
+            width={PREVIEW_SIZE * BLOCK_SIZE}
+            height={PREVIEW_SIZE * BLOCK_SIZE}
+            className="tetris-canvas rounded shadow-md"
+          />
+        ))}
+      </div>
     </div>
-  </div>
-);
-
+  );
 }

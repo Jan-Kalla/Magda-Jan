@@ -37,12 +37,9 @@ function useIsMobile() {
 export default function MobileControls() {
   const isMobile = useIsMobile();
   const isGameOver = getIsGameOver();
-
-  // Stan do wyświetlania wyniku i poziomu (reaktywnie)
   const [score, setScore] = useState(getScore());
   const [level, setLevel] = useState(getLevel());
 
-  // Aktualizacja w pętli rAF (lekka i bez freeze'ów)
   useEffect(() => {
     let raf = 0;
     const update = () => {
@@ -57,34 +54,32 @@ export default function MobileControls() {
   if (!isMobile) return null;
 
   return (
-<div className="flex flex-col items-center w-full min-h-screen p-4 overflow-hidden">
+    <div className="flex flex-col items-center w-full min-h-screen overflow-hidden">
+      {/* NextPieces + ScorePanel obok siebie */}
+      <div className="flex flex-row justify-center items-start mt-8 gap-4 mb-4">
+        <NextPieces />
 
-      {/* Plansza z bocznymi panelami (wrap dla małych ekranów, działa także w poziomie) */}
-     <div className="flex flex-row items-start justify-center gap-3 w-full max-w-full px-2">
-        {/* NextPieces po lewej (kompaktowe) */}
-        <div className="flex flex-col items-center">
-          <NextPieces />
-        </div>
-
-        {/* Plansza w środku */}
-        <div className="flex flex-col items-center">
-          <TetrisGame />
-        </div>
-
-        {/* Smukły, wysoki panel wyniku po prawej (mobile-only wariant) */}
         <div className="w-20">
-          <div className="panel-card text-center py-6 px-2 h-full flex flex-col justify-center items-center">
-            <p className="text-xs text-gray-300">Score</p>
-            <p className="text-xl font-bold">{score}</p>
-            <p className="text-xs text-gray-300 mt-2">Level</p>
-            <p className="text-lg font-semibold">{level}</p>
+          <div className="panel-card text-center px-2 py-3 h-auto min-h-0 flex flex-col justify-center items-center shadow-md space-y-1">
+            <p className="text-[10px] leading-none text-gray-300">Score</p>
+            <p className="text-base leading-none font-bold">{score}</p>
+            <p className="text-[10px] leading-none text-gray-300 mt-1">Level</p>
+            <p className="text-sm leading-none font-semibold">{level}</p>
           </div>
         </div>
       </div>
 
-      {/* Przyciski mobilne pod planszą */}
+
+      {/* Plansza + panel wyniku */}
+      <div className="flex flex-row items-start justify-center gap-3 w-full max-w-full px-2">
+        {/* Plansza */}
+        <div className="flex flex-col items-center mt-2">
+          <TetrisGame />
+        </div>
+      </div>
+
+      {/* Przyciski */}
       <div className="mt-4 flex flex-col items-center gap-4 w-full max-w-xs pl-12">
-        {/* Pierwszy rząd: Left / Rotate / Right */}
         <div className="grid grid-cols-3 gap-4 w-full">
           <button onClick={moveLeft} className="control-btn">
             <ChevronLeftIcon className="w-6 h-6" />
@@ -97,7 +92,6 @@ export default function MobileControls() {
           </button>
         </div>
 
-        {/* Drugi rząd: Down / Hard Drop */}
         <div className="grid grid-cols-2 gap-6 w-2/3">
           <button onClick={softDrop} className="control-btn">
             <ChevronDownIcon className="w-6 h-6" />
@@ -107,7 +101,6 @@ export default function MobileControls() {
           </button>
         </div>
 
-        {/* Restart tylko po Game Over */}
         {isGameOver && (
           <button
             onClick={restartGame}
@@ -118,7 +111,7 @@ export default function MobileControls() {
         )}
       </div>
 
-      {/* Leaderboard na dole */}
+      {/* Leaderboard */}
       <div className="mt-6 w-full">
         <TetrisLeaderboard />
       </div>
