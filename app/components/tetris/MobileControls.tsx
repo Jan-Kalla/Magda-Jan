@@ -57,12 +57,10 @@ export default function MobileControls() {
   if (!isMobile) return null;
 
   return (
-    <div
-      className="flex flex-col items-center w-full min-h-screen p-4 overflow-hidden"
-      style={{ background: "linear-gradient(to bottom, #FAD6C8, #4E0113)" }}
-    >
+<div className="flex flex-col items-center w-full min-h-screen p-4 overflow-hidden">
+
       {/* Plansza z bocznymi panelami (wrap dla małych ekranów, działa także w poziomie) */}
-     <div className="flex flex-row items-start justify-center gap-3 w-full max-w-full overflow-x-auto">
+     <div className="flex flex-row items-start justify-center gap-3 w-full max-w-full px-2">
         {/* NextPieces po lewej (kompaktowe) */}
         <div className="flex flex-col items-center">
           <NextPieces />

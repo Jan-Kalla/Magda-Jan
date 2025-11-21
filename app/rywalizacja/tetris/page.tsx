@@ -14,13 +14,15 @@ export default function TetrisPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#FAD6C8] pt-20">
+    <>
       <Navbar />
-      <div className="flex flex-col items-center justify-center">
-        <h1 className="text-3xl font-bold text-[#4E0113] mb-4">Tetris</h1>
-        
+      <div
+        className="min-h-screen w-full pt-0 md:pt-[112px] px-4"
+        style={{ background: "linear-gradient(to bottom, #FAD6C8, #4E0113)" }}
+      >
+        <h1 className="text-3xl font-bold text-[#4E0113] mb-6 text-center">Tetris</h1>
         {isMobile ? <MobileTetrisLayout /> : <ResponsiveTetrisLayout />}
       </div>
-    </div>
+    </>
   );
 }

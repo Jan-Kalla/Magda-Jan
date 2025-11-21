@@ -20,12 +20,6 @@ export default function ContactPage() {
   return (
     <div>
       <Navbar />
-      {guest && (
-        <p className="text-center text-[#FAD6C8] mb-4">
-          Witaj ponownie, {guest.first_name}! 💐
-        </p>
-      )}
-
       <section className="relative min-h-screen bg-gradient-to-b from-[#FAD6C8] to-[#4E0113] flex flex-col items-center justify-center text-white px-8 py-20">
         {/* Nagłówek */}
         <motion.h1

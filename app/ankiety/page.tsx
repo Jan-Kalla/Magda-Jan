@@ -74,9 +74,10 @@ export default function MealSurveyPage() {
   } = useMealSurvey();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FAD6C8] to-[#4E0113] pt-20">
-      <Navbar />
-
+    <>
+    <Navbar />
+    <div className="min-h-screen bg-gradient-to-b from-[#FAD6C8] to-[#4E0113] pt-5 md:pt-[112px]">
+    
       {/* Moduł osoby towarzyszącej */}
       <PlusOneSelector
         canBringPlusOne={guest?.can_bring_plus_one}
@@ -150,5 +151,6 @@ export default function MealSurveyPage() {
         />
       </motion.div>
     </div>
+    </>
   );
 }

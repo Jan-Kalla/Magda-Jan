@@ -34,7 +34,7 @@ export default function HarmonogramPage() {
     <div className="min-h-screen bg-gradient-to-b from-[#FAD6C8] to-[#4E0113]">
       <Navbar />
     {/* Sekcja zdjęcia + opis lokalu */}
-      <section className="flex flex-col md:flex-row w-full py-16">
+      <section className="flex flex-col md:flex-row w-full">
       {/* Lewa kolumna – slider */}
       <div className="flex-1 relative h-64 md:h-[600px] overflow-hidden shadow-lg my-[100px] ml-[100px]">
         <AnimatePresence mode="wait">

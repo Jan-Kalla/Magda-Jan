@@ -3,11 +3,10 @@ import TetrisGame from "./TetrisGame";
 import ScorePanel from "./ScorePanel";
 import NextPieces from "./NextPieces";
 import TetrisLeaderboard from "./TetrisLeaderboard";
-import MobileControls from "./MobileControls";
 
 export default function ResponsiveTetrisLayout() {
   return (
-    <div className="min-h-screen w-full p-4" style={{ background: "linear-gradient(to bottom, #FAD6C8, #4E0113)" }}>
+    <div className="min-h-screen w-full p-4">
       <div className="flex flex-col md:flex-row gap-6 justify-center items-start w-full max-w-5xl mx-auto">
 
         {/* Plansza w centrum */}

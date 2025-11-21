@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useGuest } from "@/app/context/GuestContext";
 import { usePathname } from "next/navigation";
 import { Bars3Icon } from "@heroicons/react/24/solid";
-import { togglePause } from "@/app/components/tetris/gameLogic"; // dostosuj ścieżkę do gameLogic
+import { togglePause } from "@/app/components/tetris/gameLogic";
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
@@ -36,20 +36,17 @@ export default function Navbar() {
   const visibleItems = navItems.filter((item) => !item.protected || guest);
 
   const handleMenuClick = () => {
-    // Otwórz/zamknij mobilne menu
     setIsOpen((prev) => !prev);
-    // Na mobilu dodatkowo pauzuj grę
     if (isMobile) {
       try {
         togglePause();
-      } catch {
-        // jeśli gameLogic nie jest załadowany w tym widoku, ignorujemy
-      }
+      } catch {}
     }
   };
 
   return (
-    <nav className="fixed top-0 left-0 w-full bg-[#4E0113] text-white shadow-md z-50">
+    // Mobile: sticky (w przepływie), Desktop: fixed
+    <nav className="sticky top-0 left-0 w-full bg-[#4E0113] text-white shadow-md z-50 md:fixed">
       <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
         <Link href="/" className="text-2xl font-bold text-[#FAD6C8]">
           Magda & Jan
@@ -100,7 +97,7 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile menu — renderowane poniżej nagłówka, w przepływie (nie overlay) */}
       {isOpen && (
         <div className="md:hidden bg-[#841D30] px-4 pb-4">
           <ul className="flex flex-col space-y-2">

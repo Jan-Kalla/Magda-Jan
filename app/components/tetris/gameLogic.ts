@@ -142,7 +142,7 @@ function clearLines() {
     // awans co 1 linię dla testów
     //////////////////////////////////////// TEST /////////////////////////////////
     linesClearedTotal += linesCleared;
-    while (linesClearedTotal >= level * 1) {
+    while (linesClearedTotal >= level * 5) {
       level++;
       if (levelCallback) levelCallback(level);
     }
