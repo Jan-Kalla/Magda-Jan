@@ -78,7 +78,7 @@ export default function MobileControls() {
         </div>
 
         {/* Lewa kolumna: MoveLeft + Rotate */}
-        <div className="absolute left-0 top-1/2 bottom-0 w-20 flex flex-col justify-around items-center px-1">
+        <div className="absolute left-0 top-1/2 bottom-0 w-20 sm:w-24 md:w-28 lg:w-32 flex flex-col justify-around items-center px-1">
           <button
             onClick={moveLeft}
             aria-label="Move left"
@@ -96,7 +96,7 @@ export default function MobileControls() {
         </div>
 
         {/* Prawa kolumna: MoveRight + SoftDrop */}
-        <div className="absolute right-0 top-1/2 bottom-0 w-20 flex flex-col justify-around items-center px-1">
+        <div className="absolute right-0 top-1/2 bottom-0 w-20 sm:w-24 md:w-28 lg:w-32 flex flex-col justify-around items-center px-1">
           <button
             onClick={moveRight}
             aria-label="Move right"

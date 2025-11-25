@@ -10,13 +10,14 @@ import { togglePause } from "@/app/components/tetris/gameLogic";
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
-    const update = () => setIsMobile(window.innerWidth < 768); // md breakpoint
+    const update = () => setIsMobile("ontouchstart" in window || navigator.maxTouchPoints > 0);
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
   }, []);
   return isMobile;
 }
+
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -45,15 +46,24 @@ export default function Navbar() {
   };
 
   return (
-    // Mobile: sticky (w przepływie), Desktop: fixed
-    <nav className="sticky top-0 left-0 w-full bg-[#4E0113] text-white shadow-md z-50 md:fixed">
-      <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-        <Link href="/" className="text-2xl font-bold text-[#FAD6C8]">
-          Magda & Jan
-        </Link>
+  <nav className="sticky top-0 left-0 w-full bg-[#4E0113] text-white shadow-md z-50 md:fixed">
+    <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+      <Link href="/" className="text-xl font-bold text-[#FAD6C8]">
+        Magda & Jan
+      </Link>
 
-        {/* Desktop menu */}
-        <ul className="hidden md:flex space-x-6 items-center">
+      {/* Jeśli urządzenie mobilne → toggle */}
+      {isMobile ? (
+        <button
+          className="focus:outline-none p-2 rounded-lg bg-[#841D30] hover:bg-[#9b3042] transition"
+          onClick={handleMenuClick}
+          aria-label="Otwórz menu"
+        >
+          <Bars3Icon className="w-7 h-7 text-white" />
+        </button>
+      ) : (
+        /* Jeśli desktop → pełne menu */
+        <ul className="flex space-x-6 items-center">
           {visibleItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -86,56 +96,48 @@ export default function Navbar() {
             </li>
           )}
         </ul>
-
-        {/* Mobile toggle */}
-        <button
-          className="md:hidden focus:outline-none p-2 rounded-lg bg-[#841D30] hover:bg-[#9b3042] transition"
-          onClick={handleMenuClick}
-          aria-label="Otwórz menu"
-        >
-          <Bars3Icon className="w-7 h-7 text-white" />
-        </button>
-      </div>
-
-      {/* Mobile menu — renderowane poniżej nagłówka, w przepływie (nie overlay) */}
-      {isOpen && (
-        <div className="md:hidden bg-[#841D30] px-4 pb-4">
-          <ul className="flex flex-col space-y-2">
-            {visibleItems.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={`block py-2 transition-colors ${
-                      isActive
-                        ? "text-[#FAD6C8] font-semibold"
-                        : "hover:text-[#FAD6C8]"
-                    }`}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
-
-            {guest && (
-              <li>
-                <button
-                  onClick={() => {
-                    logout();
-                    setIsOpen(false);
-                  }}
-                  className="w-full text-left py-2 px-2 rounded-lg bg-[#9b3042] hover:bg-[#b64557] transition"
-                >
-                  Wyloguj się
-                </button>
-              </li>
-            )}
-          </ul>
-        </div>
       )}
-    </nav>
-  );
+    </div>
+
+    {/* Mobile menu – tylko gdy isMobile i otwarte */}
+    {isMobile && isOpen && (
+      <div className="bg-[#841D30] px-4 pb-4">
+        <ul className="flex flex-col space-y-2">
+          {visibleItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={`block py-2 transition-colors ${
+                    isActive
+                      ? "text-[#FAD6C8] font-semibold"
+                      : "hover:text-[#FAD6C8]"
+                  }`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              </li>
+            );
+          })}
+
+          {guest && (
+            <li>
+              <button
+                onClick={() => {
+                  logout();
+                  setIsOpen(false);
+                }}
+                className="w-full text-left py-2 px-2 rounded-lg bg-[#9b3042] hover:bg-[#b64557] transition"
+              >
+                Wyloguj się
+              </button>
+            </li>
+          )}
+        </ul>
+      </div>
+    )}
+  </nav>
+);
 }

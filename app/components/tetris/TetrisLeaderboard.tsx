@@ -57,10 +57,10 @@ export default function TetrisLeaderboard() {
             <div className="text-2xl font-bold text-white w-10 text-center shrink-0">
               {medalIcons[i] || `${i + 1}.`}
             </div>
-            <div className="font-semibold text-white flex-1 px-4 break-words">
+            <div className="font-semibold text-white flex-1 px-2 break-words">
               {row.guest.first_name} {row.guest.last_name}
             </div>
-            <div className="flex gap-8 text-white text-sm font-medium shrink-0">
+            <div className="flex gap-4 text-white text-sm font-medium shrink-0">
               <span>Score: {row.score}</span>
               <span>Level: {row.level}</span>
             </div>
