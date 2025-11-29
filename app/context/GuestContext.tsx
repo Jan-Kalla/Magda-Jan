@@ -10,17 +10,24 @@ const supabase = createClient(
 );
 
 export type Guest = {
-  id: number;          // bigint z tabeli guests
+  id: number;
   first_name: string;
   last_name: string;
   code: string;
   [key: string]: any;
 } | null;
 
+// Definiujemy możliwe rezultaty logowania
+export type LoginResult = {
+  success: boolean;
+  errorType?: "INVALID_CODE" | "CONNECTION_ERROR" | "UNKNOWN";
+};
+
 type GuestContextType = {
   guest: Guest;
   loading: boolean;
-  loginWithCode: (code: string) => Promise<boolean>;
+  // Zmieniamy typ zwracany z Promise<boolean> na Promise<LoginResult>
+  loginWithCode: (code: string) => Promise<LoginResult>;
   logout: () => void;
   refreshGuest: () => Promise<void>;
 };
@@ -28,7 +35,7 @@ type GuestContextType = {
 const GuestContext = createContext<GuestContextType>({
   guest: null,
   loading: true,
-  loginWithCode: async () => false,
+  loginWithCode: async () => ({ success: false }),
   logout: () => {},
   refreshGuest: async () => {},
 });
@@ -37,11 +44,11 @@ export const GuestProvider = ({ children }: { children: React.ReactNode }) => {
   const [guest, setGuest] = useState<Guest>(null);
   const [loading, setLoading] = useState(true);
 
-  // === Ładowanie gościa z localStorage po stronie klienta ===
   useEffect(() => {
     const loadGuest = async () => {
       const savedCode = localStorage.getItem("guestCode");
       if (savedCode) {
+        // Tutaj też warto by obsłużyć błąd, ale na razie zostawmy proste sprawdzenie
         const { data, error } = await supabase
           .from("guests")
           .select("*")
@@ -60,25 +67,44 @@ export const GuestProvider = ({ children }: { children: React.ReactNode }) => {
     loadGuest();
   }, []);
 
-  // === Funkcja logowania po kodzie ===
-  const loginWithCode = async (code: string) => {
+  const loginWithCode = async (code: string): Promise<LoginResult> => {
     const trimmedCode = code.trim().toUpperCase();
-    const { data, error } = await supabase
-      .from("guests")
-      .select("*")
-      .eq("code", trimmedCode)
-      .single();
+    
+    try {
+      const { data, error } = await supabase
+        .from("guests")
+        .select("*")
+        .eq("code", trimmedCode)
+        .single();
 
-    if (!error && data) {
-      setGuest(data);
-      localStorage.setItem("guestCode", trimmedCode);
-      return true;
+      if (error) {
+        console.error("Login Supabase error:", error);
+        
+        // Kod PGRST116 oznacza: zapytanie zwróciło 0 wierszy, a oczekiwano .single()
+        // To jest nasz "Nieprawidłowy kod"
+        if (error.code === 'PGRST116') {
+          return { success: false, errorType: "INVALID_CODE" };
+        }
+
+        // Każdy inny błąd (np. brak sieci, timeout, błąd serwera)
+        return { success: false, errorType: "CONNECTION_ERROR" };
+      }
+
+      if (data) {
+        setGuest(data);
+        localStorage.setItem("guestCode", trimmedCode);
+        return { success: true };
+      }
+
+      return { success: false, errorType: "UNKNOWN" };
+
+    } catch (err) {
+      // Łapiemy błędy sieciowe, które mogą rzucić wyjątek (np. fetch failed)
+      console.error("Network/Unexpected error:", err);
+      return { success: false, errorType: "CONNECTION_ERROR" };
     }
-
-    return false;
   };
 
-  // === Odświeżenie danych gościa z bazy ===
   const refreshGuest = async () => {
     if (!guest) return;
     const { data, error } = await supabase
@@ -106,5 +132,4 @@ export const GuestProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-// Hook do łatwego użycia kontekstu
 export const useGuest = () => useContext(GuestContext);
