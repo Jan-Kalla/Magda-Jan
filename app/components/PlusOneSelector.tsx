@@ -195,7 +195,7 @@ export default function PlusOneSelector({
             Możesz zdecydować, czy chcesz przyjść na wesele z osobą towarzyszącą.
           </p>
           <p className="text-gray-800 mb-2">
-            Prosimy, abyś dobrze przemyślał tę decyzję – masz na to czas do miesiąca przed weselem.
+            Prosimy, abyś dobrze przemyślał tę decyzję – masz na to czas do dwóch tygodni przed weselem.
           </p>
           <p className="text-red-600 font-medium">
             Pamiętaj: raz podjętej decyzji nie można cofnąć.
