@@ -1,12 +1,13 @@
-// app/harmonogram/data.tsx
 import { 
   PartyPopper, 
   Heart, 
   Utensils, 
   Music, 
-  Camera, 
   Mic2, 
-  Clapperboard 
+  Clapperboard,
+  Users,
+  Star,
+  Cake
 } from "lucide-react";
 
 export type TimelineEvent = {
@@ -20,110 +21,119 @@ export type TimelineEvent = {
 };
 
 export const scheduleData: TimelineEvent[] = [
+  // --- TRADYCYJNY POCZĄTEK ---
   {
     id: 1,
-    time: "AKT I",
-    title: "Ruch i Integracja",
-    description: "Rozpoczynamy naszą wspólną przygodę. Czas się poznać i rozruszać!",
-    icon: <PartyPopper className="w-6 h-6 text-[#FAD6C8]" />,
-    type: "act",
-  },
-  {
-    id: 2,
     time: "14:00",
-    title: "Wielkie Otwarcie & Życzenia",
-    description: "Powitanie w Starej Szwajcarii. To idealny moment na uściski i pierwsze zdjęcia.",
+    title: "Przyjazd i Powitanie",
+    description: "Spotykamy się wszyscy w Starej Szwajcarii. Czas na życzenia, uściski i pierwsze wspólne zdjęcia.",
     icon: <Heart className="w-5 h-5 text-white" />,
     type: "event",
   },
   {
-    id: 3,
+    id: 2,
     time: "15:00",
-    title: "Uczta Weselna",
-    description: "Dwudaniowy obiad, który da nam siłę na resztę nocy.",
-    details: "Szef kuchni przygotował dla Was wyjątkowe menu (pamiętacie ankiety?). Spokojnie, nikt nie wyjdzie głodny!",
+    title: "Uroczysty Obiad",
+    description: "Dwudaniowy posiłek, który da nam siłę na nadchodzącą noc.",
+    details: "Szef kuchni przygotował menu zgodnie z Waszymi wyborami w ankiecie.",
     icon: <Utensils className="w-5 h-5 text-white" />,
     type: "event",
   },
   {
-    id: 4,
+    id: 3,
     time: "16:00",
     title: "Pierwszy Taniec",
-    description: "Oficjalne otwarcie parkietu. Mamy nadzieję, że nie pomylimy kroków!",
+    description: "Oficjalne otwarcie parkietu. Mamy nadzieję, że nie pomylimy kroków! Zaraz po nim ruszamy z zabawą.",
     icon: <Music className="w-5 h-5 text-white" />,
     type: "event",
   },
+
+  // --- AKT I ---
   {
-    id: 5,
-    time: "AKT II",
-    title: "Nostalgia i Anegdoty",
-    description: "Chwila oddechu i powrót do przeszłości. Przygotujcie chusteczki (ze śmiechu).",
-    icon: <Camera className="w-6 h-6 text-[#FAD6C8]" />,
+    id: 4,
+    time: "17:00",
+    title: "Akt I: Ruch i Integracja",
+    description: "Pierwsza niespodzianka wieczoru.",
+    details: "...",
+    icon: <Users className="w-6 h-6 text-[#FAD6C8]" />, 
     type: "act",
   },
-  {
-    id: 6,
-    time: "17:30",
-    title: "Czas na tort i kawę",
-    description: "Słodkie doładowanie cukrem przed dalszą zabawą.",
-    icon: <Utensils className="w-5 h-5 text-white" />,
-    type: "event",
-  },
-  {
-    id: 7,
-    time: "18:30",
-    title: "Wasze 5 minut",
-    description: "Dedykacje, krótkie przemowy i luźne rozmowy przy stolikach.",
-    details: "To ten moment, kiedy wujek Janusz może opowiedzieć tę historię z '98 roku. Jesteśmy na to (chyba) gotowi.",
-    icon: <Mic2 className="w-5 h-5 text-white" />,
-    type: "event",
-  },
-  {
-    id: 8,
-    time: "AKT III",
-    title: "Multimedialny Ping-Pong",
-    description: "Interaktywne show, jakiego nie widzieliście. Wy oglądacie, my komentujemy.",
-    icon: <Clapperboard className="w-6 h-6 text-[#FAD6C8]" />,
-    type: "act",
-  },
-  {
-    id: 9,
-    time: "20:00",
-    title: "Seans Filmowy z Komentarzem",
-    description: "Film -> Stop -> Komentarz na żywo -> Start.",
-    details: "Przygotowaliśmy dla Was filmową podróż. Ale to nie jest zwykły film. Będziemy go zatrzymywać, by dodać kontekst, wyjaśnić niejasności i zdradzić kulisy. Bądźcie czujni!",
-    icon: <Clapperboard className="w-5 h-5 text-white" />,
-    type: "event",
-  },
-  {
-    id: 10,
-    time: "AKT IV",
-    title: "Czyste Kino i Emocje",
-    description: "Finał części oficjalnej. Tradycja miesza się z nowoczesnością.",
-    icon: <Heart className="w-6 h-6 text-[#FAD6C8]" />,
-    type: "act",
-  },
+
+  // --- ZABAWA I DESER ---
   {
     id: 11,
-    time: "22:30",
-    title: "Ciepła kolacja: Płonące Prosię",
-    description: "Jan obiecał, że zje jak koń, ale dla Was też wystarczy!",
+    time: "18:00",
+    title: "Słodka chwila",
+    description: "Czas na kawę i pyszne ciasto.",
     icon: <Utensils className="w-5 h-5 text-white" />,
     type: "event",
   },
+  
+  // --- AKT II ---
+  {
+    id: 5,
+    time: "19:00",
+    title: "Akt II: Nostalgia i Anegdoty",
+    description: "Podróż w czasie do lat szkolnych i studenckich.",
+    details: "...",
+    icon: <Mic2 className="w-6 h-6 text-[#FAD6C8]" />, 
+    type: "act",
+  },
+  
   {
     id: 12,
+    time: "20:00",
+    title: "Wjazd Tortu",
+    description: "Oficjalne krojenie tortu weselnego.",
+    icon: <Cake className="w-5 h-5 text-white" />,
+    type: "event",
+  },
+
+  // --- AKT III ---
+  {
+    id: 6,
+    time: "21:00",
+    title: "Akt III: Multimedialny Ping-Pong",
+    description: "Rodzinne starcie na ekranie.",
+    details: "...",
+    icon: <Clapperboard className="w-6 h-6 text-[#FAD6C8]" />, 
+    type: "act",
+  },
+
+  {
+    id: 10,
+    time: "23:00",
+    title: "Wielki Turniej - Edycja II",
+    description: "Jeżeli masz na tym weselu osobę do pary, to już teraz ćwiczcie sprawność motoryczną ;)",
+    icon: <PartyPopper className="w-5 h-5 text-white" />,
+    type: "event",
+  },
+
+  // --- AKT IV ---
+  {
+    id: 7,
+    time: "23:30",
+    title: "Akt IV: Czyste Kino i Emocje",
+    description: "Najważniejszy moment wieczoru tuż przed północą.",
+    details: "Prosimy o przygotowanie chusteczek.",
+    icon: <Star className="w-6 h-6 text-[#FAD6C8]" />, 
+    type: "act",
+  },
+
+  // --- FINAŁ I NOC ---
+  {
+    id: 8,
     time: "00:00",
-    title: "Oczepiny & Podziękowania",
-    description: "Tradycji musi stać się zadość. Rzucamy bukietem i muchą.",
+    title: "Oczepiny",
+    description: "Tradycji musi stać się zadość! Rzut bukietem, muchą i garść zabaw weselnych.",
     icon: <PartyPopper className="w-5 h-5 text-white" />,
     type: "event",
   },
   {
-    id: 13,
+    id: 9,
     time: "01:00 - 06:00",
-    title: "Afterparty & Hardcore Dancing",
-    description: "Dla najwytrwalszych graczy. Muzyka, luźne zabawy i barszczyk nad ranem.",
+    title: "Afterparty",
+    description: "Czas dla najwytrwalszych graczy. Luźne tańce, rozmowy i zabawa do białego rana.",
     icon: <Music className="w-5 h-5 text-white" />,
     type: "party",
   },
