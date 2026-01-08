@@ -5,29 +5,66 @@ import Link from "next/link";
 import { useGuest } from "@/app/context/GuestContext";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { LockClosedIcon, PlayCircleIcon, PuzzlePieceIcon } from "@heroicons/react/24/solid";
-import { useState } from "react";
+import { LockClosedIcon, PlayCircleIcon, PuzzlePieceIcon, BeakerIcon } from "@heroicons/react/24/solid";
+import { useState, useEffect } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+// Lokalna inicjalizacja klienta
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default function CompetitionPage() {
   const { guest } = useGuest();
   const router = useRouter();
   const [showLockedMessage, setShowLockedMessage] = useState(false);
+  const [isQuizActive, setIsQuizActive] = useState(false);
 
-  // Sprawdzamy, czy to Ty (Admin)
+  // --- UPRAWNIENIA ---
   const isAdmin = guest?.code === "FC3818";
+  const isTester = guest?.code === "8DD06D"; // Gość specjalny
+
+  useEffect(() => {
+    // Sprawdzamy status quizu w bazie
+    const checkStatus = async () => {
+        const { data } = await supabase.from('quiz_state').select('status').single();
+        if (data && data.status !== 'idle' && data.status !== 'finished') {
+            setIsQuizActive(true);
+        }
+    };
+    checkStatus();
+    
+    // Realtime: nasłuchiwanie na odblokowanie przez Pana Młodego
+    const channel = supabase.channel('menu_quiz_status')
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'quiz_state', filter: 'id=eq.1' }, 
+        (payload) => {
+            const status = payload.new.status;
+            // Quiz jest aktywny, jeśli nie jest w stanie spoczynku ani zakończony
+            setIsQuizActive(status !== 'idle' && status !== 'finished');
+        })
+        .subscribe();
+        
+    return () => { supabase.removeChannel(channel) };
+  }, []);
 
   const handleQuizClick = (e: React.MouseEvent) => {
-    e.preventDefault(); // Zatrzymujemy domyślne zachowanie linku
+    e.preventDefault();
 
     if (isAdmin) {
-      // Jeśli to Ty, przekieruj do quizu
-      router.push("/rywalizacja/quiz");
+      router.push("/rywalizacja/quiz"); // Admin -> Panel
+    } else if (isTester || isQuizActive) {
+      router.push("/rywalizacja/quiz/game"); // Tester LUB Aktywny Quiz -> Gra
     } else {
-      // Jeśli to gość, pokaż komunikat
+      // Zablokowane dla reszty
       setShowLockedMessage(true);
       setTimeout(() => setShowLockedMessage(false), 2000);
     }
   };
+
+  // Warunek, czy pokazać kłódkę czy przycisk play
+  // Admin i Tester zawsze widzą "otwarte". Reszta widzi otwarte tylko gdy isQuizActive.
+  const isUnlocked = isAdmin || isTester || isQuizActive;
 
   return (
     <>
@@ -40,7 +77,7 @@ export default function CompetitionPage() {
             Strefa Rywalizacji 🏆
           </h1>
 
-          {/* === KAFELEK 1: QUIZ (KAHOOT) === */}
+          {/* === KAFELEK 1: QUIZ === */}
           <motion.div
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -50,7 +87,7 @@ export default function CompetitionPage() {
               onClick={handleQuizClick}
               className={`
                 relative w-full p-6 rounded-2xl shadow-xl border-2 flex items-center justify-between cursor-pointer transition-all overflow-hidden
-                ${isAdmin 
+                ${isUnlocked 
                   ? "bg-[#4E0113] border-[#FAD6C8] text-white hover:bg-[#6b1326]" 
                   : "bg-[#4E0113]/80 border-gray-400 text-gray-200 grayscale-[0.3]"
                 }
@@ -60,6 +97,10 @@ export default function CompetitionPage() {
                 <div className="p-3 bg-white/10 rounded-full">
                   {isAdmin ? (
                     <PlayCircleIcon className="w-8 h-8 text-[#FAD6C8]" />
+                  ) : isTester ? (
+                    <BeakerIcon className="w-8 h-8 text-[#FAD6C8]" /> 
+                  ) : isUnlocked ? (
+                    <PlayCircleIcon className="w-8 h-8 text-[#FAD6C8]" />
                   ) : (
                     <LockClosedIcon className="w-8 h-8 text-gray-400" />
                   )}
@@ -67,22 +108,22 @@ export default function CompetitionPage() {
                 <div className="text-left">
                   <h2 className="text-2xl font-bold">Wielki Quiz</h2>
                   <p className="text-sm opacity-80">
-                    {isAdmin ? "Panel Administratora" : "Sprawdź, jak dobrze nas znasz!"}
+                    {isAdmin ? "Panel Administratora" : isTester ? "Tryb Testowy" : "Sprawdź wiedzę o Parze Młodej"}
                   </p>
                 </div>
               </div>
 
               {/* Efekt tła dla zablokowanych */}
-              {!isAdmin && (
+              {!isUnlocked && (
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20 backdrop-blur-sm">
                   <p className="text-[#FAD6C8] font-bold text-lg px-4 text-center">
-                    Dostępne na weselu 🔒
+                    Czekaj na sygnał Wodzireja 🔒
                   </p>
                 </div>
               )}
             </div>
 
-            {/* Komunikat mobilny / po kliknięciu */}
+            {/* Komunikat zablokowania */}
             {showLockedMessage && (
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
@@ -91,7 +132,7 @@ export default function CompetitionPage() {
                 className="absolute -bottom-12 left-0 right-0 text-center"
               >
                 <span className="bg-red-600 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg">
-                  To wydarzenie jest jeszcze zablokowane! ⏳
+                  Quiz jeszcze nie wystartował! ⏳
                 </span>
               </motion.div>
             )}
