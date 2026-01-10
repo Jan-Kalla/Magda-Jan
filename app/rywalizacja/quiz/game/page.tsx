@@ -47,6 +47,22 @@ export default function GamePage() {
     currentQRef.current = currentQuestion;
   }, [gameState, currentQuestion]);
 
+  useEffect(() => {
+    let wakeLock: any = null;
+    const requestWakeLock = async () => {
+      try {
+        if ('wakeLock' in navigator) {
+          // @ts-ignore
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch (err) {
+        console.log('Wake Lock error:', err);
+      }
+    };
+    requestWakeLock();
+    return () => wakeLock?.release();
+  }, []);
+
 
   // === 1. GŁÓWNA FUNKCJA SYNCHRONIZACJI ===
   const syncGame = useCallback(async () => {

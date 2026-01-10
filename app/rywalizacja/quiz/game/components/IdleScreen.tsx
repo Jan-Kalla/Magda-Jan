@@ -13,7 +13,7 @@ export default function IdleScreen() {
         <TrophyIcon className="w-10 h-10 text-[#FAD6C8]" />
       </div>
       <h1 className="text-3xl font-bold text-[#4E0113] mb-2">Wielki Quiz</h1>
-      <p className="text-lg text-[#4E0113]/80 mb-6">Spójrz na Wodzireja!</p>
+      <p className="text-lg text-[#4E0113]/80 mb-6">Czekaj na to co powie pan młody!</p>
       <div className="flex items-center justify-center gap-3 bg-white/60 py-3 px-6 rounded-full inline-flex">
         <div className="animate-spin text-2xl">⏳</div>
         <span className="font-semibold text-[#4E0113]">Czekamy na pytanie...</span>
