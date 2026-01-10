@@ -10,7 +10,8 @@ import {
   StopCircleIcon, 
   ChartBarIcon, 
   ArrowRightCircleIcon, 
-  CheckCircleIcon 
+  CheckCircleIcon,
+  ArrowPathIcon 
 } from "@heroicons/react/24/solid";
 
 // Inicjalizacja Supabase
@@ -31,7 +32,7 @@ export default function AdminQuizPage() {
   const router = useRouter();
   
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [currentQIndex, setCurrentQIndex] = useState(0); // Domyślnie pierwsze pytanie
+  const [currentQIndex, setCurrentQIndex] = useState(0);
   const [gameState, setGameState] = useState<string>("idle");
   const [answersCount, setAnswersCount] = useState(0);
 
@@ -49,11 +50,10 @@ export default function AdminQuizPage() {
       const { data: qData } = await supabase.from("quiz_questions").select("*").order("id");
       if (qData) setQuestions(qData);
 
-      // Stan gry (żebyś wiedział gdzie jesteś po odświeżeniu strony)
+      // Stan gry
       const { data: sData } = await supabase.from("quiz_state").select("*").single();
       if (sData) {
         setGameState(sData.status);
-        // Jeśli gra trwa, znajdź index aktywnego pytania
         if (sData.current_question_id && qData) {
           const idx = qData.findIndex((q) => q.id === sData.current_question_id);
           if (idx !== -1) setCurrentQIndex(idx);
@@ -81,17 +81,19 @@ export default function AdminQuizPage() {
 
   // --- FUNKCJE STERUJĄCE ---
 
-  const updateState = async (status: string, questionId?: number) => {
+  const updateState = async (status: string, questionId?: number | null) => {
     const payload: any = { status };
+    
+    // Jeśli questionId jest podane (nawet null), aktualizujemy je
     if (questionId !== undefined) {
         payload.current_question_id = questionId;
-        if (status === 'question') {
-            setAnswersCount(0); // Reset licznika przy nowym pytaniu
-            payload.question_start_time = new Date().toISOString();
-        }
+    }
+
+    if (status === 'question') {
+        setAnswersCount(0);
+        payload.question_start_time = new Date().toISOString();
     }
     
-    // Optymistyczna aktualizacja UI
     setGameState(status);
     await supabase.from("quiz_state").update(payload).eq("id", 1);
   };
@@ -109,9 +111,9 @@ export default function AdminQuizPage() {
     if (currentQIndex + 1 < questions.length) {
       const nextIndex = currentQIndex + 1;
       setCurrentQIndex(nextIndex);
-      // Automatycznie startujemy kolejne pytanie? 
-      // Lepiej ustawić stan 'idle' dla nowego pytania, żebyś mógł je przeczytać zanim puścisz czas.
-      // Ale jeśli chcesz płynnie:
+      // Przechodzimy w stan oczekiwania na start nowego pytania (żebyś mógł je przeczytać)
+      // Ale status w bazie zostaje 'results' poprzedniego pytania lub 'idle' - zależy jak wolisz.
+      // Tutaj ustawiam od razu start, żeby było płynnie:
       await updateState("question", questions[nextIndex].id);
     } else {
       await updateState("finished");
@@ -120,6 +122,33 @@ export default function AdminQuizPage() {
 
   const handleFinishQuiz = async () => {
     await updateState("finished");
+  };
+
+  // --- NOWA FUNKCJA: RESET ---
+  const handleResetQuiz = async () => {
+    const confirmReset = window.confirm(
+      "UWAGA! Czy na pewno chcesz zresetować quiz? \n\nTo spowoduje:\n1. Usunięcie wszystkich odpowiedzi gości.\n2. Ustawienie gry na początek.\n\nZrób to przed startem wesela!"
+    );
+
+    if (confirmReset) {
+      // 1. Usuń odpowiedzi (czyszczenie bazy)
+      // delete().neq('id', 0) to trick, żeby usunąć wszystko (id != 0)
+      const { error } = await supabase.from("quiz_responses").delete().neq("id", 0);
+      
+      if (error) {
+        console.error("Błąd czyszczenia odpowiedzi:", error);
+        alert("Wystąpił błąd podczas usuwania odpowiedzi.");
+        return;
+      }
+
+      // 2. Reset stanu gry
+      await updateState("idle", null);
+      
+      // 3. Reset lokalny
+      setCurrentQIndex(0);
+      setAnswersCount(0);
+      alert("Quiz został zresetowany i jest gotowy do gry!");
+    }
   };
 
   if (loading || !guest) return null;
@@ -139,35 +168,47 @@ export default function AdminQuizPage() {
         {/* === GŁÓWNY PANEL STEROWANIA === */}
         <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-xl border-2 border-[#4E0113]/20 p-6 mb-8 sticky top-[90px] z-30">
           
-          {/* Status Bar */}
+          {/* Status Bar + Reset */}
           <div className="flex justify-between items-center mb-6 pb-4 border-b border-[#4E0113]/10">
             <div>
                <p className="text-sm uppercase font-bold tracking-widest opacity-60">Aktualny Status</p>
                <div className="flex items-center gap-2 mt-1">
                  <span className={`w-3 h-3 rounded-full ${
                     gameState === 'question' ? 'bg-green-500 animate-pulse' : 
-                    gameState === 'results' ? 'bg-blue-500' : 'bg-gray-400'
+                    gameState === 'results' ? 'bg-blue-500' : 
+                    gameState === 'finished' ? 'bg-black' : 'bg-gray-400'
                  }`} />
                  <span className="font-bold text-xl">
                     {gameState === 'idle' && "Oczekiwanie"}
                     {gameState === 'question' && "Pytanie w toku"}
                     {gameState === 'results' && "Wyniki"}
-                    {gameState === 'finished' && "Koniec"}
+                    {gameState === 'finished' && "Koniec Quizu"}
                  </span>
                </div>
             </div>
-            
-            {/* Licznik Odpowiedzi */}
-            <div className="text-right">
-                <p className="text-4xl font-bold">{answersCount}</p>
-                <p className="text-xs uppercase font-bold tracking-widest opacity-60">Odpowiedzi</p>
+
+            <div className="flex gap-6 items-center">
+                {/* Licznik Odpowiedzi */}
+                <div className="text-right">
+                    <p className="text-4xl font-bold">{answersCount}</p>
+                    <p className="text-xs uppercase font-bold tracking-widest opacity-60">Odp.</p>
+                </div>
+
+                {/* PRZYCISK RESETU */}
+                <button 
+                  onClick={handleResetQuiz}
+                  className="p-3 bg-red-100 hover:bg-red-200 text-red-700 rounded-full transition shadow-sm border border-red-300"
+                  title="Zresetuj Quiz (Wyczyść dane)"
+                >
+                  <ArrowPathIcon className="w-6 h-6" />
+                </button>
             </div>
           </div>
 
-          {/* Przyciski Akcji - Zmieniają się kontekstowo */}
+          {/* Przyciski Akcji */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             
-            {/* 1. START PYTANIA */}
+            {/* 1. START PYTANIA (Dostępne gdy nie trwa pytanie i nie koniec - chyba że reset zrobiony) */}
             {gameState !== 'question' && gameState !== 'finished' && (
               <button
                 onClick={handleStartQuestion}
@@ -192,7 +233,6 @@ export default function AdminQuizPage() {
             {/* 3. NAWIGACJA (Dostępna gdy są wyniki) */}
             {gameState === 'results' && (
               <>
-                {/* Ten przycisk jest trochę redundantny jeśli "Uruchom" robi to samo, ale daje kontrolę */}
                 {currentQIndex + 1 < questions.length ? (
                    <button
                     onClick={handleNextQuestion}
@@ -211,6 +251,13 @@ export default function AdminQuizPage() {
                   </button>
                 )}
               </>
+            )}
+
+            {/* Stan FINISHED */}
+            {gameState === 'finished' && (
+                <div className="col-span-2 text-center py-4 text-gray-600 italic">
+                    Quiz zakończony. Użyj czerwonego przycisku u góry, aby zresetować grę.
+                </div>
             )}
           </div>
         </div>
@@ -250,7 +297,7 @@ export default function AdminQuizPage() {
           </div>
         )}
 
-        {/* === LISTA KOLEJNYCH PYTAŃ (Podgląd) === */}
+        {/* === LISTA KOLEJNYCH PYTAŃ === */}
         <div className="mt-12 opacity-60">
            <h3 className="font-bold text-lg mb-4 uppercase tracking-widest border-b border-[#4E0113]/20 pb-2">Kolejka Pytań</h3>
            <ul className="space-y-2">
@@ -258,8 +305,8 @@ export default function AdminQuizPage() {
                <li 
                  key={q.id} 
                  onClick={() => {
-                    // Opcjonalnie: skok do pytania (dla admina)
-                    setCurrentQIndex(idx);
+                     // Pozwalamy skakać po pytaniach tylko gdy quiz nie jest w trakcie pytania
+                     if (gameState !== 'question') setCurrentQIndex(idx);
                  }}
                  className={`p-3 rounded-lg flex items-center gap-4 cursor-pointer transition ${
                     idx === currentQIndex ? "bg-[#4E0113] text-[#FAD6C8] font-bold shadow-md" : "hover:bg-white/50"
