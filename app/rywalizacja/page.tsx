@@ -117,7 +117,7 @@ export default function CompetitionPage() {
               {!isUnlocked && (
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20 backdrop-blur-sm">
                   <p className="text-[#FAD6C8] font-bold text-lg px-4 text-center">
-                    Czekaj na sygnał Wodzireja 🔒
+                    Widzimy się na weselu! 🔒
                   </p>
                 </div>
               )}

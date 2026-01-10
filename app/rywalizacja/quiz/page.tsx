@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { createClient } from "@supabase/supabase-js";
 import Navbar from "@/app/components/Navbar";
 import { useGuest } from "@/app/context/GuestContext";
@@ -36,6 +36,16 @@ export default function AdminQuizPage() {
   const [gameState, setGameState] = useState<string>("idle");
   const [answersCount, setAnswersCount] = useState(0);
 
+  // --- NOWE STANY DO AUTOMATYZACJI ---
+  const [questionStartTime, setQuestionStartTime] = useState<string | null>(null);
+  
+  // Refy (potrzebne, żeby setInterval widział aktualne dane wewnątrz pętli)
+  const questionsRef = useRef<Question[]>([]);
+  const currentQIndexRef = useRef(currentQIndex);
+
+  useEffect(() => { questionsRef.current = questions; }, [questions]);
+  useEffect(() => { currentQIndexRef.current = currentQIndex; }, [currentQIndex]);
+
   // 1. Zabezpieczenie (tylko dla Pana Młodego)
   useEffect(() => {
     if (!loading && guest?.code !== "FC3818") {
@@ -54,6 +64,7 @@ export default function AdminQuizPage() {
       const { data: sData } = await supabase.from("quiz_state").select("*").single();
       if (sData) {
         setGameState(sData.status);
+        setQuestionStartTime(sData.question_start_time); // Zapisujemy czas startu z bazy
         if (sData.current_question_id && qData) {
           const idx = qData.findIndex((q) => q.id === sData.current_question_id);
           if (idx !== -1) setCurrentQIndex(idx);
@@ -79,6 +90,41 @@ export default function AdminQuizPage() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
+  // --- 4. MECHANIZM AUTOMATYCZNEGO KOŃCZENIA PYTANIA ---
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    // Uruchom stoper tylko gdy trwa pytanie i mamy czas startu
+    if (gameState === "question" && questionStartTime) {
+      interval = setInterval(() => {
+        const currentQ = questionsRef.current[currentQIndexRef.current];
+        if (!currentQ) return;
+
+        const now = new Date().getTime();
+        const start = new Date(questionStartTime).getTime();
+        const elapsedSeconds = (now - start) / 1000;
+
+        // Dodajemy 1 sekundę zapasu, żeby każdy zdążył zobaczyć 0
+        if (elapsedSeconds > currentQ.time_limit_seconds + 1) {
+           // CZAS MINĄŁ -> Wywołujemy updateState (funkcja poniżej)
+           // Używamy bezpośredniego wywołania update w bazie, bo funkcja updateState jest async
+           // i wewnątrz interwału lepiej wywołać logikę bezpośrednio lub użyć wrappera.
+           // Tutaj dla uproszczenia wywołamy naszą funkcję pomocniczą:
+           handleAutoFinish();
+        }
+      }, 1000);
+    }
+
+    // Funkcja pomocnicza wewnątrz efektu (zamyka interval)
+    const handleAutoFinish = () => {
+        updateState("results");
+        clearInterval(interval);
+    };
+
+    return () => clearInterval(interval);
+  }, [gameState, questionStartTime]);
+
+
   // --- FUNKCJE STERUJĄCE ---
 
   const updateState = async (status: string, questionId?: number | null) => {
@@ -91,7 +137,9 @@ export default function AdminQuizPage() {
 
     if (status === 'question') {
         setAnswersCount(0);
-        payload.question_start_time = new Date().toISOString();
+        const now = new Date().toISOString();
+        payload.question_start_time = now;
+        setQuestionStartTime(now); // Aktualizuj lokalnie od razu!
     }
     
     setGameState(status);
@@ -124,7 +172,7 @@ export default function AdminQuizPage() {
     await updateState("finished");
   };
 
-  // --- NOWA FUNKCJA: RESET ---
+  // --- FUNKCJA: RESET ---
   const handleResetQuiz = async () => {
     const confirmReset = window.confirm(
       "UWAGA! Czy na pewno chcesz zresetować quiz? \n\nTo spowoduje:\n1. Usunięcie wszystkich odpowiedzi gości.\n2. Ustawienie gry na początek.\n\nZrób to przed startem wesela!"
@@ -132,7 +180,6 @@ export default function AdminQuizPage() {
 
     if (confirmReset) {
       // 1. Usuń odpowiedzi (czyszczenie bazy)
-      // delete().neq('id', 0) to trick, żeby usunąć wszystko (id != 0)
       const { error } = await supabase.from("quiz_responses").delete().neq("id", 0);
       
       if (error) {
@@ -147,6 +194,7 @@ export default function AdminQuizPage() {
       // 3. Reset lokalny
       setCurrentQIndex(0);
       setAnswersCount(0);
+      setQuestionStartTime(null);
       alert("Quiz został zresetowany i jest gotowy do gry!");
     }
   };
@@ -208,7 +256,7 @@ export default function AdminQuizPage() {
           {/* Przyciski Akcji */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             
-            {/* 1. START PYTANIA (Dostępne gdy nie trwa pytanie i nie koniec - chyba że reset zrobiony) */}
+            {/* 1. START PYTANIA */}
             {gameState !== 'question' && gameState !== 'finished' && (
               <button
                 onClick={handleStartQuestion}
@@ -219,15 +267,20 @@ export default function AdminQuizPage() {
               </button>
             )}
 
-            {/* 2. POKAŻ WYNIKI */}
+            {/* 2. POKAŻ WYNIKI (Dostępne, ale opcjonalne, bo czas sam zakończy) */}
             {gameState === 'question' && (
-              <button
-                onClick={handleShowResults}
-                className="col-span-2 bg-blue-600 text-white py-4 rounded-xl font-bold text-xl shadow-lg hover:bg-blue-700 transition flex items-center justify-center gap-3"
-              >
-                <ChartBarIcon className="w-8 h-8" />
-                Zatrzymaj i Pokaż Wyniki
-              </button>
+               <div className="col-span-2 flex flex-col gap-2">
+                  <div className="text-center text-sm font-mono opacity-60 animate-pulse mb-1">
+                     Automatyczne zakończenie po upływie czasu...
+                  </div>
+                  <button
+                    onClick={handleShowResults}
+                    className="bg-blue-600 text-white py-4 rounded-xl font-bold text-xl shadow-lg hover:bg-blue-700 transition flex items-center justify-center gap-3"
+                  >
+                    <ChartBarIcon className="w-8 h-8" />
+                    Zatrzymaj i Pokaż Wyniki Teraz
+                  </button>
+              </div>
             )}
 
             {/* 3. NAWIGACJA (Dostępna gdy są wyniki) */}
@@ -305,8 +358,8 @@ export default function AdminQuizPage() {
                <li 
                  key={q.id} 
                  onClick={() => {
-                     // Pozwalamy skakać po pytaniach tylko gdy quiz nie jest w trakcie pytania
-                     if (gameState !== 'question') setCurrentQIndex(idx);
+                      // Pozwalamy skakać po pytaniach tylko gdy quiz nie jest w trakcie pytania
+                      if (gameState !== 'question') setCurrentQIndex(idx);
                  }}
                  className={`p-3 rounded-lg flex items-center gap-4 cursor-pointer transition ${
                     idx === currentQIndex ? "bg-[#4E0113] text-[#FAD6C8] font-bold shadow-md" : "hover:bg-white/50"
