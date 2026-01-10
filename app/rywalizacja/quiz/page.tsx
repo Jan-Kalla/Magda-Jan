@@ -11,10 +11,11 @@ import {
   ChartBarIcon, 
   ArrowRightCircleIcon, 
   CheckCircleIcon,
-  ArrowPathIcon 
+  ArrowPathIcon,
+  LockClosedIcon,
+  LockOpenIcon
 } from "@heroicons/react/24/solid";
 
-// Inicjalizacja Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -35,36 +36,33 @@ export default function AdminQuizPage() {
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [gameState, setGameState] = useState<string>("idle");
   const [answersCount, setAnswersCount] = useState(0);
-
-  // --- NOWE STANY DO AUTOMATYZACJI ---
   const [questionStartTime, setQuestionStartTime] = useState<string | null>(null);
+
+  // NOWY STAN: Czy quiz jest otwarty dla ludzi?
+  const [isQuizOpen, setIsQuizOpen] = useState(false);
   
-  // Refy (potrzebne, żeby setInterval widział aktualne dane wewnątrz pętli)
   const questionsRef = useRef<Question[]>([]);
   const currentQIndexRef = useRef(currentQIndex);
 
   useEffect(() => { questionsRef.current = questions; }, [questions]);
   useEffect(() => { currentQIndexRef.current = currentQIndex; }, [currentQIndex]);
 
-  // 1. Zabezpieczenie (tylko dla Pana Młodego)
   useEffect(() => {
     if (!loading && guest?.code !== "FC3818") {
       router.push("/rywalizacja");
     }
   }, [guest, loading, router]);
 
-  // 2. Pobranie pytań i aktualnego stanu
   useEffect(() => {
     const initData = async () => {
-      // Pytania
       const { data: qData } = await supabase.from("quiz_questions").select("*").order("id");
       if (qData) setQuestions(qData);
 
-      // Stan gry
       const { data: sData } = await supabase.from("quiz_state").select("*").single();
       if (sData) {
         setGameState(sData.status);
-        setQuestionStartTime(sData.question_start_time); // Zapisujemy czas startu z bazy
+        setIsQuizOpen(sData.is_open); // Pobierz status otwarcia
+        setQuestionStartTime(sData.question_start_time);
         if (sData.current_question_id && qData) {
           const idx = qData.findIndex((q) => q.id === sData.current_question_id);
           if (idx !== -1) setCurrentQIndex(idx);
@@ -74,7 +72,6 @@ export default function AdminQuizPage() {
     initData();
   }, []);
 
-  // 3. Licznik odpowiedzi na żywo
   useEffect(() => {
     const channel = supabase
       .channel("quiz_responses_count")
@@ -90,60 +87,46 @@ export default function AdminQuizPage() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  // --- 4. MECHANIZM AUTOMATYCZNEGO KOŃCZENIA PYTANIA ---
   useEffect(() => {
     let interval: NodeJS.Timeout;
-
-    // Uruchom stoper tylko gdy trwa pytanie i mamy czas startu
     if (gameState === "question" && questionStartTime) {
       interval = setInterval(() => {
         const currentQ = questionsRef.current[currentQIndexRef.current];
         if (!currentQ) return;
-
         const now = new Date().getTime();
         const start = new Date(questionStartTime).getTime();
         const elapsedSeconds = (now - start) / 1000;
 
-        // Dodajemy 1 sekundę zapasu, żeby każdy zdążył zobaczyć 0
         if (elapsedSeconds > currentQ.time_limit_seconds + 1) {
-           // CZAS MINĄŁ -> Wywołujemy updateState (funkcja poniżej)
-           // Używamy bezpośredniego wywołania update w bazie, bo funkcja updateState jest async
-           // i wewnątrz interwału lepiej wywołać logikę bezpośrednio lub użyć wrappera.
-           // Tutaj dla uproszczenia wywołamy naszą funkcję pomocniczą:
            handleAutoFinish();
         }
       }, 1000);
     }
-
-    // Funkcja pomocnicza wewnątrz efektu (zamyka interval)
     const handleAutoFinish = () => {
         updateState("results");
         clearInterval(interval);
     };
-
     return () => clearInterval(interval);
   }, [gameState, questionStartTime]);
 
-
-  // --- FUNKCJE STERUJĄCE ---
-
   const updateState = async (status: string, questionId?: number | null) => {
     const payload: any = { status };
-    
-    // Jeśli questionId jest podane (nawet null), aktualizujemy je
-    if (questionId !== undefined) {
-        payload.current_question_id = questionId;
-    }
+    if (questionId !== undefined) payload.current_question_id = questionId;
 
     if (status === 'question') {
         setAnswersCount(0);
         const now = new Date().toISOString();
         payload.question_start_time = now;
-        setQuestionStartTime(now); // Aktualizuj lokalnie od razu!
+        setQuestionStartTime(now);
     }
-    
     setGameState(status);
     await supabase.from("quiz_state").update(payload).eq("id", 1);
+  };
+
+  const toggleQuizLock = async () => {
+    const newState = !isQuizOpen;
+    setIsQuizOpen(newState);
+    await supabase.from("quiz_state").update({ is_open: newState }).eq("id", 1);
   };
 
   const handleStartQuestion = async () => {
@@ -159,9 +142,6 @@ export default function AdminQuizPage() {
     if (currentQIndex + 1 < questions.length) {
       const nextIndex = currentQIndex + 1;
       setCurrentQIndex(nextIndex);
-      // Przechodzimy w stan oczekiwania na start nowego pytania (żebyś mógł je przeczytać)
-      // Ale status w bazie zostaje 'results' poprzedniego pytania lub 'idle' - zależy jak wolisz.
-      // Tutaj ustawiam od razu start, żeby było płynnie:
       await updateState("question", questions[nextIndex].id);
     } else {
       await updateState("finished");
@@ -172,177 +152,140 @@ export default function AdminQuizPage() {
     await updateState("finished");
   };
 
-  // --- FUNKCJA: RESET ---
   const handleResetQuiz = async () => {
     const confirmReset = window.confirm(
-      "UWAGA! Czy na pewno chcesz zresetować quiz? \n\nTo spowoduje:\n1. Usunięcie wszystkich odpowiedzi gości.\n2. Ustawienie gry na początek.\n\nZrób to przed startem wesela!"
+      "UWAGA! Czy na pewno chcesz zresetować quiz? \n\nTo usunie odpowiedzi i ustawi grę na początek. Quiz zostanie też ZAMKNIĘTY."
     );
 
     if (confirmReset) {
-      // 1. Usuń odpowiedzi (czyszczenie bazy)
-      const { error } = await supabase.from("quiz_responses").delete().neq("id", 0);
+      await supabase.from("quiz_responses").delete().neq("id", 0);
+      // Reset też zamyka quiz dla bezpieczeństwa
+      await supabase.from("quiz_state").update({ status: "idle", is_open: false }).eq("id", 1);
       
-      if (error) {
-        console.error("Błąd czyszczenia odpowiedzi:", error);
-        alert("Wystąpił błąd podczas usuwania odpowiedzi.");
-        return;
-      }
-
-      // 2. Reset stanu gry
-      await updateState("idle", null);
-      
-      // 3. Reset lokalny
+      setGameState("idle");
+      setIsQuizOpen(false);
       setCurrentQIndex(0);
       setAnswersCount(0);
       setQuestionStartTime(null);
-      alert("Quiz został zresetowany i jest gotowy do gry!");
+      alert("Quiz zresetowany!");
     }
   };
 
   if (loading || !guest) return null;
-
   const currentQ = questions[currentQIndex];
 
   return (
-    <div className="min-h-screen bg-[#FAD6C8] pt-[112px] pb-20 px-4 text-[#4E0113]">
+    <>
       <Navbar />
-      
+      <div className="min-h-screen bg-[#FAD6C8] pt-[112px] pb-20 px-4 text-[#4E0113]">
       <div className="max-w-4xl mx-auto">
-        <header className="mb-8 text-center">
-          <h1 className="text-4xl font-bold mb-2">Panel Wodzireja 🎤</h1>
-          <p className="opacity-80">Sterowanie quizem w czasie rzeczywistym</p>
+        <header className="mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div>
+              <h1 className="text-3xl font-bold">Panel Administratora 🎤</h1>
+              <p className="opacity-80">Sterowanie quizem</p>
+          </div>
+          
+          <div className="flex gap-3">
+              {/* PRZYCISK BLOKADY */}
+              <button 
+                onClick={toggleQuizLock}
+                className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold shadow-md transition ${
+                    isQuizOpen 
+                    ? "bg-green-600 text-white hover:bg-green-700" 
+                    : "bg-red-600 text-white hover:bg-red-700"
+                }`}
+              >
+                {isQuizOpen ? (
+                    <>
+                        <LockOpenIcon className="w-5 h-5" /> Quiz OTWARTY
+                    </>
+                ) : (
+                    <>
+                        <LockClosedIcon className="w-5 h-5" /> Quiz ZAMKNIĘTY
+                    </>
+                )}
+              </button>
+
+              <button 
+                onClick={handleResetQuiz}
+                className="p-3 bg-red-100 hover:bg-red-200 text-red-700 rounded-full transition shadow-sm border border-red-300"
+                title="Resetuj Quiz"
+              >
+                <ArrowPathIcon className="w-6 h-6" />
+              </button>
+          </div>
         </header>
 
-        {/* === GŁÓWNY PANEL STEROWANIA === */}
         <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-xl border-2 border-[#4E0113]/20 p-6 mb-8 sticky top-[90px] z-30">
-          
-          {/* Status Bar + Reset */}
           <div className="flex justify-between items-center mb-6 pb-4 border-b border-[#4E0113]/10">
             <div>
-               <p className="text-sm uppercase font-bold tracking-widest opacity-60">Aktualny Status</p>
+               <p className="text-sm uppercase font-bold tracking-widest opacity-60">Status</p>
                <div className="flex items-center gap-2 mt-1">
                  <span className={`w-3 h-3 rounded-full ${
                     gameState === 'question' ? 'bg-green-500 animate-pulse' : 
                     gameState === 'results' ? 'bg-blue-500' : 
                     gameState === 'finished' ? 'bg-black' : 'bg-gray-400'
                  }`} />
-                 <span className="font-bold text-xl">
-                    {gameState === 'idle' && "Oczekiwanie"}
-                    {gameState === 'question' && "Pytanie w toku"}
-                    {gameState === 'results' && "Wyniki"}
-                    {gameState === 'finished' && "Koniec Quizu"}
-                 </span>
+                 <span className="font-bold text-xl uppercase">{gameState}</span>
                </div>
             </div>
-
-            <div className="flex gap-6 items-center">
-                {/* Licznik Odpowiedzi */}
-                <div className="text-right">
-                    <p className="text-4xl font-bold">{answersCount}</p>
-                    <p className="text-xs uppercase font-bold tracking-widest opacity-60">Odp.</p>
-                </div>
-
-                {/* PRZYCISK RESETU */}
-                <button 
-                  onClick={handleResetQuiz}
-                  className="p-3 bg-red-100 hover:bg-red-200 text-red-700 rounded-full transition shadow-sm border border-red-300"
-                  title="Zresetuj Quiz (Wyczyść dane)"
-                >
-                  <ArrowPathIcon className="w-6 h-6" />
-                </button>
+            <div className="text-right">
+                <span className="text-4xl font-bold">{answersCount}</span>
+                <span className="text-xs uppercase ml-1">Odp.</span>
             </div>
           </div>
 
-          {/* Przyciski Akcji */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
-            {/* 1. START PYTANIA */}
+          <div className="grid grid-cols-1 gap-4">
+            {/* OSTRZEŻENIE JEŚLI QUIZ ZAMKNIĘTY */}
+            {!isQuizOpen && (
+                <div className="bg-red-100 text-red-800 p-3 rounded-lg text-center font-bold text-sm mb-2">
+                    ⚠️ Quiz jest zamknięty dla gości. Otwórz go przyciskiem u góry, aby mogli dołączyć!
+                </div>
+            )}
+
             {gameState !== 'question' && gameState !== 'finished' && (
-              <button
-                onClick={handleStartQuestion}
-                className="col-span-2 bg-[#4E0113] text-[#FAD6C8] py-4 rounded-xl font-bold text-xl shadow-lg hover:bg-[#6b1326] transition flex items-center justify-center gap-3"
-              >
-                <PlayCircleIcon className="w-8 h-8" />
-                {gameState === 'results' ? "Uruchom Następne Pytanie" : "Uruchom Pytanie"}
+              <button onClick={handleStartQuestion} className="bg-[#4E0113] text-[#FAD6C8] py-4 rounded-xl font-bold text-xl shadow-lg flex justify-center gap-2 hover:bg-[#6b1326] transition">
+                <PlayCircleIcon className="w-8 h-8" /> {gameState === 'results' ? "Następne Pytanie" : "Start Pytania"}
               </button>
             )}
 
-            {/* 2. POKAŻ WYNIKI (Dostępne, ale opcjonalne, bo czas sam zakończy) */}
             {gameState === 'question' && (
                <div className="col-span-2 flex flex-col gap-2">
                   <div className="text-center text-sm font-mono opacity-60 animate-pulse mb-1">
                      Automatyczne zakończenie po upływie czasu...
                   </div>
-                  <button
-                    onClick={handleShowResults}
-                    className="bg-blue-600 text-white py-4 rounded-xl font-bold text-xl shadow-lg hover:bg-blue-700 transition flex items-center justify-center gap-3"
-                  >
-                    <ChartBarIcon className="w-8 h-8" />
-                    Zatrzymaj i Pokaż Wyniki Teraz
+                  <button onClick={handleShowResults} className="bg-blue-600 text-white py-4 rounded-xl font-bold text-xl shadow-lg hover:bg-blue-700 transition flex items-center justify-center gap-3">
+                    <ChartBarIcon className="w-8 h-8" /> Pokaż Wyniki Teraz
                   </button>
               </div>
             )}
 
-            {/* 3. NAWIGACJA (Dostępna gdy są wyniki) */}
-            {gameState === 'results' && (
-              <>
-                {currentQIndex + 1 < questions.length ? (
-                   <button
-                    onClick={handleNextQuestion}
-                    className="bg-white border-2 border-[#4E0113] text-[#4E0113] py-3 rounded-xl font-bold hover:bg-[#FAD6C8] transition flex items-center justify-center gap-2"
-                  >
-                    <ArrowRightCircleIcon className="w-6 h-6" />
-                    Przejdź do następnego
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleFinishQuiz}
-                    className="bg-gray-800 text-white py-3 rounded-xl font-bold hover:bg-black transition flex items-center justify-center gap-2"
-                  >
-                    <StopCircleIcon className="w-6 h-6" />
-                    Zakończ Quiz
-                  </button>
-                )}
-              </>
+            {gameState === 'results' && currentQIndex + 1 >= questions.length && (
+                 <button onClick={handleFinishQuiz} className="bg-black text-white py-3 rounded-xl font-bold flex justify-center gap-2">
+                    <StopCircleIcon className="w-6 h-6"/> Zakończ Quiz
+                 </button>
             )}
 
-            {/* Stan FINISHED */}
             {gameState === 'finished' && (
-                <div className="col-span-2 text-center py-4 text-gray-600 italic">
-                    Quiz zakończony. Użyj czerwonego przycisku u góry, aby zresetować grę.
-                </div>
+                <div className="text-center py-4 text-gray-600 italic">Quiz zakończony.</div>
             )}
           </div>
         </div>
 
-        {/* === PODGLĄD AKTUALNEGO PYTANIA === */}
         {currentQ && (
           <div className="bg-white/80 rounded-3xl p-8 border border-[#4E0113]/10 shadow-md">
             <div className="flex justify-between items-start mb-6">
                <h2 className="text-2xl font-bold">
-                 <span className="opacity-50 mr-2">#{currentQIndex + 1}</span> 
-                 {currentQ.question_text}
+                 <span className="opacity-50 mr-2">#{currentQIndex + 1}</span> {currentQ.question_text}
                </h2>
                <span className="bg-[#4E0113] text-[#FAD6C8] px-3 py-1 rounded-full font-mono font-bold">
                  {currentQ.time_limit_seconds}s
                </span>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {currentQ.answers.map((ans, idx) => (
-                <div 
-                  key={idx} 
-                  className={`p-4 rounded-xl border-2 flex items-center gap-3 ${
-                    ans.isCorrect 
-                      ? "bg-green-100 border-green-500 text-green-900" 
-                      : "bg-white border-gray-200 text-gray-500"
-                  }`}
-                >
-                  {ans.isCorrect ? (
-                    <CheckCircleIcon className="w-6 h-6 text-green-600 shrink-0" />
-                  ) : (
-                    <div className="w-6 h-6 rounded-full border-2 border-gray-300 shrink-0" />
-                  )}
+                <div key={idx} className={`p-4 rounded-xl border-2 flex items-center gap-3 ${ans.isCorrect ? "bg-green-100 border-green-500 text-green-900" : "bg-white border-gray-200 text-gray-500"}`}>
+                  {ans.isCorrect ? <CheckCircleIcon className="w-6 h-6 text-green-600" /> : <div className="w-6 h-6 rounded-full border-2 border-gray-300" />}
                   <span className="font-semibold">{ans.label}</span>
                 </div>
               ))}
@@ -350,21 +293,11 @@ export default function AdminQuizPage() {
           </div>
         )}
 
-        {/* === LISTA KOLEJNYCH PYTAŃ === */}
-        <div className="mt-12 opacity-60">
+        <div className="mt-12 opacity-60 pb-10">
            <h3 className="font-bold text-lg mb-4 uppercase tracking-widest border-b border-[#4E0113]/20 pb-2">Kolejka Pytań</h3>
            <ul className="space-y-2">
              {questions.map((q, idx) => (
-               <li 
-                 key={q.id} 
-                 onClick={() => {
-                      // Pozwalamy skakać po pytaniach tylko gdy quiz nie jest w trakcie pytania
-                      if (gameState !== 'question') setCurrentQIndex(idx);
-                 }}
-                 className={`p-3 rounded-lg flex items-center gap-4 cursor-pointer transition ${
-                    idx === currentQIndex ? "bg-[#4E0113] text-[#FAD6C8] font-bold shadow-md" : "hover:bg-white/50"
-                 }`}
-               >
+               <li key={q.id} onClick={() => { if (gameState !== 'question') setCurrentQIndex(idx); }} className={`p-3 rounded-lg flex items-center gap-4 cursor-pointer transition ${idx === currentQIndex ? "bg-[#4E0113] text-[#FAD6C8] font-bold shadow-md" : "hover:bg-white/50"}`}>
                  <span className="font-mono text-sm">{idx + 1}.</span>
                  <span>{q.question_text}</span>
                  {idx === currentQIndex && <span className="ml-auto text-xs bg-[#FAD6C8] text-[#4E0113] px-2 py-1 rounded">TERAZ</span>}
@@ -372,8 +305,8 @@ export default function AdminQuizPage() {
              ))}
            </ul>
         </div>
-
       </div>
     </div>
+    </>
   );
 }

@@ -9,7 +9,6 @@ import { LockClosedIcon, PlayCircleIcon, PuzzlePieceIcon, BeakerIcon } from "@he
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-// Lokalna inicjalizacja klienta
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -19,29 +18,28 @@ export default function CompetitionPage() {
   const { guest } = useGuest();
   const router = useRouter();
   const [showLockedMessage, setShowLockedMessage] = useState(false);
-  const [isQuizActive, setIsQuizActive] = useState(false);
+  
+  // Nowy stan: czy quiz jest otwarty (niezależnie od tego czy trwa pytanie)
+  const [isOpen, setIsOpen] = useState(false);
 
-  // --- UPRAWNIENIA ---
   const isAdmin = guest?.code === "FC3818";
-  const isTester = guest?.code === "8DD06D"; // Gość specjalny
+  const isTester = guest?.code === "8DD06D";
 
   useEffect(() => {
-    // Sprawdzamy status quizu w bazie
+    // 1. Sprawdź status początkowy
     const checkStatus = async () => {
-        const { data } = await supabase.from('quiz_state').select('status').single();
-        if (data && data.status !== 'idle' && data.status !== 'finished') {
-            setIsQuizActive(true);
+        const { data } = await supabase.from('quiz_state').select('is_open').single();
+        if (data) {
+            setIsOpen(data.is_open);
         }
     };
     checkStatus();
     
-    // Realtime: nasłuchiwanie na odblokowanie przez Pana Młodego
-    const channel = supabase.channel('menu_quiz_status')
+    // 2. Nasłuchuj zmian (gdy wodzirej kliknie przycisk)
+    const channel = supabase.channel('menu_quiz_access')
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'quiz_state', filter: 'id=eq.1' }, 
         (payload) => {
-            const status = payload.new.status;
-            // Quiz jest aktywny, jeśli nie jest w stanie spoczynku ani zakończony
-            setIsQuizActive(status !== 'idle' && status !== 'finished');
+            setIsOpen(payload.new.is_open);
         })
         .subscribe();
         
@@ -52,19 +50,17 @@ export default function CompetitionPage() {
     e.preventDefault();
 
     if (isAdmin) {
-      router.push("/rywalizacja/quiz"); // Admin -> Panel
-    } else if (isTester || isQuizActive) {
-      router.push("/rywalizacja/quiz/game"); // Tester LUB Aktywny Quiz -> Gra
+      router.push("/rywalizacja/quiz"); 
+    } else if (isTester || isOpen) {
+      // Wchodzą jeśli tester LUB jeśli wodzirej otworzył
+      router.push("/rywalizacja/quiz/game"); 
     } else {
-      // Zablokowane dla reszty
       setShowLockedMessage(true);
       setTimeout(() => setShowLockedMessage(false), 2000);
     }
   };
 
-  // Warunek, czy pokazać kłódkę czy przycisk play
-  // Admin i Tester zawsze widzą "otwarte". Reszta widzi otwarte tylko gdy isQuizActive.
-  const isUnlocked = isAdmin || isTester || isQuizActive;
+  const isUnlocked = isAdmin || isTester || isOpen;
 
   return (
     <>
@@ -77,7 +73,7 @@ export default function CompetitionPage() {
             Strefa Rywalizacji 🏆
           </h1>
 
-          {/* === KAFELEK 1: QUIZ === */}
+          {/* === QUIZ === */}
           <motion.div
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -95,35 +91,28 @@ export default function CompetitionPage() {
             >
               <div className="flex items-center gap-4 z-10">
                 <div className="p-3 bg-white/10 rounded-full">
-                  {isAdmin ? (
-                    <PlayCircleIcon className="w-8 h-8 text-[#FAD6C8]" />
-                  ) : isTester ? (
-                    <BeakerIcon className="w-8 h-8 text-[#FAD6C8]" /> 
-                  ) : isUnlocked ? (
-                    <PlayCircleIcon className="w-8 h-8 text-[#FAD6C8]" />
-                  ) : (
-                    <LockClosedIcon className="w-8 h-8 text-gray-400" />
-                  )}
+                  {isAdmin ? <PlayCircleIcon className="w-8 h-8 text-[#FAD6C8]" /> :
+                   isTester ? <BeakerIcon className="w-8 h-8 text-[#FAD6C8]" /> :
+                   isUnlocked ? <PlayCircleIcon className="w-8 h-8 text-[#FAD6C8]" /> :
+                   <LockClosedIcon className="w-8 h-8 text-gray-400" />}
                 </div>
                 <div className="text-left">
                   <h2 className="text-2xl font-bold">Wielki Quiz</h2>
                   <p className="text-sm opacity-80">
-                    {isAdmin ? "Panel Administratora" : isTester ? "Tryb Testowy" : "Sprawdź wiedzę o Parze Młodej"}
+                    {isAdmin ? "Panel Wodzireja" : isTester ? "Tryb Testowy" : "Sprawdź wiedzę o Parze Młodej"}
                   </p>
                 </div>
               </div>
 
-              {/* Efekt tła dla zablokowanych */}
               {!isUnlocked && (
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20 backdrop-blur-sm">
                   <p className="text-[#FAD6C8] font-bold text-lg px-4 text-center">
-                    Widzimy się na weselu! 🔒
+                    Czekaj na sygnał Wodzireja 🔒
                   </p>
                 </div>
               )}
             </div>
 
-            {/* Komunikat zablokowania */}
             {showLockedMessage && (
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
@@ -132,13 +121,13 @@ export default function CompetitionPage() {
                 className="absolute -bottom-12 left-0 right-0 text-center"
               >
                 <span className="bg-red-600 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg">
-                  Quiz jeszcze nie wystartował! ⏳
+                  Quiz jest zamknięty! ⏳
                 </span>
               </motion.div>
             )}
           </motion.div>
 
-          {/* === KAFELEK 2: TETRIS === */}
+          {/* === TETRIS === */}
           <Link href="/rywalizacja/tetris" className="w-full">
             <motion.div
               whileHover={{ scale: 1.02 }}

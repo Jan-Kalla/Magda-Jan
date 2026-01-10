@@ -113,7 +113,7 @@ export default function GamePage() {
 
     const intervalId = setInterval(() => {
       syncGame();
-    }, 3000);
+    }, 1000);
 
     const channel = supabase
       .channel("quiz_game_loop")
@@ -186,8 +186,9 @@ export default function GamePage() {
   if (loading) return null;
 
   return (
-    <div className="min-h-screen bg-[#FAD6C8] pt-[80px] md:pt-[112px] flex flex-col overflow-hidden">
+    <>
       <Navbar />
+      <div className="min-h-screen bg-[#FAD6C8] pt-[80px] md:pt-[112px] flex flex-col overflow-hidden">
 
       <div className="flex-1 flex flex-col items-center justify-center p-4 w-full">
         <AnimatePresence mode="wait">
@@ -223,5 +224,6 @@ export default function GamePage() {
         </AnimatePresence>
       </div>
     </div>
+    </>
   );
 }
