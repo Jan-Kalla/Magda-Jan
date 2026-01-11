@@ -11,7 +11,7 @@ import {
   PuzzlePieceIcon, 
   BeakerIcon,
   MagnifyingGlassIcon,
-  TrophyIcon
+  GiftIcon
 } from "@heroicons/react/24/solid";
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
@@ -25,18 +25,14 @@ export default function CompetitionPage() {
   const { guest } = useGuest();
   const router = useRouter();
   
-  // Stan komunikatów blokady
   const [showLockedMessage, setShowLockedMessage] = useState(false);
   const [showTournamentMessage, setShowTournamentMessage] = useState(false);
-  
-  // Stan otwarcia quizu
   const [isOpen, setIsOpen] = useState(false);
 
   const isAdmin = guest?.code === "FC3818";
   const isTester = guest?.code === "8DD06D";
 
   useEffect(() => {
-    // 1. Sprawdź status początkowy
     const checkStatus = async () => {
         const { data } = await supabase.from('quiz_state').select('is_open').single();
         if (data) {
@@ -45,7 +41,6 @@ export default function CompetitionPage() {
     };
     checkStatus();
     
-    // 2. Nasłuchuj zmian
     const channel = supabase.channel('menu_quiz_access')
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'quiz_state', filter: 'id=eq.1' }, 
         (payload) => {
@@ -83,9 +78,27 @@ export default function CompetitionPage() {
       <div className="min-h-screen bg-gradient-to-b from-[#FAD6C8] to-[#4E0113] pt-[112px] px-4 pb-20">
         <div className="max-w-md mx-auto flex flex-col items-center gap-6">
           
-          <h1 className="text-3xl md:text-4xl font-bold text-[#4E0113] mb-2 text-center">
+          {/* NAGŁÓWEK */}
+          <h1 className="text-3xl md:text-4xl font-bold text-[#4E0113] mb-1 text-center">
             Strefa Rywalizacji 🏆
           </h1>
+
+          {/* === NOWE: KOMUNIKAT O NAGRODACH === */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white/40 backdrop-blur-sm p-4 rounded-xl border border-[#4E0113]/10 text-center shadow-sm w-full"
+          >
+             <div className="flex justify-center mb-2">
+                <GiftIcon className="w-6 h-6 text-[#4E0113]" />
+             </div>
+             <p className="text-[#4E0113] text-sm md:text-base leading-relaxed font-medium">
+                Włączcie ducha walki! 🔥 <br/>
+                W każdej konkurencji <strong>TOP 3 graczy</strong> zgarnia wyjątkowe nagrody, które wręczymy na weselu.
+                <br/>
+                Jest o co walczyć, więc... do dzieła!
+             </p>
+          </motion.div>
 
           {/* === 1. QUIZ (GŁÓWNY EVENT) === */}
           <motion.div
@@ -98,7 +111,7 @@ export default function CompetitionPage() {
               className={`
                 relative w-full p-6 rounded-2xl shadow-xl border-2 flex items-center justify-between cursor-pointer transition-all overflow-hidden
                 ${isQuizUnlocked 
-                  ? "bg-[#4E0113] border-[#FAD6C8] text-[#FAD6C8] hover:bg-[#6b1326]" 
+                  ? "bg-[#4E0113] border-[#FAD6C8] text-white hover:bg-[#6b1326]" 
                   : "bg-[#4E0113]/80 border-gray-400 text-gray-200 grayscale-[0.3]"
                 }
               `}
@@ -143,16 +156,15 @@ export default function CompetitionPage() {
             </AnimatePresence>
           </motion.div>
 
-
-          {/* === 2. TETRIS === */}
+          {/* === 2. TETRIS (Z KOLORAMI #841D30) === */}
           <Link href="/rywalizacja/tetris" className="w-full">
             <motion.div
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full p-6 bg-[#841D30] border-2 border-[#FAD6C8] text-[#FAD6C8] rounded-2xl shadow-xl flex items-center gap-4 hover:bg-[#9E233A] transition-colors"
+              className="w-full p-6 bg-[#841D30] border-2 border-[#4E0113] text-[#FAD6C8] rounded-2xl shadow-xl flex items-center gap-4 hover:bg-[#9E233A] transition-colors"
             >
-              <div className="p-3 bg-[#FAD6C8]/20 rounded-full">
-                <PuzzlePieceIcon className="w-8 h-8 text-[#4E0113]" />
+              <div className="p-3 bg-[#4E0113]/30 rounded-full">
+                <PuzzlePieceIcon className="w-8 h-8 text-[#FAD6C8]" />
               </div>
               <div className="text-left">
                 <h2 className="text-2xl font-bold">Tetris</h2>
@@ -161,9 +173,7 @@ export default function CompetitionPage() {
             </motion.div>
           </Link>
 
-
-          {/* === 3. ZAGADKA (NOWOŚĆ) === */}
-          {/* Linkujemy do /wyprawa, którą stworzymy za chwilę */}
+          {/* === 3. ZAGADKA (JASNA) === */}
           <Link href="/rywalizacja/wyprawa" className="w-full">
             <motion.div
               whileHover={{ scale: 1.02 }}
@@ -180,8 +190,7 @@ export default function CompetitionPage() {
             </motion.div>
           </Link>
 
-
-          {/* === 4. WIELKI TURNIEJ II (ZABLOKOWANE) === */}
+          {/* === 4. TURNIEJ II (ZABLOKOWANY) === */}
           <motion.div
              whileHover={{ scale: 1.02 }}
              whileTap={{ scale: 0.98 }}
@@ -193,7 +202,7 @@ export default function CompetitionPage() {
                    <LockClosedIcon className="w-8 h-8 text-gray-500" />
                 </div>
                 <div className="text-left">
-                   <h2 className="text-2xl font-bold">Wielki Turniej - Edycja II</h2>
+                   <h2 className="text-2xl font-bold">Turniej - Edycja II</h2>
                    <p className="text-sm opacity-80">Dostępne po weselu</p>
                 </div>
              </div>
