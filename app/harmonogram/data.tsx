@@ -125,7 +125,7 @@ export const scheduleData: TimelineEvent[] = [
     id: 8,
     time: "00:00",
     title: "Oczepiny",
-    description: "Tradycji musi stać się zadość! Rzut bukietem, muchą i garść zabaw weselnych.",
+    description: "Tradycji musi stać się zadość! Rzut welonem, muchą i garść zabaw weselnych.",
     icon: <PartyPopper className="w-5 h-5 text-white" />,
     type: "event",
   },
