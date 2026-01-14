@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createClient } from "@supabase/supabase-js"; // Potrzebne do zapisu
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   KeyIcon, 
@@ -8,10 +9,16 @@ import {
   LightBulbIcon,
   ExclamationCircleIcon,
   InformationCircleIcon,
-  SparklesIcon // Ikona do super-podpowiedzi
+  SparklesIcon
 } from "@heroicons/react/24/solid";
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
 type Props = {
+  guestId: number;
   onSuccess: () => void;
   onMistake: () => void;
 };
@@ -58,39 +65,72 @@ const A_LITTLE_VALID_FINALS = [
 // === KONFIGURACJA PYTAŃ I POSZLAK ===
 // Pamiętaj, aby uzupełnić pola "valid" (odpowiedzi) małymi literami!
 const QUESTIONS_DATA = [
-  { id: 1,  question: "Jaki jest ulubiony kolor Magdy?", valid: ["karmin", "czerwony", "bordo"], clue: "🧭" }, // Kompas
-  { id: 2,  question: "Jaki jest ulubiony kolor Jana?", valid: ["czerwony", "niebieski"], clue: "🌬️" }, // Wiatr
-  { id: 3,  question: "Miesiąc naszych zaręczyn?", valid: ["sierpień", "08", "8", "sierpien"], clue: "🪢" }, // Lina
-  { id: 4,  question: "Ile lat się znamy?", valid: ["6", "sześć", "szesc"], clue: "🗺️" }, // Mapa
-  { id: 5,  question: "Ulubiona marka auta Jana?", valid: ["audi"], clue: "⚙️❌" }, // Brak silnika
-  { id: 6,  question: "Kto lepiej gotuje?", valid: ["jan", "janek", "magda", "oboje"], clue: "⛺" }, // Namiot
-  { id: 7,  question: "Gdzie była pierwsza randka?", valid: ["kino", "park", "spacer"], clue: "🌊" }, // Fale
-  { id: 8,  question: "Jakie zwierzę chcielibyśmy mieć?", valid: ["pies", "psa", "kot", "kota"], clue: "🔕" }, // Cisza
-  { id: 9,  question: "Rozmiar buta Magdy?", valid: ["36"], clue: "🐟" }, // NOWE: Ryba (zamiast Kotwicy)
-  { id: 10, question: "Ulubiony alkohol Jana?", valid: ["whisky", "piwo", "rum"], clue: "🌲" }, // Drzewo
-  { id: 11, question: "Kto jest starszy?", valid: ["jan", "janek", "on"], clue: "🕶️" }, // NOWE: Okulary (zamiast Koła)
-  { id: 12, question: "Data ślubu (Dzień)?", valid: ["26", "dwudziesty szósty"], clue: "🌅" }, // Zachód słońca
+  { id: 1,  question: "Ulica w Katowicach na której Magda z Johnym swego czasu często bywali?", valid: ["mariacka"], clue: "🧭" }, // Kompas
+  { id: 2,  question: "Największe jezioro, na jakim wspólnie byli Magda z Janem?", valid: ["sniardwy", "śniardwy"], clue: "🌬️" }, // Wiatr
+  { id: 3,  question: "Najwyższy szczyt, na jaki razem weszli Magda z Janem?", valid: ["świnica", "swinica", "2303", "2304", "2303m.n.p.m.", "2304m.n.p.m.", "2303 m.n.p.m.", "2304 m.n.p.m."], clue: "🪢" }, // Lina
+  { id: 4,  question: "Państwo, do którego odbył się pierwszy wspólny zagraniczny wyjazd Magdy i Johnego?", valid: ["austria"], clue: "🗺️" }, // Mapa
+  { id: 5,  question: "W jaką grę video Magda najbardziej lubi grać u Jana?", valid: ["granturismo", "gran turismo", "gr7","granturismo7", "gran turismo7","granturismo 7", "gran turismo 7", "gr 7"], clue: "⚙️❌" }, // Brak silnika
+  { id: 6,  question: "Pierwsze miasto, w którym Magda z Johnym zamieszkają po ślubie", valid: ["zabrze"], clue: "⛺" }, // Namiot
+  { id: 7,  question: "Co Magda z Janem częściej wybierają, gdy się ich o to spyta: kawa czy herbata?", valid: ["kawa", "kawę"], clue: "🌊" }, // Fale
+  { id: 8,  question: "Wymień chociaż jeden z trzech zespołów, na których występie na żywo byli wspólnie Magda z Janem?", valid: ["myslovitz", "myslowic", "strachy na lachy", "strachynalachy","tlove","t-love"], clue: "🔕" }, // Cisza
+  { id: 9,  question: "Danie, które Magda i Jan oboje lubią jeść?", valid: ["jajecznica","owsianka","bar gil","sushi","vifon","zupka chińska","kebab", "pizza", "burger", "burgery", "hamburger", "hamburgery", "wszystko","spaghetti"], clue: "🐟" }, // NOWE: Ryba (zamiast Kotwicy)
+  { id: 10, question: "?", valid: ["w"], clue: "🌲" }, // Drzewo
+  { id: 11, question: "Marka samochodu, która często pojawiała się zarówno w rodzinie Magdy, jak i w rodzinie Jana?", valid: ["skoda", "škoda"], clue: "🕶️" }, // NOWE: Okulary (zamiast Koła)
+  { id: 12, question: "?", valid: ["2y"], clue: "🌅" }, // Zachód słońca
 ];
 
-export default function StageOnePuzzle({ onSuccess, onMistake }: Props) {
+export default function StageOnePuzzle({ guestId, onSuccess, onMistake }: Props) {
   const [solvedIds, setSolvedIds] = useState<number[]>([]);
   const [inputs, setInputs] = useState<{ [key: number]: string }>({});
 
   const [finalGuess, setFinalGuess] = useState("");
   const [shakeFinal, setShakeFinal] = useState(false);
-  
-  // Licznik prób "Prawie Dobrze"
   const [almostCount, setAlmostCount] = useState(0);
-  
   const [finalMsg, setFinalMsg] = useState<{ text: string; type: 'error' | 'warning' | 'info' } | null>(null);
 
-  const checkQuestion = (id: number) => {
+  // === 1. POBIERANIE STANU Z BAZY PRZY STARCIE ===
+  useEffect(() => {
+    const loadState = async () => {
+      const { data } = await supabase
+        .from('honey_hunt_progress')
+        .select('stage_1_clues')
+        .eq('guest_id', guestId)
+        .single();
+
+      if (data && data.stage_1_clues) {
+        // Rzutowanie na tablicę liczb (jsonb w bazie -> number[] w JS)
+        const savedIds = data.stage_1_clues as number[];
+        setSolvedIds(savedIds);
+      }
+    };
+    loadState();
+  }, [guestId]);
+
+  // === 2. FUNKCJA ZAPISUJĄCA STAN ===
+  const saveSolvedToDb = async (newSolvedIds: number[]) => {
+    // Aktualizujemy tylko kolumnę stage_1_clues
+    await supabase
+      .from('honey_hunt_progress')
+      .update({ stage_1_clues: newSolvedIds })
+      .eq('guest_id', guestId);
+  };
+
+  const checkQuestion = async (id: number) => {
     const q = QUESTIONS_DATA.find(item => item.id === id);
     if (!q) return;
     const userVal = (inputs[id] || "").trim().toLowerCase();
+    
     if (q.valid.some(v => userVal.includes(v))) {
-      setSolvedIds(prev => [...prev, id]);
+      // SUKCES:
+      // 1. Aktualizujemy lokalnie
+      const newSolved = [...solvedIds, id];
+      setSolvedIds(newSolved);
+      
+      // 2. Zapisujemy w bazie (żeby po odświeżeniu pamiętało)
+      await saveSolvedToDb(newSolved);
+
     } else {
+      // BŁĄD:
       onMistake();
       setInputs(prev => ({ ...prev, [id]: "❌" }));
       setTimeout(() => setInputs(prev => ({ ...prev, [id]: "" })), 500);
@@ -107,16 +147,13 @@ export default function StageOnePuzzle({ onSuccess, onMistake }: Props) {
       return;
     }
 
-    // Błąd techniczny (zawsze naliczamy błąd, jeśli to nie jest sukces)
     setShakeFinal(true);
     setTimeout(() => setShakeFinal(false), 500);
     onMistake();
 
-    // 2. GORĄCO (ALMOST) - Zliczamy próby
+    // 2. GORĄCO
     if (ALMOST_VALID_FINALS.some(v => val.includes(v))) {
-      const newCount = almostCount + 1;
-      setAlmostCount(newCount);
-
+      setAlmostCount(prev => prev + 1);
       setFinalMsg({ 
         text: "Gorąco! 🔥 Jesteś bardzo blisko, ale bądź bardziej precyzyjny...", 
         type: 'warning' 
@@ -124,7 +161,7 @@ export default function StageOnePuzzle({ onSuccess, onMistake }: Props) {
       return;
     }
 
-    // 3. DOBRZE KOMBINUJESZ (A LITTLE)
+    // 3. DOBRZE KOMBINUJESZ
     if (A_LITTLE_VALID_FINALS.some(v => val.includes(v))) {
       setFinalMsg({ 
         text: "Dobrze kombinujesz! 🤔 To część planu, ale szukamy głównej aktywności...", 
@@ -147,7 +184,7 @@ export default function StageOnePuzzle({ onSuccess, onMistake }: Props) {
         <h2 className="text-2xl font-bold mb-2">Etap 1: Co będziemy robić?</h2>
         <p className="text-gray-600 text-sm">
           Odpowiadaj na pytania o nas, aby odkrywać poszlaki. <br/>
-          Spokojnie, najpewniej nie znasz odpowiedzi na wszysrtkie pytania.<br/>
+          Spokojnie, najpewniej nie znasz odpowiedzi na wszystkie pytania.<br/>
           Nie martw się, to nie szkodzi, każda z poszlak przybliża Cię do rozwiązania!<br/>
           Gdy domyślisz się całości, wpisz hasło główne na górze!<br/>
           Tutaj ważniejsza jest poprawność niż czas, choć lepiej go nie tracić 😉<br/>

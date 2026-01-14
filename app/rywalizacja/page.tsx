@@ -94,7 +94,7 @@ export default function CompetitionPage() {
              </div>
              <p className="text-[#4E0113] text-sm md:text-base leading-relaxed font-medium">
                 Włączcie ducha walki! 🔥 <br/>
-                Przygotowaliśmy dla was kilka ciekawych konkurencji<br/>
+                Przygotowaliśmy dla was kilka ciekawych konkurencji!<br/>
                 Liczy się przede wszystkim dobra zabawa, ale jest też o co walczyć<br/>
                 W każdej konkurencji <strong>TOP 3 graczy</strong> zgarnia wyjątkowe nagrody, które wręczymy na weselu.
              </p>
@@ -134,7 +134,7 @@ export default function CompetitionPage() {
               {!isQuizUnlocked && (
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20 backdrop-blur-sm">
                   <p className="text-[#FAD6C8] font-bold text-lg px-4 text-center">
-                    Czekaj na sygnał Wodzireja 🔒
+                    Quiz odbędzie się na weselu. 🔒
                   </p>
                 </div>
               )}

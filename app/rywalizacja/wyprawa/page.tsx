@@ -150,7 +150,7 @@ export default function WyprawaPage() {
     setIsChecking(false);
   };
 
-  if (loading || isLoadingData) return null;
+  if (loading || isLoadingData || !guest) return null;
 
   // Obliczanie aktualnego etapu (1, 2, 3, 4 - koniec)
   let currentStage = 1;
@@ -162,13 +162,43 @@ export default function WyprawaPage() {
     <div className="min-h-screen bg-[#fff0e6] pt-[112px] pb-20 px-4 text-[#4E0113]">
       <Navbar />
       
-      <div className="max-w-md mx-auto">
+      <div className="max-w-xl mx-auto">
         <header className="text-center mb-6">
           <div className="inline-block p-4 bg-[#4E0113] rounded-full mb-4 shadow-lg">
             <MapIcon className="w-10 h-10 text-[#FAD6C8]" />
           </div>
           <h1 className="text-3xl font-bold mb-1">Tajemnicza Wyprawa</h1>
           
+          {/* === NOWA RAMKA INFORMACYJNA === */}
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-6 bg-white/60 backdrop-blur-md rounded-2xl border border-[#4E0113]/10 shadow-sm max-w-lg mx-auto"
+          >
+            <p className="text-lg text-[#4E0113] font-medium mb-4 leading-relaxed">
+               Czy potraficie odkryć plan naszej<br/>
+               <span className="font-bold text-xl">Podróży Poślubnej? 💍✈️</span>
+            </p>
+            
+            <div className="text-sm text-[#4E0113]/90 bg-[#FAD6C8]/30 p-4 rounded-xl text-left inline-block">
+               <p className="mb-2 font-bold text-center opacity-80 uppercase tracking-wider text-xs">Misja składa się z 3 części:</p>
+               <ul className="space-y-2">
+                  <li className="flex items-center gap-2">
+                    <span className="bg-[#4E0113] text-[#FAD6C8] w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                    <span>Zgadnijcie, <strong>co</strong> będziemy robić</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="bg-[#4E0113] text-[#FAD6C8] w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                    <span>Odkryjcie, <strong>gdzie</strong> jedziemy</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="bg-[#4E0113] text-[#FAD6C8] w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                    <span>Ustalcie, <strong>ile</strong> to potrwa</span>
+                  </li>
+               </ul>
+            </div>
+          </motion.div>
+
           {/* LICZNIK BŁĘDÓW */}
           <div className="flex items-center justify-center gap-2 text-sm text-red-600 font-bold bg-red-50 py-1 px-3 rounded-full inline-flex mt-2 border border-red-100">
              <ExclamationTriangleIcon className="w-4 h-4" />
@@ -202,12 +232,13 @@ export default function WyprawaPage() {
                 
                 {/* ETAP 1: KOMPONENT PUZZLI */}
                 {currentStage === 1 && (
-                    <motion.div key="stage1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                        <StageOnePuzzle 
-                            onSuccess={handleStage1Success} 
-                            onMistake={handleMistake} 
-                        />
-                    </motion.div>
+                  <motion.div key="stage1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                      <StageOnePuzzle 
+                          guestId={guest.id}  // <--- DODAJ TĘ LINIJKĘ
+                          onSuccess={handleStage1Success} 
+                          onMistake={handleMistake} 
+                      />
+                  </motion.div>
                 )}
 
                 {/* ETAP 2: GDZIE? */}
@@ -220,7 +251,7 @@ export default function WyprawaPage() {
                         <GlobeEuropeAfricaIcon className="w-16 h-16 mx-auto text-blue-800 mb-4 opacity-80" />
                         <h2 className="text-2xl font-bold mb-2">Zagadka #2</h2>
                         <p className="text-lg mb-6 italic">
-                            "Kraina tysiąca jezior, Muminków i Świętego Mikołaja."
+                            "Muminki"
                         </p>
                         <div className="bg-yellow-100 p-3 rounded-xl text-sm text-yellow-800 mb-6">
                             💡 Wskazówka: Odpowiedź znajdziesz na butelce przy barze!
