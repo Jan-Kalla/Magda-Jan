@@ -196,7 +196,7 @@ export default function WyprawaPage() {
         </div>
 
         {/* === ZAWARTOŚĆ ETAPÓW === */}
-        <div className="bg-white p-6 md:p-8 rounded-3xl shadow-xl border border-[#4E0113]/10 relative overflow-hidden">
+        <div className="bg-white p-8 md:p-8 rounded-3xl shadow-xl border border-[#4E0113]/10 relative overflow-hidden">
             
             <AnimatePresence mode="wait">
                 
