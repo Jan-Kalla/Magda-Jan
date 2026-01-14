@@ -94,9 +94,8 @@ export default function CompetitionPage() {
              </div>
              <p className="text-[#4E0113] text-sm md:text-base leading-relaxed font-medium">
                 Włączcie ducha walki! 🔥 <br/>
+                Liczy się przede wszystkim dobra zabawa, ale jest też o co walczyć<br/>
                 W każdej konkurencji <strong>TOP 3 graczy</strong> zgarnia wyjątkowe nagrody, które wręczymy na weselu.
-                <br/>
-                Jest o co walczyć, więc... do dzieła!
              </p>
           </motion.div>
 
@@ -185,7 +184,7 @@ export default function CompetitionPage() {
               </div>
               <div className="text-left">
                 <h2 className="text-2xl font-bold">Zagadka</h2>
-                <p className="text-sm opacity-80">Gdzie jedziemy w podróż?</p>
+                <p className="text-sm opacity-80">Mniej zręczności a więcej myślenia</p>
               </div>
             </motion.div>
           </Link>
