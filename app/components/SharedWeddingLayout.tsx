@@ -8,6 +8,7 @@ import MapSection from "./MapSection";
 import Image from "next/image";
 import { useGuest } from "@/app/context/GuestContext";
 import { motion, AnimatePresence } from "framer-motion";
+import AnimatedText from "./AnimatedText";
 import { useEffect, useState } from "react";
 
 export default function SharedWeddingLayout({ showNavbar = true }: { showNavbar?: boolean }) {
@@ -49,7 +50,7 @@ export default function SharedWeddingLayout({ showNavbar = true }: { showNavbar?
 
       <main 
         className={`relative z-10 transition-[padding] duration-700 ease-in-out ${
-          guest ? "md:pt-24 pt-24" : " pt-12"
+          guest ? "md:pt-24 pt-24" : "md:pt-12 pt-12"
         }`}
       >
         {/* === FIX: "Łata" tła === 

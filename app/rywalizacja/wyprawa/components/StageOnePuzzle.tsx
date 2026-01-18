@@ -30,8 +30,8 @@ const VALID_FINALS = [
   "żeglarstwo", "zeglarstwo",
   "pływać żaglówką", "plywac zaglowka", "plywac zaglowką",
   "rejs żeglarski", "rejs zeglarski", "rejs zaglarski",
-  "rejs", "wyprawa żeglarska", "wyprawa zeglarska",
-  "płynąć w rejs", "plynac w rejs", "pływać jachtem", "plywac jachtem",
+  "wyprawa żeglarska", "wyprawa zeglarska",
+  "pływać jachtem", "plywac jachtem",
   "płynąć jachtem", "plynac jachtem", "pływanie jachtem", "plywanie jachtem"
 ];
 
@@ -44,6 +44,7 @@ const ALMOST_VALID_FINALS = [
   "pływanie", "pływać", "plywac", "plywanie",
   "płynąć", "plynac", "popłynąć",
   "wiosłować", "wioslowac",
+  "rejs", "płynąć w rejs", "plynac w rejs",
   "żeglarz", "zeglarz", "kapitan"
 ];
 
@@ -75,7 +76,7 @@ const QUESTIONS_DATA = [
   { id: 7,  question: "Co Magda z Janem częściej wybierają, gdy się ich o to spyta: kawa czy herbata?", valid: ["kawa", "kawę"], clue: "🌊" }, // Fale
   { id: 8,  question: "Wymień chociaż jeden z trzech zespołów, na których występie na żywo byli wspólnie Magda z Janem?", valid: ["myslovitz", "myslowic", "strachy na lachy", "strachynalachy","tlove","t-love"], clue: "🔕" }, // Cisza
   { id: 9,  question: "Danie, które Magda i Jan oboje lubią jeść?", valid: ["jajecznica","owsianka","bar gil","sushi","vifon","zupka chińska","kebab", "pizza", "burger", "burgery", "hamburger", "hamburgery", "wszystko","spaghetti"], clue: "🐟" }, // NOWE: Ryba (zamiast Kotwicy)
-  { id: 10, question: "Wspólne hobby Magdy i Jana", valid: ["film", "kino", "chodzenie do kina", "oglądanie filmów", "oglądanie filmow", "kinematografia", "sauna", "sauny", "chodzenie na saune", "saunowanie", "taniec", "tanczenie", "tańczenie", "gory", "góry", "gorskie wedrowki", "górskie wędrówki", "wedrowki gorskie", "trekking", "hiking", "spacery", "spacer", "chodzenie na spacery", "jedzenie", "chodzenie na jedzenie", "jedzenie na miescie", "food", "foodie", "muzyka", "sluchanie muzyki", "słuchanie muzyki", "koncerty", "zeglowanie", "żeglowanie", "plywanie zaglowka", "pływanie żaglówką", "zaglowka", "żaglówka", "standup", "stand-up", "oglądanie standupów", "oglądanie stand-upów", "standupy", "narty", "narciarstwo", "jazda na nartach", "gotowanie", "gotuja razem", "kuchnia", "biblia", "czytanie biblii", "pismo święte", "czytanie pisma świętego"], clue: "🌲" }, // Drzewo
+  { id: 10, question: "Wspólne hobby Magdy i Jana", valid: ["film", "kino", "chodzenie do kina", "oglądanie filmów", "oglądanie filmow", "kinematografia", "sauna", "sauny", "chodzenie na saune", "saunowanie", "taniec", "tanczenie", "tańczenie", "gory", "góry", "chodzenie po górach", "chodzenie po gorach", "gorskie wedrowki", "górskie wędrówki", "wedrowki gorskie", "trekking", "hiking", "spacery", "spacer", "chodzenie na spacery", "jedzenie", "chodzenie na jedzenie", "jedzenie na miescie", "food", "foodie", "muzyka", "sluchanie muzyki", "słuchanie muzyki", "koncerty", "zeglowanie", "żeglowanie", "plywanie zaglowka", "pływanie żaglówką", "zaglowka", "żaglówka", "standup", "stand-up", "oglądanie standupów", "oglądanie stand-upów", "standupy", "narty", "narciarstwo", "jazda na nartach", "gotowanie", "gotuja razem", "kuchnia", "biblia", "czytanie biblii", "pismo święte" , "czytanie pisma świętego"], clue: "🌲" }, // Drzewo
   { id: 11, question: "Marka samochodu, która często pojawiała się zarówno w rodzinie Magdy, jak i w rodzinie Jana?", valid: ["skoda", "škoda"], clue: "🕶️" }, // NOWE: Okulary (zamiast Koła)
   { id: 12, question: "?", valid: ["2y"], clue: "🌅" }, // Zachód słońca
 ];

@@ -15,12 +15,28 @@ export default function ChurchSection() {
   return (
     <section className="relative z-10 bg-gradient-to-b from-[#FAD6C8] to-[#A46C6E] px-8 py-20 flex flex-col lg:flex-row items-stretch gap-12 text-[#4E0113]">
       <div className="flex-1 flex flex-col justify-center text-lg md:text-xl leading-relaxed text-center lg:text-right space-y-3">
-        <AnimatedText text="Kościół pw. św. Piotra i Pawła" className="font-bold" delay={0.2} mode="line" />
-        <AnimatedText text="ul. Staromiejska 95, 43-190 Mikołów" delay={0.4} mode="line" />
+        <AnimatedText 
+            text="Kościół pw. św. Piotra i Pawła" 
+            className="font-bold" 
+            delay={0.2} 
+            mode="line" 
+        />
+        <AnimatedText 
+            text="ul. Staromiejska 95, 43-190 Mikołów" 
+            delay={0.4} 
+            mode="line" 
+        />
         <AnimatedText
           text="Uroczystość rozpocznie się 19 lipca 2026 o godzinie 12:00"
           className="font-semibold"
           delay={0.6}
+          mode="line"
+        />
+        
+        <AnimatedText
+          text="Będziemy wdzięczni za dar Komunii ofiarowanej za nas podzczas mszy świętej" 
+          className="text-base opacity-80 hover:opacity-100 cursor-pointer transition-opacity"
+          delay={0.8}
           mode="line"
         />
       </div>
