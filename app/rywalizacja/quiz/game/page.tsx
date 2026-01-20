@@ -225,11 +225,12 @@ export default function GamePage() {
             />
           )}
 
-          {gameState === "results" && (
+        {gameState === "results" && (
             <ResultsScreen 
                 key="results" 
                 result={result} 
-                correctAnswerLabel={correctLabel} // PRZEKAZUJEMY TUTAJ
+                correctAnswerLabel={correctLabel}
+                questionId={currentQuestion?.id || 0} // <--- DODAJ TĘ LINIJKĘ
             />
           )}
 
