@@ -3,7 +3,8 @@ import {
   CameraIcon, 
   PhotoIcon, 
   SparklesIcon, 
-  FaceSmileIcon 
+  FaceSmileIcon,
+  EyeSlashIcon // <--- NOWA IKONA DO "KOMPROMITUJĄCYCH"
 } from "@heroicons/react/24/solid";
 
 export type AccessLevel = "basic" | "extended" | "vip";
@@ -26,6 +27,7 @@ export const ACCESS_WEIGHTS: Record<AccessLevel, number> = {
 };
 
 export const ALBUMS: Album[] = [
+  // 1. ŚLUB
   {
     id: "wedding",
     title: "Ceremonia Ślubna",
@@ -35,6 +37,7 @@ export const ALBUMS: Album[] = [
     requiredLevel: "basic",
     description: "Oficjalne zdjęcia z zaślubin"
   },
+  // 2. WESELE
   {
     id: "party",
     title: "Wesele i Zabawa",
@@ -44,6 +47,7 @@ export const ALBUMS: Album[] = [
     requiredLevel: "basic",
     description: "Szaleństwo do białego rana"
   },
+  // 3. NASZA HISTORIA
   {
     id: "us",
     title: "Nasza Historia",
@@ -53,6 +57,7 @@ export const ALBUMS: Album[] = [
     requiredLevel: "basic",
     description: "Jak to się wszystko zaczęło..."
   },
+  // 4. MOMENTY (Extended)
   {
     id: "moments",
     title: "Najlepsze Momenty",
@@ -62,13 +67,24 @@ export const ALBUMS: Album[] = [
     requiredLevel: "extended",
     description: "Podróże, pasje i chwile warte zapamiętania"
   },
+  // 5. MEMY (VIP)
   {
     id: "memes",
-    title: "Strefa 51 (VIP)",
-    coverImage: "/fotki/raczki.jpg", 
+    title: "Komnata Memów",
+    coverImage: "/fotki/raczki.jpg", // Tu daj jakiegoś klasycznego mema
     icon: <FaceSmileIcon className="w-6 h-6" />,
     isLockedFuture: false,
     requiredLevel: "vip",
-    description: "Memy i zdjęcia, o których wolelibyśmy zapomnieć..."
+    description: "Memy, które nas definiują"
+  },
+  // 6. KOMPROMITUJĄCE (VIP - HARDCORE)
+  {
+    id: "cringe",
+    title: "Archiwum X",
+    coverImage: "/fotki/Szwajcaria1.jpg", // Tu daj coś zamazanego lub tajemniczego
+    icon: <EyeSlashIcon className="w-6 h-6" />,
+    isLockedFuture: false,
+    requiredLevel: "vip",
+    description: "Prosimy nie udostępniać! 🤫"
   }
 ];
