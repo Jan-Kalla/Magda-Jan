@@ -7,7 +7,9 @@ import MainCourseSelector from "@/app/components/MainCourseSelector";
 import ChildrenChoices from "@/app/components/ChildrenChoices";
 import SurveyResults from "@/app/components/SurveyResults";
 import PlusOneSelector from "@/app/components/PlusOneSelector";
+import Footer from "@/app/components/Footer";
 import RsvpSelector, { RsvpStatus } from "@/app/components/RsvpSelector"; // Importujemy też typ
+
 import { motion, Variants, easeOut, easeInOut, AnimatePresence } from "framer-motion";
 
 // ... (tutaj Twoje stałe mainCourses, childrenDishes, variants - bez zmian) ...
@@ -168,6 +170,7 @@ export default function MealSurveyPage() {
           )}
         </AnimatePresence>
       </div>
+      <Footer />
     </>
   );
 }

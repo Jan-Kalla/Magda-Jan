@@ -58,27 +58,34 @@ const A_LITTLE_VALID_FINALS = [
   "łowić", "łowienie", "ryby", "wędkować", "wedkowac",
   "pić", "imprezować", "impreza", "picie", "jedzenie",
   "przygoda", "las", "natura", "przyroda",
-  "miesiąc miodowy", "miesiac miodowy", "noc poślubna", "noc poslubna",
+  "miesiąc miodowy", "miesiac miodowy",
   "opalanie", "słońce", "slonce",
   "wyspa", "wyspy", "archipelag",
   "plecak", "śpiwór"
 ];
 
+const BAWDY = [
+"jajczyć się", "noc poślubna", "noc poslubna", 
+"seks", "sex", "uprawiać seks", "uprawiać sex",
+"współżyć", "współżycie", "konsumować małżeństwo", "konsumatacja małżeństwa",
+"ruchać się", "ruchanie"
+];
+
 // === KONFIGURACJA PYTAŃ I POSZLAK ===
 // Pamiętaj, aby uzupełnić pola "valid" (odpowiedzi) małymi literami!
 const QUESTIONS_DATA = [
-  { id: 1,  question: "Ulica w Katowicach na której Magda z Johnym swego czasu często bywali?", valid: ["mariacka"], clue: "🧭" }, // Kompas
+  { id: 1,  question: "Ulica w Katowicach na której Magda z Johnym swego czasu często bywali?", valid: ["mariacka", "na mariackiej", "mariackiej"], clue: "🧭" }, // Kompas
   { id: 2,  question: "Największe jezioro, na jakim wspólnie byli Magda z Janem?", valid: ["sniardwy", "śniardwy"], clue: "🌬️" }, // Wiatr
   { id: 3,  question: "Najwyższy szczyt, na jaki razem weszli Magda z Janem?", valid: ["świnica", "swinica", "2303", "2304", "2303m.n.p.m.", "2304m.n.p.m.", "2303 m.n.p.m.", "2304 m.n.p.m."], clue: "🪢" }, // Lina
   { id: 4,  question: "Państwo, do którego odbył się pierwszy wspólny zagraniczny wyjazd Magdy i Johnego?", valid: ["austria"], clue: "🗺️" }, // Mapa
   { id: 5,  question: "W jaką grę video Magda najbardziej lubi grać u Jana?", valid: ["granturismo", "gran turismo", "gr7","granturismo7", "gran turismo7","granturismo 7", "gran turismo 7", "gr 7"], clue: "⚙️❌" }, // Brak silnika
-  { id: 6,  question: "Pierwsze miasto, w którym Magda z Johnym zamieszkają po ślubie", valid: ["zabrze"], clue: "⛺" }, // Namiot
+  { id: 6,  question: "Pierwsze miasto, w którym Magda z Johnym zamieszkają po ślubie?", valid: ["zabrze"], clue: "⛺" }, // Namiot
   { id: 7,  question: "Co Magda z Janem częściej wybierają, gdy się ich o to spyta: kawa czy herbata?", valid: ["kawa", "kawę"], clue: "🌊" }, // Fale
   { id: 8,  question: "Wymień chociaż jeden z trzech zespołów, na których występie na żywo byli wspólnie Magda z Janem?", valid: ["myslovitz", "myslowic", "strachy na lachy", "strachynalachy","tlove","t-love"], clue: "🔕" }, // Cisza
   { id: 9,  question: "Danie, które Magda i Jan oboje lubią jeść?", valid: ["jajecznica","owsianka","bar gil","sushi","vifon","zupka chińska","kebab", "pizza", "burger", "burgery", "hamburger", "hamburgery", "wszystko","spaghetti"], clue: "🐟" }, // NOWE: Ryba (zamiast Kotwicy)
-  { id: 10, question: "Wspólne hobby Magdy i Jana", valid: ["film", "kino", "chodzenie do kina", "oglądanie filmów", "oglądanie filmow", "kinematografia", "sauna", "sauny", "chodzenie na saune", "saunowanie", "taniec", "tanczenie", "tańczenie", "gory", "góry", "chodzenie po górach", "chodzenie po gorach", "gorskie wedrowki", "górskie wędrówki", "wedrowki gorskie", "trekking", "hiking", "spacery", "spacer", "chodzenie na spacery", "jedzenie", "chodzenie na jedzenie", "jedzenie na miescie", "food", "foodie", "muzyka", "sluchanie muzyki", "słuchanie muzyki", "koncerty", "zeglowanie", "żeglowanie", "plywanie zaglowka", "pływanie żaglówką", "zaglowka", "żaglówka", "standup", "stand-up", "oglądanie standupów", "oglądanie stand-upów", "standupy", "narty", "narciarstwo", "jazda na nartach", "gotowanie", "gotuja razem", "kuchnia", "biblia", "czytanie biblii", "pismo święte" , "czytanie pisma świętego"], clue: "🌲" }, // Drzewo
+  { id: 10, question: "Wspólne hobby Magdy i Jana?", valid: ["film", "kino", "chodzenie do kina", "oglądanie filmów", "oglądanie filmow", "kinematografia", "sauna", "sauny", "chodzenie na saune", "saunowanie", "taniec", "tanczenie", "tańczenie", "gory", "góry", "chodzenie po górach", "chodzenie po gorach", "gorskie wedrowki", "górskie wędrówki", "wedrowki gorskie", "trekking", "hiking", "spacery", "spacer", "chodzenie na spacery", "jedzenie", "chodzenie na jedzenie", "jedzenie na miescie", "food", "foodie", "muzyka", "sluchanie muzyki", "słuchanie muzyki", "koncerty", "zeglowanie", "żeglowanie", "plywanie zaglowka", "pływanie żaglówką", "zaglowka", "żaglówka", "standup", "stand-up", "oglądanie standupów", "oglądanie stand-upów", "standupy", "narty", "narciarstwo", "jazda na nartach", "gotowanie", "gotowanie razem", "gotuja razem", "gotują razem", "kuchnia", "biblia", "czytanie biblii", "pismo święte" , "czytanie pisma świętego"], clue: "🌲" }, // Drzewo
   { id: 11, question: "Marka samochodu, która często pojawiała się zarówno w rodzinie Magdy, jak i w rodzinie Jana?", valid: ["skoda", "škoda"], clue: "🕶️" }, // NOWE: Okulary (zamiast Koła)
-  { id: 12, question: "?", valid: ["2y"], clue: "🌅" }, // Zachód słońca
+  { id: 12, question: "Ulubiona księga Nowego Testamentu Johnego i Magdy?", valid: ["dzieje apostolskie"], clue: "🌅" }, // Zachód słońca
 ];
 
 export default function StageOnePuzzle({ guestId, onSuccess, onMistake }: Props) {
@@ -172,7 +179,15 @@ export default function StageOnePuzzle({ guestId, onSuccess, onMistake }: Props)
       return;
     }
 
-    // 4. ZIMNO
+    // 4.
+    if (BAWDY.some(v => val.includes(v))) {
+      setFinalMsg({
+        text: "Seriooo?! Ile Ty masz lat? No tak, to generalnie też część planu, ale nie o to chodziło w głównym haśle... 😅"
+        , type: 'error'
+      });
+      return;
+    }
+    // 5. ZIMNO
     setFinalMsg({ text: "Pudło! To nie to. ❄️", type: 'error' });
   };
 

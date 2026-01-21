@@ -101,6 +101,15 @@ export const scheduleData: TimelineEvent[] = [
   },
 
   {
+    id: 13,
+    time: "22:00",
+    title: "Kolacja",
+    description: "Żarcia ciąg dalszy",
+    icon: <PartyPopper className="w-5 h-5 text-white" />,
+    type: "event",
+  },
+
+  {
     id: 10,
     time: "23:00",
     title: "Wielki Turniej - Edycja II",
@@ -125,7 +134,7 @@ export const scheduleData: TimelineEvent[] = [
     id: 8,
     time: "00:00",
     title: "Oczepiny",
-    description: "Tradycji musi stać się zadość! Rzut welonem, muchą i garść zabaw weselnych.",
+    description: "Tradycji musi stać się zadość! Rzut welonem, muchą i garść zabaw.",
     icon: <PartyPopper className="w-5 h-5 text-white" />,
     type: "event",
   },

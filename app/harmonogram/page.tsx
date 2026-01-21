@@ -4,6 +4,7 @@ import Navbar from "@/app/components/Navbar";
 import MapTrackSection from "./MapTrackSection"; 
 import VenueHeroSection from "./VenueHeroSection"; 
 import TimelineSection from "./TimelineSection";
+import Footer from "@/app/components/Footer";
 
 export default function HarmonogramPage() {
   return (
@@ -12,6 +13,7 @@ export default function HarmonogramPage() {
       <VenueHeroSection />
       <MapTrackSection />
       <TimelineSection />
+      <Footer />
     </div>
   );
 }

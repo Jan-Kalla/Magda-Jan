@@ -10,8 +10,8 @@ import {
   TrophyIcon, 
   LightBulbIcon, 
   ChartBarIcon,
-  CheckIcon,     // NOWE
-  XMarkIcon      // NOWE
+  CheckIcon,     
+  XMarkIcon      
 } from "@heroicons/react/24/solid";
 
 const supabase = createClient(
@@ -23,7 +23,7 @@ type Props = {
   result: { score: number; correct: boolean } | null;
   correctAnswerLabel?: string; 
   questionId: number;
-  correctAnswerIndex: number; // NOWE: Odbieramy indeks poprawnej odp.
+  correctAnswerIndex: number; 
 };
 
 type LeaderboardEntry = {
@@ -70,13 +70,44 @@ export default function ResultsScreen({ result, correctAnswerLabel, questionId, 
     return Math.round((count / stats.total) * 100);
   };
 
-  // Pomocnicza tablica do mapowania kluczy a,b,c,d na indeksy 0,1,2,3
   const KEYS = ['a', 'b', 'c', 'd'];
+
+  // === FUNKCJA RENDERUJĄCA KSZTAŁTY ZAMIAST LITER ===
+  const renderShape = (key: string) => {
+    switch (key) {
+      case 'a': // Czerwony Trójkąt
+        return (
+          <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-red-500 drop-shadow-sm">
+            <path d="M12 2L22 22H2L12 2Z" />
+          </svg>
+        );
+      case 'b': // Niebieski Romb
+        return (
+          <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-blue-500 drop-shadow-sm">
+            <path d="M12 2L22 12L12 22L2 12L12 2Z" />
+          </svg>
+        );
+      case 'c': // Żółte Kółko
+        return (
+          <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-yellow-400 drop-shadow-sm">
+            <circle cx="12" cy="12" r="10" />
+          </svg>
+        );
+      case 'd': // Zielony Kwadrat
+        return (
+          <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-green-500 drop-shadow-sm">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+          </svg>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="w-full max-w-md mx-auto flex flex-col gap-6 pb-24">
       
-      {/* 1. KARTA Z WYNIKIEM (BEZ ZMIAN) */}
+      {/* 1. KARTA Z WYNIKIEM */}
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -141,14 +172,15 @@ export default function ResultsScreen({ result, correctAnswerLabel, questionId, 
                     const percent = getPercent(count);
                     const colorClass = BAR_COLORS[key] || "bg-gray-400";
                     
-                    // Sprawdzamy czy ten wiersz to poprawna odpowiedź
                     const isRowCorrect = index === correctAnswerIndex;
 
                     return (
                         <div key={key} className="flex items-center gap-3 text-sm">
-                            <span className={`font-bold w-4 uppercase ${key === 'c' ? 'text-yellow-600' : 'text-[#4E0113]'}`}>
-                                {key}
-                            </span>
+                            
+                            {/* === ZMIANA: IKONA GEOMETRYCZNA ZAMIAST LITERY === */}
+                            <div className="w-6 flex justify-center items-center">
+                                {renderShape(key)}
+                            </div>
                             
                             {/* Kontener Paska */}
                             <div className="flex-1 h-8 bg-gray-100 rounded-full overflow-hidden relative shadow-inner">
@@ -167,7 +199,7 @@ export default function ResultsScreen({ result, correctAnswerLabel, questionId, 
                                 </span>
                             </div>
 
-                            {/* === IKONA WYNIKU (PTASZEK / KRZYŻYK) === */}
+                            {/* Ikona wyniku (ptaszek / krzyżyk) */}
                             <div className="w-6 flex justify-center">
                                 {isRowCorrect ? (
                                     <div className="bg-green-100 p-1 rounded-full">

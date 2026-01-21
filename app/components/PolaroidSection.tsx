@@ -55,25 +55,21 @@ export default function PolaroidSection() {
       >
 
         <p className="text-base md:text-lg leading-relaxed whitespace-pre-line">
-          Czeeeeeeeeeść! To My! Magda i Johny!{"\n\n"}
-          Znamy się od września 2018 roku i już całkiem sporo razem przeżyliśmy,{"\n\n"}
-          Nadzszedł w końcu ten czas, że podjęliśmy wspólnie decyzję o tym, że chcemy spędzić ze sobą resztę życia,{"\n\n"}
-          Traktujemy jednak tę decyzję śmiertelnie poważnie, a nie jako coś, co po prostu postalowiliśmy sobie w przypływie uniesienia,{"\n\n"}
-          Dlatego chcemy jawnie wyznać i zapieczętować tę decyzję przed Bogiem, jak i przed ludźmi,{"\n\n"}
-          Świadomie i dobrowolnie zrzekając się możliwości pójścia w inną stronę, nawet gdyby kiedyś miało być ciężko, {"\n\n"}
-          Dobrze zdając sobie sprawę, z czym się to wiąże, chcemy pozostać ze sobą już do końca życia, bez możliwości rezygnacji z tej umowy,{"\n\n"}
-          Chcemy, byście toważyszyli nam w tym, być może, najważniejszym momencie naszego życia, bo zakładamy, że drugiego takiego już nie będzie,{"\n\n"}
-          Dlatego zależy nam na waszej obecności w tym dniu, na naszym ślubie każdy jest mile widziany! {"\n\n"}
-          Niech każdy z was stanie się świadkiem naszego sakramwntalnego "TAK", by jak najbardziej się ono umocniło,{"\n\n"}
-          Niech wasza obecność  
-
-
-
+          Czeeeeeeeeeść! To My! Magda i Johny!{"\n"}
+          Znamy się od września 2018 roku i już całkiem sporo razem przeżyliśmy,{"\n"}
+          Nadzszedł w końcu ten czas, że podjęliśmy wspólnie decyzję o tym, że chcemy spędzić ze sobą resztę życia,{"\n"}
+          Traktujemy jednak tę decyzję śmiertelnie poważnie, a nie jako coś, co po prostu postalowiliśmy sobie w przypływie uniesienia,{"\n"}
+          Dlatego chcemy jawnie wyznać i zapieczętować tę decyzję przed Bogiem, jak i przed ludźmi,{"\n"}
+          Świadomie i dobrowolnie zrzekając się możliwości pójścia w inną stronę, nawet gdyby kiedyś miało być ciężko, {"\n"}
+          Dobrze zdając sobie sprawę, z czym się to wiąże, chcemy pozostać ze sobą już do końca życia, bez możliwości rezygnacji z tej umowy,{"\n"}
+          Chcemy, byście toważyszyli nam w tym, być może, najważniejszym momencie naszego życia, bo zakładamy, że drugiego takiego już nie będzie,{"\n"}
+          Dlatego zależy nam na waszej obecności w tym dniu, na naszym ślubie każdy, kto towarzyszył nam na tej dorodze chćby przez moment, jest mile widziany! {"\n"}
+          Super by było, jeżeli jak najwięcej z was stanie się świadkami naszego sakramwntalnego "TAK"!{"\n\n"}
 
         </p>
 
         <blockquote className="italic text-xl md:text-2xl mb-6">
-          „Miłość cierpliwa jest, łaskawa jest...” <br /> (1 Kor 13, 4)
+          „Zwierzęta, które mają jądra zgniecione, starte, wyrwane albo wycięte, nie będziecie składać w ofierze Panu i nie będziecie takich rzeczy robić w waszym kraju” <br /> (Ks. Kpł 22, 24)
         </blockquote>
       </motion.div>
     </section>

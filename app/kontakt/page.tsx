@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Mail, Phone, Heart, Send } from "lucide-react";
 import { useGuest } from "@/app/context/GuestContext";
+import Footer from "@/app/components/Footer";
 
 export default function ContactPage() {
   const { guest, loading } = useGuest();
@@ -130,6 +131,7 @@ export default function ContactPage() {
           </div>
         </motion.div>
       </section>
+      <Footer />
     </div>
   );
 }

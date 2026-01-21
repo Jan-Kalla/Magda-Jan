@@ -5,6 +5,7 @@ import Timer from "./Timer";
 import PolaroidSection from "./PolaroidSection";
 import ChurchSection from "./ChurchSection";
 import MapSection from "./MapSection";
+import Footer from "./Footer";
 import Image from "next/image";
 import { useGuest } from "@/app/context/GuestContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -93,6 +94,7 @@ export default function SharedWeddingLayout({ showNavbar = true }: { showNavbar?
         <Timer />
         <ChurchSection />
         <MapSection />
+        <Footer />
       </main>
     </>
   );

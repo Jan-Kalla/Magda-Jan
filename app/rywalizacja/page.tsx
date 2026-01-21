@@ -3,6 +3,7 @@
 import Navbar from "@/app/components/Navbar";
 import Link from "next/link";
 import { useGuest } from "@/app/context/GuestContext";
+import Footer from "@/app/components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { 
@@ -124,7 +125,7 @@ export default function CompetitionPage() {
                    <LockClosedIcon className="w-8 h-8 text-gray-400" />}
                 </div>
                 <div className="text-left">
-                  <h2 className="text-2xl font-bold">Wielki Quiz</h2>
+                  <h2 className="text-2xl font-bold">Quiz</h2>
                   <p className="text-sm opacity-80">
                     {isAdmin ? "Panel Wodzireja" : isTester ? "Tryb Testowy" : "Sprawdź wiedzę o Parze Młodej"}
                   </p>
@@ -202,7 +203,7 @@ export default function CompetitionPage() {
                    <LockClosedIcon className="w-8 h-8 text-gray-500" />
                 </div>
                 <div className="text-left">
-                   <h2 className="text-2xl font-bold">Turniej - Edycja II</h2>
+                   <h2 className="text-2xl font-bold">Wielki Turniej - Edycja II</h2>
                    <p className="text-sm opacity-80">Dostępne po weselu</p>
                 </div>
              </div>
@@ -225,6 +226,7 @@ export default function CompetitionPage() {
 
         </div>
       </div>
+      <Footer />
     </>
   );
 }
