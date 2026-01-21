@@ -195,9 +195,11 @@ export default function GamePage() {
     }
   };
 
-  // === 5. OBLICZENIE POPRAWNEJ ODPOWIEDZI (Dla widoku Results) ===
-  // Znajdujemy odpowiedź, która ma isCorrect: true
+  // === 5. OBLICZENIE POPRAWNEJ ODPOWIEDZI ===
+  // Etykieta (tekst)
   const correctLabel = currentQuestion?.answers.find(a => a.isCorrect)?.label;
+  // Index (0, 1, 2 lub 3) - to naprawia Twój błąd!
+  const correctIndex = currentQuestion?.answers.findIndex(a => a.isCorrect) ?? -1;
 
   if (loading) return null;
 
@@ -230,7 +232,8 @@ export default function GamePage() {
                 key="results" 
                 result={result} 
                 correctAnswerLabel={correctLabel}
-                questionId={currentQuestion?.id || 0} // <--- DODAJ TĘ LINIJKĘ
+                questionId={currentQuestion?.id || 0}
+                correctAnswerIndex={correctIndex} // <--- TO JEST TO, CZEGO BRAKOWAŁO
             />
           )}
 
