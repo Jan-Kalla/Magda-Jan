@@ -66,7 +66,7 @@ export default function VenueHeroSection() {
           mode="letters"
         />
         <AnimatedText
-          text="Gliwice, ul. Łabędzka"
+          text="Gliwice, ul. Łabędzka 6"
           className="text-xl font-medium mb-8 opacity-80"
           mode="line"
           delay={0.3}

@@ -11,6 +11,7 @@ import { useGuest } from "@/app/context/GuestContext";
 import { motion, AnimatePresence } from "framer-motion";
 import AnimatedText from "./AnimatedText";
 import { useEffect, useState } from "react";
+import CustomCursor from "./CustomCursor";
 
 export default function SharedWeddingLayout({ showNavbar = true }: { showNavbar?: boolean }) {
   const { guest, loading } = useGuest();
@@ -42,6 +43,7 @@ export default function SharedWeddingLayout({ showNavbar = true }: { showNavbar?
 
   return (
     <>
+    <CustomCursor />
       {showNavbar && <Navbar />}
 
       {/* Tło pod spodem (zdjęcie) */}

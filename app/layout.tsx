@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { GuestProvider } from "@/app/context/GuestContext"; // 🟢 Import kontekstu gościa
+import { SoundProvider } from "@/app/context/SoundContext";
 
 // --- Fonty ---
 const geistSans = Geist({
@@ -32,7 +33,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#FAD6C8] text-[#4E0113]`}
       >
         {/* 🟣 Owijamy całą aplikację w kontekst gościa */}
-        <GuestProvider>{children}</GuestProvider>
+        <GuestProvider>
+            <SoundProvider>
+              {children}
+            </SoundProvider>
+          </GuestProvider>
       </body>
     </html>
   );

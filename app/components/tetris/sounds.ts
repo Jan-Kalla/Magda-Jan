@@ -2,10 +2,10 @@
 import { Howl } from "howler";
 
 export const sounds = {
-  hit1: new Howl({ src: ["/sounds/hit1.wav"], volume: 0.5 }),
-  hit2: new Howl({ src: ["/sounds/hit2.wav"], volume: 0.5 }),
-  line: new Howl({ src: ["/sounds/line.wav"], volume: 0.5 }),
-  gameover: new Howl({ src: ["/sounds/gameover.wav"], volume: 0.7 }),
+  hit1: new Howl({ src: ["/sounds/tetris/hit1.wav"], volume: 0.5 }),
+  hit2: new Howl({ src: ["/sounds/tetris/hit2.wav"], volume: 0.5 }),
+  line: new Howl({ src: ["/sounds/tetris/line.wav"], volume: 0.5 }),
+  gameover: new Howl({ src: ["/sounds/tetris/gameover.wav"], volume: 0.7 }),
 };
 
 // Alternator uderzeń

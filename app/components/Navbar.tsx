@@ -6,6 +6,8 @@ import { useGuest } from "@/app/context/GuestContext";
 import { usePathname } from "next/navigation";
 import { Bars3Icon } from "@heroicons/react/24/solid";
 import { togglePause } from "@/app/components/tetris/gameLogic";
+import { SpeakerWaveIcon, SpeakerXMarkIcon } from "@heroicons/react/24/solid";
+import { useSound } from "@/app/context/SoundContext";
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
@@ -24,6 +26,7 @@ export default function Navbar() {
   const { guest, logout } = useGuest();
   const pathname = usePathname();
   const isMobile = useIsMobile();
+  const { isMuted, toggleMute } = useSound(); // <--- Hook
 
   const navItems = [
     { label: "Strona główna", href: "/" },
@@ -84,6 +87,21 @@ export default function Navbar() {
               </li>
             );
           })}
+          {/* PRZYCISK DŹWIĘKU */}
+         <button 
+           onClick={(e) => {
+             e.stopPropagation(); // Żeby kliknięcie w przycisk nie wywołało chrumknięcia (opcjonalne)
+             toggleMute();
+           }}
+           className="p-2 rounded-full hover:bg-black/10 transition text-[#FAD6C8]"
+           title={isMuted ? "Włącz dźwięki" : "Wycisz dźwięki"}
+         >
+           {isMuted ? (
+             <SpeakerXMarkIcon className="w-6 h-6" />
+           ) : (
+             <SpeakerWaveIcon className="w-6 h-6 animate-pulse" />
+           )}
+         </button>
 
           {guest && (
             <li>
