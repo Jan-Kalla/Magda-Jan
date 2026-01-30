@@ -19,57 +19,41 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Web Audio API Context
   const audioCtxRef = useRef<AudioContext | null>(null);
-  // Bufor (Pamięć RAM) na dźwięki - dzięki temu odpalają się w 0ms
   const buffersRef = useRef<Record<string, AudioBuffer>>({});
-  // Referencje do aktualnie grających źródeł (żeby móc je zatrzymać, np. tykanie)
   const activeSourcesRef = useRef<Record<string, AudioBufferSourceNode>>({});
+  
+  // Ref do śledzenia ostatniego elementu hover (żeby dźwięk nie "jąkał się" na ikonach wewnątrz przycisku)
+  const lastHoveredRef = useRef<Element | null>(null);
 
-  // 1. INICJALIZACJA I ŁADOWANIE PLIKÓW DO PAMIĘCI
+  // 1. INICJALIZACJA
   useEffect(() => {
-    // Tworzymy kontekst Audio tylko raz
     const CtxClass = (window.AudioContext || (window as any).webkitAudioContext);
     const ctx = new CtxClass();
     audioCtxRef.current = ctx;
 
-    // Lista plików do załadowania
     const soundsToLoad: Record<string, string> = {
-      "timer": "/sounds/ui/timer.mp3",
-      "hover": "/sounds/ui/hover.mp3",
+      "hover":   "/sounds/ui/hover.mp3", // Upewnij się, że masz ten plik!
       "click-1": "/sounds/ui/click1.mp3",
       "click-2": "/sounds/ui/click2.mp3",
       "click-3": "/sounds/ui/click3.mp3",
       "click-4": "/sounds/ui/click4.mp3",
     };
 
-    // Funkcja pobierająca i dekodująca plik
     const loadSound = async (key: string, url: string) => {
       try {
         const response = await fetch(url);
-        
-        // 1. Sprawdź czy plik w ogóle istnieje (Status 200 OK)
         if (!response.ok) {
-          throw new Error(`Błąd sieci: ${response.status} ${response.statusText}`);
+          console.warn(`⚠️ Brak pliku dźwiękowego: ${url}`);
+          return; 
         }
-
-        // 2. Sprawdź czy to na pewno audio (opcjonalne, ale pomocne)
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("text/html")) {
-           throw new Error(`Pobrano stronę HTML zamiast pliku audio! Sprawdź ścieżkę do pliku.`);
-        }
-
         const arrayBuffer = await response.arrayBuffer();
-        
-        // 3. Dekodowanie
         const decodedBuffer = await ctx.decodeAudioData(arrayBuffer);
         buffersRef.current[key] = decodedBuffer;
-        
       } catch (err) {
-        // Tu zobaczysz w konsoli dokładnie, który plik robi problem
-        console.error(`❌ BŁĄD ładowania dźwięku: "${key}" (URL: ${url})`, err);
+        console.error(`❌ BŁĄD ładowania dźwięku: "${key}"`, err);
       }
     };
 
-    // Ładujemy wszystko równolegle
     Promise.all(
       Object.entries(soundsToLoad).map(([key, url]) => loadSound(key, url))
     ).then(() => {
@@ -82,108 +66,123 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, []);
 
-  // 2. FUNKCJA ODTWARZANIA (Niskopoziomowa)
+  // 2. ODTWARZANIE
   const playSound = useCallback((type: SoundType) => {
     if (isMuted || !audioCtxRef.current || !isReady) return;
 
     const ctx = audioCtxRef.current;
+    if (ctx.state === "suspended") ctx.resume();
 
-    // Przeglądarki usypiają AudioContext do pierwszej interakcji. Budzimy go.
-    if (ctx.state === "suspended") {
-      ctx.resume();
-    }
-
-   let bufferKey: string = type;
+    let bufferKey: string = type;
     let volume = 1.0;
     let playbackRate = 1.0;
     let loop = false;
 
-    // LOGIKA LOSOWANIA I GŁOŚNOŚCI
+    // --- KONFIGURACJA DŹWIĘKÓW ---
     if (type === "click") {
-      // Losujemy wariant
       const variant = Math.floor(Math.random() * 4) + 1;
       bufferKey = `click-${variant}`;
-      
-      // Losowy pitch (wysokość dźwięku) dla realizmu
       playbackRate = 0.95 + Math.random() * 0.1;
-
-      // Specjalna głośność dla click3 (jak ustalałeś wcześniej)
       volume = variant === 3 ? 1.0 : 0.5;
     
     } else if (type === "ticking") {
-      volume = 0.4; // Głośność tykania ustawiamy tutaj bazowo, ale Timer ją nadpisuje swoim volume
-      loop = true;  // Zapętlamy
+      volume = 0.4;
+      loop = true;
+
+    } else if (type === "hover") {
+      // Hover musi być subtelny!
+      volume = 0.25; // Bardzo cicho (15%)
+      // Lekko podbijamy pitch, żeby brzmiało "lekko" i "powietrznie"
+      playbackRate = 1.2 + Math.random() * 0.1; 
+
     } else {
       volume = 0.5;
     }
 
-    // Pobieramy zdekodowany dźwięk z pamięci
     const buffer = buffersRef.current[bufferKey];
     if (!buffer) return;
 
-    // Tworzymy źródło dźwięku
+    // Jeśli to hover, ucinamy poprzedni hover (żeby nie nakładały się przy szybkim ruchu myszą)
+    // To zapobiega hałasowi "machine gun"
+    if (type === "hover" && activeSourcesRef.current["last-hover"]) {
+       try { activeSourcesRef.current["last-hover"].stop(); } catch(e){}
+    }
+
     const source = ctx.createBufferSource();
     source.buffer = buffer;
     source.loop = loop;
     source.playbackRate.value = playbackRate;
 
-    // Tworzymy węzeł głośności (GainNode)
     const gainNode = ctx.createGain();
     gainNode.gain.value = volume;
 
-    // Łączymy: Źródło -> Głośność -> Głośniki
     source.connect(gainNode);
     gainNode.connect(ctx.destination);
-
-    // Start!
     source.start(0);
 
-    // Zapisujemy referencję (tylko dla długich dźwięków, żeby móc je zatrzymać)
     if (type === "ticking") {
-      // Jeśli coś już tykało, zatrzymaj to najpierw
       if (activeSourcesRef.current["ticking"]) {
         try { activeSourcesRef.current["ticking"].stop(); } catch(e){}
       }
       activeSourcesRef.current["ticking"] = source;
+    } else if (type === "hover") {
+      // Zapisujemy referencję do hovera, żeby móc go uciąć przy następnym szybkim ruchu
+      activeSourcesRef.current["last-hover"] = source;
     }
+
   }, [isMuted, isReady]);
 
-  // 3. FUNKCJA ZATRZYMYWANIA
   const stopSound = useCallback((type: SoundType) => {
     const source = activeSourcesRef.current[type];
     if (source) {
-      try {
-        source.stop();
-      } catch (e) {
-        // Ignorujemy błędy, jeśli dźwięk już się skończył
-      }
+      try { source.stop(); } catch (e) {}
       delete activeSourcesRef.current[type];
     }
   }, []);
 
   const toggleMute = () => {
-    // Przy odciszaniu musimy upewnić się, że kontekst jest aktywny
     if (isMuted && audioCtxRef.current?.state === "suspended") {
       audioCtxRef.current.resume();
     }
     setIsMuted((prev) => !prev);
   };
 
-  // 4. GLOBALNY LISTENER - ZMIANA NA POINTERDOWN (SZYBSZE NIŻ CLICK)
+  // 3. GLOBALNE NASŁUCHIWANIE
   useEffect(() => {
-    const handleGlobalInteraction = () => {
-      // Budzimy kontekst przy pierwszym dotknięciu
-      if (audioCtxRef.current?.state === "suspended") {
-        audioCtxRef.current.resume();
-      }
+    // KLIKNIĘCIA (PointerDown - szybkie)
+    const handleGlobalClick = () => {
+      if (audioCtxRef.current?.state === "suspended") audioCtxRef.current.resume();
       playSound("click");
     };
 
-    // Używamy 'pointerdown' zamiast 'click'. 
-    // 'click' czeka na puszczenie przycisku myszy. 'pointerdown' działa natychmiast po wciśnięciu.
-    window.addEventListener("pointerdown", handleGlobalInteraction);
+    // NAJECHANIE (MouseOver - inteligentne)
+    const handleGlobalHover = (e: MouseEvent) => {
+      const target = e.target as Element;
+      
+      // Szukamy najbliższego elementu interaktywnego w górę drzewa DOM
+      // (Szukamy: button, a, input, label)
+      const interactiveElement = target.closest("button, a, input, [role='button']");
+
+      if (interactiveElement) {
+        // Sprawdzamy, czy to NOWY element. 
+        // Jeśli mysz jest nadal na tym samym przycisku (np. zjechała z tekstu na tło przycisku), nie graj.
+        if (interactiveElement !== lastHoveredRef.current) {
+          lastHoveredRef.current = interactiveElement;
+          playSound("hover");
+        }
+      } else {
+        // Jeśli zjechaliśmy na puste tło, resetujemy pamięć
+        lastHoveredRef.current = null;
+      }
+    };
+
+    window.addEventListener("pointerdown", handleGlobalClick);
+    window.addEventListener("mouseover", handleGlobalHover); // Używamy mouseover, bo bubbling pozwala łapać dzieci
     
-    return () => window.removeEventListener("pointerdown", handleGlobalInteraction);
+    return () => {
+      window.removeEventListener("pointerdown", handleGlobalClick);
+      window.removeEventListener("mouseover", handleGlobalHover);
+    };
   }, [playSound]);
 
   return (
