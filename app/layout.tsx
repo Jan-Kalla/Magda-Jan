@@ -20,7 +20,7 @@ const lato = Lato({
 export const metadata: Metadata = {
   // 1. Podstawowy adres strony (wymagane, żeby obrazki działały poprawnie)
   // Zmień to na swój prawdziwy adres po wrzuceniu na Vercel!
-  metadataBase: new URL("https://wasza-strona-slubna.vercel.app"), 
+  metadataBase: new URL("https://magda-jan.vercel.app"), 
 
   // 2. Tytuł widoczny w zakładce przeglądarki
   title: "Magda & Jan | Zapraszamy na ślub!",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Magda & Jan | Zapraszamy na ślub! 💍",
     description: "To będzie piękny dzień! Wejdź, potwierdź obecność i baw się z nami.",
-    url: "https://wasza-strona-slubna.vercel.app",
+    url: "https://magda-jan.vercel.app",
     siteName: "Ślub Magdy i Jana",
     locale: "pl_PL",
     type: "website",
