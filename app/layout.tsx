@@ -1,27 +1,60 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Playfair_Display, Lato } from "next/font/google"; // Zakładam, że używasz tych lub podobnych fontów
 import "./globals.css";
-import { GuestProvider } from "@/app/context/GuestContext"; // 🟢 Import kontekstu gościa
-import { SoundProvider } from "@/app/context/SoundContext";
+import { GuestProvider } from "./context/GuestContext";
+import { SoundProvider } from "./context/SoundContext";
 
-// --- Fonty ---
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Konfiguracja czcionek (jeśli masz inne, zostaw swoje)
+const playfair = Playfair_Display({ 
   subsets: ["latin"],
+  variable: "--font-playfair",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const lato = Lato({ 
   subsets: ["latin"],
+  weight: ["300", "400", "700"],
+  variable: "--font-lato",
 });
 
-// --- Metadane ---
+// --- TUTAJ JEST MAGIA OPEN GRAPH ---
 export const metadata: Metadata = {
-  title: "Nasze Wesele 💍",
-  description: "Witamy na naszej stronie ślubnej 💐",
+  // 1. Podstawowy adres strony (wymagane, żeby obrazki działały poprawnie)
+  // Zmień to na swój prawdziwy adres po wrzuceniu na Vercel!
+  metadataBase: new URL("https://wasza-strona-slubna.vercel.app"), 
+
+  // 2. Tytuł widoczny w zakładce przeglądarki
+  title: "Magda & Jan | Zapraszamy na ślub!",
+  
+  // 3. Opis pod linkiem w Google
+  description: "19 lipca 2026. Dołącz do nas w tym wyjątkowym dniu! Sprawdź harmonogram, galerię i weź udział w weselnej rywalizacji.",
+
+  // 4. Konfiguracja dla Facebooka / Messengera / WhatsAppa
+  openGraph: {
+    title: "Magda & Jan | Zapraszamy na ślub! 💍",
+    description: "To będzie piękny dzień! Wejdź, potwierdź obecność i baw się z nami.",
+    url: "https://wasza-strona-slubna.vercel.app",
+    siteName: "Ślub Magdy i Jana",
+    locale: "pl_PL",
+    type: "website",
+    images: [
+      {
+        url: "/fotki/raczki.jpg", // Tu podajemy ścieżkę do zdjęcia
+        width: 1200,
+        height: 630,
+        alt: "Magda i Jan - Zaproszenie",
+      },
+    ],
+  },
+
+  // 5. Konfiguracja dla Twittera / X (opcjonalnie)
+  twitter: {
+    card: "summary_large_image",
+    title: "Magda & Jan | Wielki Dzień",
+    description: "Zapraszamy na nasz ślub. Kliknij i zobacz szczegóły.",
+    images: ["/fotki/raczki.jpg"],
+  },
 };
 
-// --- Layout główny ---
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,15 +62,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pl">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#FAD6C8] text-[#4E0113]`}
-      >
-        {/* 🟣 Owijamy całą aplikację w kontekst gościa */}
+      <body className={`${playfair.variable} ${lato.variable} font-sans antialiased`}>
         <GuestProvider>
-            <SoundProvider>
-              {children}
-            </SoundProvider>
-          </GuestProvider>
+          <SoundProvider>
+            {children}
+          </SoundProvider>
+        </GuestProvider>
       </body>
     </html>
   );
