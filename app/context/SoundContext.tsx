@@ -22,17 +22,27 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
   const buffersRef = useRef<Record<string, AudioBuffer>>({});
   const activeSourcesRef = useRef<Record<string, AudioBufferSourceNode>>({});
   
-  // Ref do śledzenia ostatniego elementu hover (żeby dźwięk nie "jąkał się" na ikonach wewnątrz przycisku)
+  // Ref do śledzenia ostatniego elementu hover
   const lastHoveredRef = useRef<Element | null>(null);
 
-  // 1. INICJALIZACJA
+  // 1. WCZYTYWANIE USTAWIEŃ Z LOCALSTORAGE (Nowość)
+  useEffect(() => {
+    // Sprawdzamy, czy w przeglądarce jest zapisane ustawienie
+    const savedMuteState = localStorage.getItem("wedding_isMuted");
+    
+    if (savedMuteState === "true") {
+      setIsMuted(true);
+    }
+  }, []);
+
+  // 2. INICJALIZACJA AUDIO
   useEffect(() => {
     const CtxClass = (window.AudioContext || (window as any).webkitAudioContext);
     const ctx = new CtxClass();
     audioCtxRef.current = ctx;
 
     const soundsToLoad: Record<string, string> = {
-      "hover":   "/sounds/ui/hover.mp3", // Upewnij się, że masz ten plik!
+      "hover":   "/sounds/ui/hover.mp3",
       "click-1": "/sounds/ui/click1.mp3",
       "click-2": "/sounds/ui/click2.mp3",
       "click-3": "/sounds/ui/click3.mp3",
@@ -66,8 +76,9 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, []);
 
-  // 2. ODTWARZANIE
+  // 3. ODTWARZANIE
   const playSound = useCallback((type: SoundType) => {
+    // Jeśli wyciszone - nie graj (nawet nie sprawdzaj reszty)
     if (isMuted || !audioCtxRef.current || !isReady) return;
 
     const ctx = audioCtxRef.current;
@@ -90,9 +101,7 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
       loop = true;
 
     } else if (type === "hover") {
-      // Hover musi być subtelny!
-      volume = 0.25; // Bardzo cicho (15%)
-      // Lekko podbijamy pitch, żeby brzmiało "lekko" i "powietrznie"
+      volume = 0.15; 
       playbackRate = 1.2 + Math.random() * 0.1; 
 
     } else {
@@ -102,8 +111,7 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
     const buffer = buffersRef.current[bufferKey];
     if (!buffer) return;
 
-    // Jeśli to hover, ucinamy poprzedni hover (żeby nie nakładały się przy szybkim ruchu myszą)
-    // To zapobiega hałasowi "machine gun"
+    // Anti-Machine-Gun dla Hovera
     if (type === "hover" && activeSourcesRef.current["last-hover"]) {
        try { activeSourcesRef.current["last-hover"].stop(); } catch(e){}
     }
@@ -126,7 +134,6 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
       }
       activeSourcesRef.current["ticking"] = source;
     } else if (type === "hover") {
-      // Zapisujemy referencję do hovera, żeby móc go uciąć przy następnym szybkim ruchu
       activeSourcesRef.current["last-hover"] = source;
     }
 
@@ -140,44 +147,44 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
+  // 4. PRZEŁĄCZANIE WYCISZENIA + ZAPIS DO LOCALSTORAGE
   const toggleMute = () => {
+    // Jeśli odciszamy, musimy upewnić się, że kontekst wstanie
     if (isMuted && audioCtxRef.current?.state === "suspended") {
       audioCtxRef.current.resume();
     }
-    setIsMuted((prev) => !prev);
+
+    setIsMuted((prev) => {
+      const newState = !prev;
+      // Zapisujemy nowy stan do pamięci przeglądarki
+      localStorage.setItem("wedding_isMuted", String(newState));
+      return newState;
+    });
   };
 
-  // 3. GLOBALNE NASŁUCHIWANIE
+  // 5. GLOBALNE NASŁUCHIWANIE
   useEffect(() => {
-    // KLIKNIĘCIA (PointerDown - szybkie)
     const handleGlobalClick = () => {
       if (audioCtxRef.current?.state === "suspended") audioCtxRef.current.resume();
       playSound("click");
     };
 
-    // NAJECHANIE (MouseOver - inteligentne)
     const handleGlobalHover = (e: MouseEvent) => {
       const target = e.target as Element;
-      
-      // Szukamy najbliższego elementu interaktywnego w górę drzewa DOM
-      // (Szukamy: button, a, input, label)
       const interactiveElement = target.closest("button, a, input, [role='button']");
 
       if (interactiveElement) {
-        // Sprawdzamy, czy to NOWY element. 
-        // Jeśli mysz jest nadal na tym samym przycisku (np. zjechała z tekstu na tło przycisku), nie graj.
         if (interactiveElement !== lastHoveredRef.current) {
           lastHoveredRef.current = interactiveElement;
           playSound("hover");
         }
       } else {
-        // Jeśli zjechaliśmy na puste tło, resetujemy pamięć
         lastHoveredRef.current = null;
       }
     };
 
     window.addEventListener("pointerdown", handleGlobalClick);
-    window.addEventListener("mouseover", handleGlobalHover); // Używamy mouseover, bo bubbling pozwala łapać dzieci
+    window.addEventListener("mouseover", handleGlobalHover);
     
     return () => {
       window.removeEventListener("pointerdown", handleGlobalClick);

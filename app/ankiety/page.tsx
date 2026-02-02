@@ -9,6 +9,7 @@ import SurveyResults from "@/app/components/SurveyResults";
 import PlusOneSelector from "@/app/components/PlusOneSelector";
 import Footer from "@/app/components/Footer";
 import RsvpSelector, { RsvpStatus } from "@/app/components/RsvpSelector"; // Importujemy też typ
+import PageWrapper from "@/app/components/PageWrapper";
 
 import { motion, Variants, easeOut, easeInOut, AnimatePresence } from "framer-motion";
 
@@ -78,97 +79,100 @@ export default function MealSurveyPage() {
       <Navbar />
       <div className="min-h-screen bg-gradient-to-b from-[#FAD6C8] to-[#4E0113] pt-5 md:pt-[112px] pb-20">
         
-        {/* 1. SEKCJA RSVP */}
-        {guest && (
-          <RsvpSelector 
-            guestId={guest.id} 
-            onDecisionChange={(status) => setRsvpStatus(status)} 
-          />
-        )}
-
-        {/* 2. Reszta strony - widoczna TYLKO gdy rsvpStatus === 'confirmed' */}
-        <AnimatePresence>
-          {rsvpStatus === 'confirmed' && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              {/* Moduł osoby towarzyszącej */}
-              <PlusOneSelector
-                canBringPlusOne={guest?.can_bring_plus_one}
-                parentGuestId={guest?.id}
+        {/* WRAPPER OTULA CAŁĄ TREŚĆ FORMULARZY */}
+        <PageWrapper>
+            {/* 1. SEKCJA RSVP */}
+            {guest && (
+              <RsvpSelector 
+                guestId={guest.id} 
+                onDecisionChange={(status) => setRsvpStatus(status)} 
               />
+            )}
 
-              {/* Formularz jedzenia */}
-              <motion.form
-                onSubmit={handleSubmit}
-                className="bg-white rounded-xl shadow-2xl p-6 md:p-10 max-w-4xl mx-auto mt-10"
-                initial="hidden"
-                animate="visible"
-                variants={fadeUp}
-              >
-                <motion.h1
-                  className="text-3xl md:text-4xl font-bold mb-10 text-[#4E0113] text-center"
-                  variants={fadeUp}
+            {/* 2. Reszta strony - widoczna TYLKO gdy rsvpStatus === 'confirmed' */}
+            <AnimatePresence>
+              {rsvpStatus === 'confirmed' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.8 }}
                 >
-                  Wybierz swoje danie
-                </motion.h1>
-
-                <motion.div variants={fadeInLeft}>
-                  <MainCourseSelector
-                    dishes={mainCourses}
-                    mainCourse={mainCourse}
-                    setMainCourse={setMainCourse}
+                  {/* Moduł osoby towarzyszącej */}
+                  <PlusOneSelector
+                    canBringPlusOne={guest?.can_bring_plus_one}
+                    parentGuestId={guest?.id}
                   />
-                </motion.div>
 
-                <motion.div variants={fadeInRight} className="mt-8">
-                  <ChildrenChoices
-                    children={children}
-                    standardDishes={mainCourses}
-                    childrenDishes={childrenDishes}
-                    childrenChoices={childrenChoices}
-                    handleChildChoice={handleChildChoice}
-                  />
-                </motion.div>
-
-                <motion.button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-[#4E0113] text-white py-4 rounded-lg hover:bg-[#6b1326] transition text-xl font-semibold mt-8 shadow-md"
-                  variants={fadeUp}
-                >
-                  {loading ? "Zapisywanie..." : "Zatwierdź wybór posiłku"}
-                </motion.button>
-
-                {message && (
-                  <motion.p
-                    className="mt-8 text-center text-[#4E0113] font-medium text-lg"
+                  {/* Formularz jedzenia */}
+                  <motion.form
+                    onSubmit={handleSubmit}
+                    className="bg-white rounded-xl shadow-2xl p-6 md:p-10 max-w-4xl mx-auto mt-10"
+                    initial="hidden"
+                    animate="visible"
                     variants={fadeUp}
                   >
-                    {message}
-                  </motion.p>
-                )}
-              </motion.form>
+                    <motion.h1
+                      className="text-3xl md:text-4xl font-bold mb-10 text-[#4E0113] text-center"
+                      variants={fadeUp}
+                    >
+                      Wybierz swoje danie
+                    </motion.h1>
 
-              {/* Wyniki ankiety */}
-              <motion.div
-                initial="hidden"
-                animate="visible"
-                variants={fadeInRight}
-                className="mt-12"
-              >
-                <SurveyResults
-                  guest={guest}
-                  dishes={[...mainCourses, ...childrenDishes]}
-                  results={results}
-                />
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                    <motion.div variants={fadeInLeft}>
+                      <MainCourseSelector
+                        dishes={mainCourses}
+                        mainCourse={mainCourse}
+                        setMainCourse={setMainCourse}
+                      />
+                    </motion.div>
+
+                    <motion.div variants={fadeInRight} className="mt-8">
+                      <ChildrenChoices
+                        children={children}
+                        standardDishes={mainCourses}
+                        childrenDishes={childrenDishes}
+                        childrenChoices={childrenChoices}
+                        handleChildChoice={handleChildChoice}
+                      />
+                    </motion.div>
+
+                    <motion.button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full bg-[#4E0113] text-white py-4 rounded-lg hover:bg-[#6b1326] transition text-xl font-semibold mt-8 shadow-md"
+                      variants={fadeUp}
+                    >
+                      {loading ? "Zapisywanie..." : "Zatwierdź wybór posiłku"}
+                    </motion.button>
+
+                    {message && (
+                      <motion.p
+                        className="mt-8 text-center text-[#4E0113] font-medium text-lg"
+                        variants={fadeUp}
+                      >
+                        {message}
+                      </motion.p>
+                    )}
+                  </motion.form>
+
+                  {/* Wyniki ankiety */}
+                  <motion.div
+                    initial="hidden"
+                    animate="visible"
+                    variants={fadeInRight}
+                    className="mt-12"
+                  >
+                    <SurveyResults
+                      guest={guest}
+                      dishes={[...mainCourses, ...childrenDishes]}
+                      results={results}
+                    />
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+        </PageWrapper>
       </div>
       <Footer />
     </>

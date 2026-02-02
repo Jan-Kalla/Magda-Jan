@@ -34,6 +34,7 @@ export default function Navbar() {
     { label: "Harmonogram wesela", href: "/harmonogram", protected: true },
     { label: "Ankiety", href: "/ankiety", protected: true },
     { label: "Rywalizacja", href: "/rywalizacja", protected: true },
+    { label: "FAQ", href: "/faq", protected: true },
     { label: "Kontakt", href: "/kontakt" },
   ];
 
