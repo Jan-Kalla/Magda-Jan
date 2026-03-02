@@ -23,15 +23,15 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://magda-jan.vercel.app"), 
 
   // 2. Tytuł widoczny w zakładce przeglądarki
-  title: "Magda & Jan | Zapraszamy na ślub!",
+  title: "Magda & Jan | Pobieramy się!",
   
   // 3. Opis pod linkiem w Google
-  description: "19 lipca 2026. Dołącz do nas w tym wyjątkowym dniu! Sprawdź harmonogram, galerię i weź udział w weselnej rywalizacji.",
+  description: "19 lipca 2026. Dołącz do nas w tym wyjątkowym dniu! Zależy nam na twojej obecności!",
 
   // 4. Konfiguracja dla Facebooka / Messengera / WhatsAppa
   openGraph: {
-    title: "Magda & Jan | Zapraszamy na ślub! 💍",
-    description: "To będzie piękny dzień! Wejdź, potwierdź obecność i baw się z nami.",
+    title: "Magda & Jan | Pobieramy się! 💍",
+    description: "To będzie piękny dzień! Zależy nam na twojej obecności!.",
     url: "https://magda-jan.vercel.app",
     siteName: "Ślub Magdy i Jana",
     locale: "pl_PL",

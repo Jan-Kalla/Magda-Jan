@@ -35,7 +35,7 @@ export default function CustomCursor() {
   const isFemale = guest?.first_name?.trim().endsWith("a");
   
   // Domyślnie świnka, jeśli nie rozpoznano
-  const cursorImage = isFemale ? "/cursors/swinia.png" : "/cursors/dzik.png";
+  const cursorImage = isFemale ? "/cursors/madzi.jpg" : "/cursors/dzik.png";
 
   // Ukrywamy customowy kursor na telefonach i tabletach (dotyk)
   return (

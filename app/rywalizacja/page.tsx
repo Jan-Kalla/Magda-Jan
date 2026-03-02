@@ -253,9 +253,28 @@ export default function CompetitionPage() {
                 </Link>
             </motion.div>
 
-            {/* === 4. TURNIEJ II (Z LEWEJ) === */}
+             {/* === 5. Gra melodyjna (Z LEWEJ) === */}
             <motion.div
                custom={-1} // -1 = Lewa strona
+               variants={cardVariant}
+               whileHover={{ scale: 1.02 }}
+               whileTap={{ scale: 0.98 }}
+               className="w-full relative group cursor-pointer"
+            >
+               <div className="w-full p-6 bg-gray-300 border-2 border-gray-400 text-gray-500 rounded-2xl shadow-md flex items-center gap-4 grayscale opacity-80">
+                  <div className="p-3 bg-gray-400/20 rounded-full">
+                     <LockClosedIcon className="w-8 h-8 text-gray-500" />
+                  </div>
+                  <div className="text-left">
+                     <h2 className="text-2xl font-bold">Gra melodyjna</h2>
+                     <p className="text-sm opacity-80">Odbędzie się na weselu</p>
+                  </div>
+               </div>
+            </motion.div>
+
+            {/* === 4. TURNIEJ II (Z PRAWEJ) === */}
+            <motion.div
+               custom={1} // 1 = Prawa strona
                variants={cardVariant}
                whileHover={{ scale: 1.02 }}
                whileTap={{ scale: 0.98 }}
@@ -287,6 +306,8 @@ export default function CompetitionPage() {
                )}
                </AnimatePresence>
             </motion.div>
+
+
 
           </motion.div>
         </PageWrapper>

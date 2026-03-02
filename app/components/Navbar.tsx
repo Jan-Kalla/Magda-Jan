@@ -32,7 +32,7 @@ export default function Navbar() {
     { label: "Strona główna", href: "/" },
     { label: "Galeria", href: "/galeria", protected: true },
     { label: "Harmonogram wesela", href: "/harmonogram", protected: true },
-    { label: "Ankiety", href: "/ankiety", protected: true },
+    { label: "Strefa dla gościa", href: "/ankiety", protected: true },
     { label: "Rywalizacja", href: "/rywalizacja", protected: true },
     { label: "FAQ", href: "/faq", protected: true },
     { label: "Kontakt", href: "/kontakt" },

@@ -138,9 +138,19 @@ export const scheduleData: TimelineEvent[] = [
     icon: <PartyPopper className="w-5 h-5 text-white" />,
     type: "event",
   },
+
+  {
+    id: 14,
+    time: "1:00",
+    title: "Druga Kolacja",
+    description: "Żarcia dalszy ciąg dalszy",
+    icon: <PartyPopper className="w-5 h-5 text-white" />,
+    type: "event",
+  },
+
   {
     id: 9,
-    time: "01:00 - 06:00",
+    time: "01:30 - 06:00",
     title: "Afterparty",
     description: "Czas dla najwytrwalszych graczy. Luźne tańce, rozmowy i zabawa do białego rana.",
     icon: <Music className="w-5 h-5 text-white" />,
