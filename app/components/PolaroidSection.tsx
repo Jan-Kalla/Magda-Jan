@@ -14,9 +14,11 @@ export default function PolaroidSection() {
   ];
 
   return (
-    <section className="relative min-h-screen bg-[#FAD6C8] flex flex-col lg:flex-row items-start justify-between gap-16 px-32 py-24 text-[#4E0113]">
-      <div className="relative flex flex-col items-center w-full max-w-md lg:max-w-lg">
-        <div className="absolute left-[45%] lg:left-[40%] top-0 bottom-0 w-1 bg-[#4E0113]/30 -z-10"></div>
+    // USUNIĘTO: bg-gradient, min-h-screen, overflow-hidden (zajmuje się tym teraz wrapper)
+    <section className="relative flex flex-col lg:flex-row items-start justify-between gap-16 px-4 md:px-32 pb-24 pt-4 text-[#4E0113] z-10">
+      
+      <div className="relative flex flex-col items-center w-full max-w-md lg:max-w-lg mx-auto lg:mx-0">
+        <div className="absolute left-[50%] lg:left-[40%] top-0 bottom-0 w-1 bg-[#4E0113]/20 -z-10 rounded-full" />
 
         {photos.map((photo, idx) => {
           const isLeft = idx % 2 === 0;
@@ -27,9 +29,9 @@ export default function PolaroidSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.6, delay: idx * 0.15 }}
-              className={`relative bg-white p-2 md:p-3 shadow-lg rounded-md 
+              className={`relative bg-white p-2 md:p-3 shadow-xl rounded-sm 
                 w-52 sm:w-60 md:w-72
-                ${isLeft ? "md:mr-auto md:-rotate-6 md:-translate-x-10" : "md:ml-auto md:rotate-6 md:translate-x-40"}
+                ${isLeft ? "md:mr-auto md:-rotate-6 md:-translate-x-10" : "md:ml-auto md:rotate-6 md:translate-x-12"}
                 ${isLeft ? "rotate-[-2deg]" : "rotate-[2deg]"}`}
               style={{ marginTop: idx === 0 ? "0" : "-3rem" }}
             >
@@ -40,7 +42,7 @@ export default function PolaroidSection() {
                 height={300}
                 className="rounded-sm object-contain"
               />
-              <p className="mt-2 text-sm text-center text-[#4E0113]">{photo.alt}</p>
+              <p className="mt-2 text-sm text-center text-[#4E0113]/80 font-medium">{photo.alt}</p>
             </motion.div>
           );
         })}
@@ -51,25 +53,24 @@ export default function PolaroidSection() {
         whileInView={{ opacity: 1, x: 0 }}
         viewport={{ once: true, amount: 0.5 }}
         transition={{ duration: 0.7 }}
-        className="flex-1 max-w-xl text-center lg:text-left mt-12 lg:mt-0"
+        className="flex-1 max-w-xl text-center lg:text-left mt-12 lg:mt-0 relative z-10"
       >
-
-        <p className="text-base md:text-lg leading-relaxed whitespace-pre-line">
+        <p className="text-base md:text-lg leading-relaxed whitespace-pre-line text-[#4E0113]/90 font-medium">
           Czeeeeeeeeeść! To My! Magda i Johny!{"\n"}
-          Znamy się od września 2018 roku i już całkiem sporo razem przeżyliśmy,{"\n"}
-          Nadzszedł w końcu ten czas, że podjęliśmy wspólnie decyzję o tym, że chcemy spędzić ze sobą resztę życia,{"\n"}
-          Traktujemy jednak tę decyzję śmiertelnie poważnie, a nie jako coś, co po prostu postalowiliśmy sobie w przypływie uniesienia,{"\n"}
+          Znamy się od września 2018 roku i już całkiem sporo razem przeżyliśmy.{"\n"}
+          Nadszedł w końcu ten czas, że podjęliśmy wspólnie decyzję o tym, że chcemy spędzić ze sobą resztę życia.{"\n"}
+          Traktujemy jednak tę decyzję śmiertelnie poważnie, a nie jako coś, co po prostu postanowiliśmy sobie w przypływie uniesienia.{"\n"}
           Dlatego chcemy jawnie wyznać i zapieczętować tę decyzję przed Bogiem, jak i przed ludźmi,{"\n"}
-          Świadomie i dobrowolnie zrzekając się możliwości pójścia w inną stronę, nawet gdyby kiedyś miało być ciężko, {"\n"}
-          Dobrze zdając sobie sprawę, z czym się to wiąże, chcemy pozostać ze sobą już do końca życia, bez możliwości rezygnacji z tej umowy,{"\n"}
-          Chcemy, byście toważyszyli nam w tym, być może, najważniejszym momencie naszego życia, bo zakładamy, że drugiego takiego już nie będzie,{"\n"}
-          Dlatego zależy nam na waszej obecności w tym dniu, na naszym ślubie każdy, kto towarzyszył nam na tej dorodze chćby przez moment, jest mile widziany! {"\n"}
-          Super by było, jeżeli jak najwięcej z was stanie się świadkami naszego sakramwntalnego "TAK"!{"\n\n"}
-
+          Świadomie i dobrowolnie zrzekając się możliwości pójścia w inną stronę, nawet gdyby kiedyś miało być ciężko. {"\n"}
+          Dobrze zdając sobie sprawę, z czym się to wiąże, chcemy pozostać ze sobą już do końca życia, bez możliwości rezygnacji z tej umowy.{"\n"}
+          Chcemy, byście towarzyszyli nam w tym, być może, najważniejszym momencie naszego życia, bo zakładamy, że drugiego takiego już nie będzie.{"\n"}
+          Dlatego zależy nam na Waszej obecności w tym dniu. Na naszym ślubie każdy, kto towarzyszył nam na tej drodze choćby przez moment, jest mile widziany! {"\n"}
+          Super by było, jeżeli jak najwięcej z Was stanie się świadkami naszego sakramentalnego "TAK"!{"\n\n"}
         </p>
 
-        <blockquote className="italic text-xl md:text-2xl mb-6">
-          „Zwierzęta, które mają jądra zgniecione, starte, wyrwane albo wycięte, nie będziecie składać w ofierze Panu i nie będziecie takich rzeczy robić w waszym kraju” <br /> (Ks. Kpł 22, 24)
+        <blockquote className="italic text-xl md:text-2xl mb-6 font-serif border-l-4 border-[#4E0113]/30 pl-4 py-2 bg-white/20 rounded-r-lg">
+          „Zwierzęta, które mają jądra zgniecione, starte, wyrwane albo wycięte, nie będziecie składać w ofierze Panu i nie będziecie takich rzeczy robić w waszym kraju” <br />
+          <span className="text-sm font-sans not-italic font-bold mt-2 block opacity-80">(Ks. Kpł 22, 24)</span>
         </blockquote>
       </motion.div>
     </section>

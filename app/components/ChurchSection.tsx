@@ -11,7 +11,6 @@ export default function ChurchSection() {
   const [activeImage, setActiveImage] = useState(0);
   const { playSound } = useSound();
 
-  // --- 1. KONFIGURACJA WYDARZENIA ---
   const eventDetails = {
     title: "Ślub Magdy i Jana",
     description: "Uroczystość zaślubin w kościele pw. św. Piotra i Pawła.",
@@ -20,17 +19,14 @@ export default function ChurchSection() {
     end: "20260719T131500", 
   };
 
-  // --- 2. LINK DO GOOGLE CALENDAR ---
   const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
     eventDetails.title
   )}&dates=${eventDetails.start}/${eventDetails.end}&details=${encodeURIComponent(
     eventDetails.description
   )}&location=${encodeURIComponent(eventDetails.location)}&ctz=Europe/Warsaw`;
 
-  // --- 3. GENEROWANIE PLIKU .ICS ---
   const handleDownloadICS = () => {
     playSound("click");
-
     const icsContent = [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
@@ -65,34 +61,32 @@ export default function ChurchSection() {
     document.body.removeChild(link);
   };
 
-  // --- SLIDESHOW ---
   useEffect(() => {
     const imgTimer = setInterval(() => setActiveImage((p) => (p === 0 ? 1 : 0)), 8000);
     return () => clearInterval(imgTimer);
   }, []);
 
   return (
-    <section className="relative z-10 bg-gradient-to-b from-[#FAD6C8] to-[#A46C6E] px-8 py-20 flex flex-col lg:flex-row items-stretch gap-12 text-[#4E0113]">
+    // ZMIANA: Usunięto bg-gradient... oraz overflow-hidden
+    <section className="relative z-10 px-8 py-20 flex flex-col lg:flex-row items-stretch gap-12 text-[#4E0113]">
       
-      {/* LEWA KOLUMNA - TEKST 
-         Zmiana: lg:flex-[1] zamiast flex-1. 
-         To sprawia, że zajmuje 1/3 dostępnej przestrzeni w poziomie.
-      */}
-      <div className="w-full lg:flex-[1] flex flex-col justify-center text-lg md:text-xl leading-relaxed text-center lg:text-right space-y-4">
-        
+      {/* --- MESH GRADIENT --- */}
+      <div className="absolute top-[10%] right-[-10%] w-[40%] h-[300px] bg-[#A46C6E] blur-[120px] rounded-full mix-blend-multiply opacity-40 pointer-events-none" />
+      <div className="absolute top-[20%] left-[-10%] w-[40%] h-[250px] bg-[#FFFDF9] blur-[120px] rounded-full opacity-30 pointer-events-none" />
+
+      {/* LEWA KOLUMNA - TEKST */}
+      <div className="w-full lg:flex-[1] flex flex-col justify-center text-lg md:text-xl leading-relaxed text-center lg:text-right space-y-4 relative z-10">
         <AnimatedText 
             text="Kościół pw. św. Piotra i Pawła" 
             className="font-bold text-2xl md:text-3xl mb-2" 
             delay={0.2} 
             mode="line" 
         />
-        
         <AnimatedText 
             text="ul. Staromiejska 91, 43-190 Mikołów" 
             delay={0.4} 
             mode="line" 
         />
-        
         <div className="pt-2 pb-6">
             <AnimatedText
               text="Uroczystość rozpocznie się 19 lipca 2026 o godzinie 12:00"
@@ -102,7 +96,7 @@ export default function ChurchSection() {
             />
         </div>
 
-        {/* --- SEKCJA KALENDARZA --- */}
+        {/* SEKCJA KALENDARZA */}
         <motion.div 
           initial={{ opacity: 0, x: 20 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -110,14 +104,10 @@ export default function ChurchSection() {
           transition={{ delay: 0.8 }}
           className="flex flex-col items-center lg:items-end gap-3"
         >
-          {/* NAGŁÓWEK */}
           <p className="text-xs font-bold uppercase tracking-widest opacity-70">
             Dodaj do kalendarza:
           </p>
-
           <div className="flex flex-wrap gap-3 justify-center lg:justify-end">
-            
-            {/* Przycisk Google */}
             <a
               href={googleUrl}
               target="_blank"
@@ -128,8 +118,6 @@ export default function ChurchSection() {
               <CalendarDaysIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
               Google Calendar
             </a>
-
-            {/* Przycisk Apple / Outlook */}
             <button
               onClick={handleDownloadICS}
               className="group flex items-center gap-2 px-4 py-2.5 bg-white/40 border border-[#4E0113]/20 text-[#4E0113] rounded-xl text-sm font-bold shadow-sm hover:bg-white/60 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 backdrop-blur-sm"
@@ -139,7 +127,6 @@ export default function ChurchSection() {
               </svg>
               Apple / Outlook
             </button>
-            
           </div>
         </motion.div>
         
@@ -151,11 +138,8 @@ export default function ChurchSection() {
         />
       </div>
 
-      {/* PRAWA KOLUMNA - ZDJĘCIA 
-         Zmiana: lg:flex-[2].
-         Zajmuje 2/3 dostępnej przestrzeni.
-      */}
-      <div className="relative w-full lg:flex-[2] h-[600px] lg:h-auto min-h-[500px] overflow-hidden rounded-xl shadow-2xl border-4 border-white/30">
+      {/* PRAWA KOLUMNA - ZDJĘCIA */}
+      <div className="relative w-full lg:flex-[2] h-[600px] lg:h-auto min-h-[500px] overflow-hidden rounded-xl shadow-2xl border-4 border-white/30 z-10">
         <AnimatePresence mode="sync">
           <motion.div
             key={activeImage}

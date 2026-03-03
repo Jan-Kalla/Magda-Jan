@@ -3,7 +3,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-// Supabase init
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -17,7 +16,6 @@ export type Guest = {
   [key: string]: any;
 } | null;
 
-// Definiujemy możliwe rezultaty logowania
 export type LoginResult = {
   success: boolean;
   errorType?: "INVALID_CODE" | "CONNECTION_ERROR" | "UNKNOWN";
@@ -26,7 +24,6 @@ export type LoginResult = {
 type GuestContextType = {
   guest: Guest;
   loading: boolean;
-  // Zmieniamy typ zwracany z Promise<boolean> na Promise<LoginResult>
   loginWithCode: (code: string) => Promise<LoginResult>;
   logout: () => void;
   refreshGuest: () => Promise<void>;
@@ -48,7 +45,6 @@ export const GuestProvider = ({ children }: { children: React.ReactNode }) => {
     const loadGuest = async () => {
       const savedCode = localStorage.getItem("guestCode");
       if (savedCode) {
-        // Tutaj też warto by obsłużyć błąd, ale na razie zostawmy proste sprawdzenie
         const { data, error } = await supabase
           .from("guests")
           .select("*")
@@ -80,13 +76,12 @@ export const GuestProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) {
         console.error("Login Supabase error:", error);
         
-        // Kod PGRST116 oznacza: zapytanie zwróciło 0 wierszy, a oczekiwano .single()
-        // To jest nasz "Nieprawidłowy kod"
+        // Brak kodu w bazie
         if (error.code === 'PGRST116') {
           return { success: false, errorType: "INVALID_CODE" };
         }
 
-        // Każdy inny błąd (np. brak sieci, timeout, błąd serwera)
+        // Błąd bazy / Timeout
         return { success: false, errorType: "CONNECTION_ERROR" };
       }
 
@@ -99,7 +94,6 @@ export const GuestProvider = ({ children }: { children: React.ReactNode }) => {
       return { success: false, errorType: "UNKNOWN" };
 
     } catch (err) {
-      // Łapiemy błędy sieciowe, które mogą rzucić wyjątek (np. fetch failed)
       console.error("Network/Unexpected error:", err);
       return { success: false, errorType: "CONNECTION_ERROR" };
     }
@@ -124,9 +118,7 @@ export const GuestProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <GuestContext.Provider
-      value={{ guest, loading, loginWithCode, logout, refreshGuest }}
-    >
+    <GuestContext.Provider value={{ guest, loading, loginWithCode, logout, refreshGuest }}>
       {children}
     </GuestContext.Provider>
   );
