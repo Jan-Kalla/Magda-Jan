@@ -1,78 +1,146 @@
 "use client";
+
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useState } from "react";
+
+const PhotoCard = ({ photo, globalIndex }: { photo: any; globalIndex: number }) => {
+  const [isFlipped, setIsFlipped] = useState(false);
+
+  return (
+    <motion.div
+      // ZMIANA: Dodano role="button", co automatycznie aktywuje dźwięki z naszego globalnego SoundContext!
+      role="button"
+      tabIndex={0}
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "0px 0px -50px 0px" }}
+      transition={{ duration: 0.6, delay: globalIndex * 0.1, ease: "easeOut" }}
+      className={`relative w-full group cursor-pointer perspective-1000 ${!isFlipped ? "hover:-translate-y-1 hover:scale-[1.03]" : ""} transition-transform duration-200`}
+      onClick={() => setIsFlipped(!isFlipped)}
+      // Dodano onKeyDown dla pełnej dostępności (obsługa klawiatury jak w prawdziwym przycisku)
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          setIsFlipped(!isFlipped);
+        }
+      }}
+    >
+      <motion.div
+        className="relative w-full [transform-style:preserve-3d]"
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        transition={{ duration: 0.6, ease: "easeInOut" }}
+      >
+        {/* ========================================================= */}
+        {/* PRZÓD: ZDJĘCIE */}
+        {/* ========================================================= */}
+        <div className="relative w-full [backface-visibility:hidden] rounded-sm overflow-hidden shadow-lg group-hover:shadow-2xl transition-shadow duration-300 bg-black/5">
+          <Image
+            src={photo.src}
+            alt={photo.alt}
+            width={800}
+            height={800} 
+            className="w-full h-auto object-cover block"
+          />
+          
+          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+            <p className="font-serif tracking-widest uppercase text-white border border-white px-4 py-2 rounded-full backdrop-blur-sm text-sm">
+              Obróć
+            </p>
+          </div>
+        </div>
+
+        {/* ========================================================= */}
+        {/* TYŁ: OPIS (ODWRÓCONY) */}
+        {/* ========================================================= */}
+        <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-sm overflow-hidden shadow-lg group-hover:shadow-2xl transition-shadow duration-300 bg-[#FDF9EC] flex items-center justify-center p-4 md:p-6 text-center border-2 border-[#4c4a1e]/10">
+          <div className="flex flex-col items-center justify-center space-y-3 overflow-y-auto w-full h-full custom-scrollbar">
+            <h3 className="font-serif font-medium text-base md:text-lg lg:text-xl text-[#4c4a1e] uppercase tracking-widest shrink-0">
+              {photo.alt}
+            </h3>
+            <div className="w-8 h-[1px] bg-[#4c4a1e]/40 shrink-0"></div>
+            <p className="font-serif font-normal text-xs md:text-sm lg:text-base text-[#4c4a1e] leading-relaxed">
+              {photo.desc}
+            </p>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
 
 export default function PolaroidSection() {
   const photos = [
-    { src: "/fotki/2019.02.jpg", alt: "Pierwsza liceum" },
-    { src: "/fotki/2020.jpg", alt: "Druga liceum" },
-    { src: "/fotki/2022.04.jpeg", alt: "Pierwszy rok studiów" },
-    { src: "/fotki/2024.09.jpeg", alt: "Czwarty rok studiów" },
-    { src: "/fotki/2024.11.jpg", alt: "Zaręczyny" },
-    { src: "/fotki/2024.12.jpg", alt: "Narty" },
-    { src: "/fotki/2025.09.jpg", alt: "Świnica" },
+    { src: "/fotki/2020.jpg", alt: "Druga liceum", desc: "Siedzieliśmy w jednej ławce na polskim i na godzinie wychowawczej, do polskiego dzieliliśmy się jednym podręcznikiem" },
+    { src: "/fotki/2024.05.jpg", alt: "Trzeci rok studiów", desc: "Maj 2024, gdzieś w krzokach." },
+    { src: "/fotki/2025.05.jpg", alt: "Ciasta w naszym kolorze", desc: "Nie jest tajemnicą, że ciasta zwykle dobieramy pod swój kolor" },
+    { src: "/fotki/2021.05.jpeg", alt: "Po maturach!", desc: "Maj 2021, chwila, kiedy można było trochę odpocząć, poimprezować i wymienić się dobrymi memami" },
+    { src: "/fotki/2019.02.jpg", alt: "Pierwsza liceum", desc: "Krynica-Zdrój, luty 2019, szkolny wyjazd narciarski. Nasze pierwsze wspólne zdjęcie! Oczywiście załapał się tu również Szczyrbix😁" },
+    { src: "/fotki/2024.08.jpg", alt: "Kierunki", desc: "Sierpień 2024. Madzia mówi, że trzeba iść tam, a ewidentnie widać, że Johny jest innego zdania" },
+    { src: "/fotki/2022.04.jpeg", alt: "Pierwszy rok studiów", desc: "Wspólne podróże w Smarcie" },
+    { src: "/fotki/2024.09.jpeg", alt: "Czwarty rok studiów", desc: "Wrzesień 2024 - pierwsze wspólne Tatry" },
+    { src: "/fotki/2024.12_.jpg", alt: "Narty", desc: "Austria, Zillertal, grudzień 2024" },
+    { src: "/fotki/2022.09.jpg", alt: "Pierwsze Mazury", desc: "Wrzesień 2022. Oboje uwielbiamy Mazury! Razem żeglowaliśmy już tam cztery razy i aż dziw bierze, że mamy tak mało wspólnych zdjęć z tych wyjazdów. Ale ponownie pozdrawiamy Szczyrbixa, który też załapał się na to zdjęcie🤗" },
   ];
 
   return (
-    // USUNIĘTO: bg-gradient, min-h-screen, overflow-hidden (zajmuje się tym teraz wrapper)
-    <section className="relative flex flex-col lg:flex-row items-start justify-between gap-16 px-4 md:px-32 pb-24 pt-4 text-[#4E0113] z-10">
+    <section className="relative w-full max-w-7xl mx-auto px-4 md:px-8 pb-32 pt-16 z-10">
       
-      <div className="relative flex flex-col items-center w-full max-w-md lg:max-w-lg mx-auto lg:mx-0">
-        <div className="absolute left-[50%] lg:left-[40%] top-0 bottom-0 w-1 bg-[#4E0113]/20 -z-10 rounded-full" />
+      {/* NAGŁÓWEK SEKCJI */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "0px 0px -100px 0px" }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="text-center mb-16 md:mb-24"
+      >
+        <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl uppercase tracking-[0.15em] text-[#4c4a1e] mb-6 px-4 leading-snug">
+          Wspólne chwile ulotne jak motyle
+        </h2>
+        <div className="w-24 h-[1px] bg-[#4c4a1e]/40 mx-auto"></div>
+      </motion.div>
 
-        {photos.map((photo, idx) => {
-          const isLeft = idx % 2 === 0;
-          return (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.6, delay: idx * 0.15 }}
-              className={`relative bg-white p-2 md:p-3 shadow-xl rounded-sm 
-                w-52 sm:w-60 md:w-72
-                ${isLeft ? "md:mr-auto md:-rotate-6 md:-translate-x-10" : "md:ml-auto md:rotate-6 md:translate-x-12"}
-                ${isLeft ? "rotate-[-2deg]" : "rotate-[2deg]"}`}
-              style={{ marginTop: idx === 0 ? "0" : "-3rem" }}
-            >
-              <Image
-                src={photo.src}
-                alt={photo.alt}
-                width={400}
-                height={300}
-                className="rounded-sm object-contain"
-              />
-              <p className="mt-2 text-sm text-center text-[#4E0113]/80 font-medium">{photo.alt}</p>
-            </motion.div>
-          );
-        })}
+      {/* UKŁAD ZDJĘĆ Z FIZYCZNYM PODZIAŁEM NA BLOKI */}
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 w-full items-start">
+        
+        {/* BLOK LEWY I ŚRODKOWY (Obejmuje ciasto na dole) */}
+        <div className="flex flex-col w-full lg:w-2/3 gap-4 lg:gap-6">
+          
+          {/* GÓRA: Dwie osobne kolumny */}
+          <div className="flex flex-col sm:flex-row gap-4 lg:gap-6 w-full">
+            
+            {/* Kolumna Lewa (Index 0, 1) */}
+            <div className="flex flex-col w-full sm:w-1/2 gap-4 lg:gap-6">
+              <PhotoCard photo={photos[0]} globalIndex={0} />
+              <PhotoCard photo={photos[1]} globalIndex={1} />
+            </div>
+
+            {/* Kolumna Środkowa (Index 3, 4, 5) */}
+            <div className="flex flex-col w-full sm:w-1/2 gap-4 lg:gap-6">
+              <PhotoCard photo={photos[3]} globalIndex={3} />
+              <PhotoCard photo={photos[4]} globalIndex={4} />
+              <PhotoCard photo={photos[5]} globalIndex={5} />
+            </div>
+
+          </div>
+
+          {/* DÓŁ: Ciasto (Index 2) - Automatycznie rozciąga się pod kolumną lewą i środkową! */}
+          <div className="w-full">
+            <PhotoCard photo={photos[2]} globalIndex={2} />
+          </div>
+
+        </div>
+
+        {/* BLOK PRAWY: Oddzielna, długa kolumna (Index 6, 7, 8, 9) */}
+        <div className="flex flex-col w-full lg:w-1/3 gap-4 lg:gap-6">
+          <PhotoCard photo={photos[6]} globalIndex={6} />
+          <PhotoCard photo={photos[7]} globalIndex={7} />
+          <PhotoCard photo={photos[8]} globalIndex={8} />
+          <PhotoCard photo={photos[9]} globalIndex={9} />
+        </div>
+
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, x: 40 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true, amount: 0.5 }}
-        transition={{ duration: 0.7 }}
-        className="flex-1 max-w-xl text-center lg:text-left mt-12 lg:mt-0 relative z-10"
-      >
-        <p className="text-base md:text-lg leading-relaxed whitespace-pre-line text-[#4E0113]/90 font-medium">
-          Czeeeeeeeeeść! To My! Magda i Johny!{"\n"}
-          Znamy się od września 2018 roku i już całkiem sporo razem przeżyliśmy.{"\n"}
-          Nadszedł w końcu ten czas, że podjęliśmy wspólnie decyzję o tym, że chcemy spędzić ze sobą resztę życia.{"\n"}
-          Traktujemy jednak tę decyzję śmiertelnie poważnie, a nie jako coś, co po prostu postanowiliśmy sobie w przypływie uniesienia.{"\n"}
-          Dlatego chcemy jawnie wyznać i zapieczętować tę decyzję przed Bogiem, jak i przed ludźmi,{"\n"}
-          Świadomie i dobrowolnie zrzekając się możliwości pójścia w inną stronę, nawet gdyby kiedyś miało być ciężko. {"\n"}
-          Dobrze zdając sobie sprawę, z czym się to wiąże, chcemy pozostać ze sobą już do końca życia, bez możliwości rezygnacji z tej umowy.{"\n"}
-          Chcemy, byście towarzyszyli nam w tym, być może, najważniejszym momencie naszego życia, bo zakładamy, że drugiego takiego już nie będzie.{"\n"}
-          Dlatego zależy nam na Waszej obecności w tym dniu. Na naszym ślubie każdy, kto towarzyszył nam na tej drodze choćby przez moment, jest mile widziany! {"\n"}
-          Super by było, jeżeli jak najwięcej z Was stanie się świadkami naszego sakramentalnego "TAK"!{"\n\n"}
-        </p>
-
-        <blockquote className="italic text-xl md:text-2xl mb-6 font-serif border-l-4 border-[#4E0113]/30 pl-4 py-2 bg-white/20 rounded-r-lg">
-          „Zwierzęta, które mają jądra zgniecione, starte, wyrwane albo wycięte, nie będziecie składać w ofierze Panu i nie będziecie takich rzeczy robić w waszym kraju” <br />
-          <span className="text-sm font-sans not-italic font-bold mt-2 block opacity-80">(Ks. Kpł 22, 24)</span>
-        </blockquote>
-      </motion.div>
     </section>
   );
 }

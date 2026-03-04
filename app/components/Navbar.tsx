@@ -20,13 +20,12 @@ function useIsMobile() {
   return isMobile;
 }
 
-
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { guest, logout } = useGuest();
   const pathname = usePathname();
   const isMobile = useIsMobile();
-  const { isMuted, toggleMute } = useSound(); // <--- Hook
+  const { isMuted, toggleMute } = useSound();
 
   const navItems = [
     { label: "Strona główna", href: "/" },
@@ -51,9 +50,11 @@ export default function Navbar() {
 
   return (
   <nav className="sticky top-0 left-0 w-full bg-[#4E0113] text-white shadow-md z-50 md:fixed">
-    <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-      <Link href="/" className="text-xl font-bold text-[#FAD6C8]">
-        Magda & Jan
+    {/* ZMIANA 1: Rozciągnięcie na pełną szerokość z eleganckimi marginesami (w-full px-6 lg:px-16) */}
+    <div className="w-full px-6 lg:px-16 py-3 flex justify-between items-center">
+      
+      <Link href="/" className="text-4xl md:text-5xl font-script text-[#FAD6C8] hover:opacity-80 transition-opacity mt-1">
+        M&J
       </Link>
 
       {/* Jeśli urządzenie mobilne → toggle */}
@@ -67,20 +68,21 @@ export default function Navbar() {
         </button>
       ) : (
         /* Jeśli desktop → pełne menu */
-        <ul className="flex space-x-6 items-center">
+        <ul className="flex space-x-6 lg:space-x-8 items-center">
           {visibleItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className={`relative group transition-colors ${
+                  /* ZMIANA 2: Dodano font-medium, aby linki były nieco grubsze i bardziej czytelne */
+                  className={`relative group transition-colors font-serif font-medium uppercase tracking-[0.15em] text-xs lg:text-sm ${
                     isActive ? "text-[#FAD6C8]" : "hover:text-[#FAD6C8]"
                   }`}
                 >
                   {item.label}
                   <span
-                    className={`absolute left-0 -bottom-1 h-[2px] bg-[#FAD6C8] transition-all duration-300 ${
+                    className={`absolute left-0 -bottom-2 h-[1px] bg-[#FAD6C8] transition-all duration-300 ${
                       isActive ? "w-full" : "w-0 group-hover:w-full"
                     }`}
                   />
@@ -88,19 +90,20 @@ export default function Navbar() {
               </li>
             );
           })}
+          
           {/* PRZYCISK DŹWIĘKU */}
          <button 
            onClick={(e) => {
-             e.stopPropagation(); // Żeby kliknięcie w przycisk nie wywołało chrumknięcia (opcjonalne)
+             e.stopPropagation();
              toggleMute();
            }}
            className="p-2 rounded-full hover:bg-black/10 transition text-[#FAD6C8]"
            title={isMuted ? "Włącz dźwięki" : "Wycisz dźwięki"}
          >
            {isMuted ? (
-             <SpeakerXMarkIcon className="w-6 h-6" />
+             <SpeakerXMarkIcon className="w-5 h-5" />
            ) : (
-             <SpeakerWaveIcon className="w-6 h-6 animate-pulse" />
+             <SpeakerWaveIcon className="w-5 h-5 animate-pulse" />
            )}
          </button>
 
@@ -108,7 +111,7 @@ export default function Navbar() {
             <li>
               <button
                 onClick={logout}
-                className="ml-4 bg-[#841D30] hover:bg-[#9b3042] transition px-4 py-2 rounded-lg text-white font-medium shadow"
+                className="ml-2 bg-[#841D30] hover:bg-[#9b3042] transition px-4 py-2 rounded-lg text-white text-xs font-serif font-medium uppercase tracking-widest shadow"
               >
                 Wyloguj się
               </button>
@@ -120,17 +123,18 @@ export default function Navbar() {
 
     {/* Mobile menu – tylko gdy isMobile i otwarte */}
     {isMobile && isOpen && (
-      <div className="bg-[#841D30] px-4 pb-4">
-        <ul className="flex flex-col space-y-2">
+      <div className="bg-[#841D30] px-4 pb-4 border-t border-white/10">
+        <ul className="flex flex-col space-y-2 mt-2">
           {visibleItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className={`block py-2 transition-colors ${
+                  /* ZMIANA 3: Dodano font-medium również w menu mobilnym */
+                  className={`block py-3 transition-colors font-serif font-medium uppercase tracking-widest text-sm ${
                     isActive
-                      ? "text-[#FAD6C8] font-semibold"
+                      ? "text-[#FAD6C8]"
                       : "hover:text-[#FAD6C8]"
                   }`}
                   onClick={() => setIsOpen(false)}
@@ -148,7 +152,7 @@ export default function Navbar() {
                   logout();
                   setIsOpen(false);
                 }}
-                className="w-full text-left py-2 px-2 rounded-lg bg-[#9b3042] hover:bg-[#b64557] transition"
+                className="w-full text-left py-3 transition font-serif font-medium uppercase tracking-widest text-sm text-white/80 hover:text-white"
               >
                 Wyloguj się
               </button>

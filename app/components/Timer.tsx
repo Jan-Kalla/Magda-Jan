@@ -46,50 +46,47 @@ function FlipDigit({ digit, isMuted, getVolume }: FlipDigitProps) {
     }
   }, [digit, prevDigit, isMuted, getVolume]);
 
-  // Style (bez zmian)
   const containerShadow = "shadow-[0_4px_10px_rgba(0,0,0,0.1),0_8px_20px_rgba(0,0,0,0.1)]";
   const topHalfStyle = "bg-gradient-to-b from-white to-[#f2f2f2] shadow-[inset_0_-2px_5px_rgba(0,0,0,0.08)] border-b border-[#841D30]/20";
   const bottomHalfStyle = "bg-gradient-to-b from-[#e6e6e6] to-white shadow-[inset_0_2px_5px_rgba(0,0,0,0.08)]";
 
   return (
-    <div className={`relative w-10 sm:w-14 h-14 sm:h-20 bg-white rounded-lg ${containerShadow} mx-0.5 sm:mx-1 perspective-1000`}>
+    <div className={`relative w-10 sm:w-14 md:w-16 lg:w-20 h-14 sm:h-20 md:h-28 lg:h-32 bg-white rounded-lg ${containerShadow} mx-0.5 sm:mx-1 md:mx-1.5 perspective-1000`}>
+      {/* ZMIANA: Dodano znacznie większe rozmiary dla md: i lg: (np. lg:w-20 lg:h-32) oraz większe marginesy */}
       
       {/* --- TŁO STATYCZNE --- */}
       <div className="absolute inset-0 flex flex-col rounded-lg overflow-hidden">
         {/* Górna połowa */}
         <div className={`h-1/2 w-full relative overflow-hidden flex justify-center items-end ${topHalfStyle}`}>
-          <span className="text-3xl sm:text-5xl font-bold text-[#4E0113] translate-y-[50%] leading-none">
+          {/* ZMIANA: Potężniejsze cyfry na desktopie (md:text-6xl lg:text-7xl) */}
+          <span className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-[#4E0113] translate-y-[50%] leading-none">
             {flipping ? digit : prevDigit}
           </span>
         </div>
         
-        {/* --- DOLNA POŁOWA (TU DODAJEMY CIEŃ) --- */}
+        {/* DOLNA POŁOWA */}
         <div className={`h-1/2 w-full relative overflow-hidden flex justify-center items-start ${bottomHalfStyle}`}>
-          <span className="text-3xl sm:text-5xl font-bold text-[#4E0113] -translate-y-[50%] leading-none relative z-0">
+          {/* ZMIANA: Potężniejsze cyfry na desktopie */}
+          <span className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-[#4E0113] -translate-y-[50%] leading-none relative z-0">
             {flipping ? prevDigit : digit}
           </span>
 
-          {/* === NOWOŚĆ: DYNAMICZNY CIEŃ === */}
+          {/* DYNAMICZNY CIEŃ */}
           <AnimatePresence>
             {flipping && (
               <motion.div
                 key="dynamic-shadow"
-                // Start: przezroczysty
                 initial={{ opacity: 0 }}
-                // Animacja: 0 -> 0.5 (najciemniej) -> 0
                 animate={{ opacity: [0, 0.5, 0] }}
-                // Timing: początek -> środek (0.5 czyli 300ms) -> koniec (1.0 czyli 600ms)
                 transition={{ duration: 0.6, times: [0, 0.5, 1], ease: "easeInOut" }}
-                // Gradient: mocny cień przy zawiasie, zanikający w dół. Z-index zeby przykryć tekst.
                 className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/20 to-transparent z-10 pointer-events-none"
               />
             )}
           </AnimatePresence>
-           {/* =============================== */}
         </div>
       </div>
 
-      {/* --- KLAPKI ANIMOWANE (bez zmian) --- */}
+      {/* --- KLAPKI ANIMOWANE --- */}
       <AnimatePresence>
         {flipping && (
           <>
@@ -101,7 +98,7 @@ function FlipDigit({ digit, isMuted, getVolume }: FlipDigitProps) {
               className={`absolute top-0 left-0 w-full h-1/2 rounded-t-lg overflow-hidden flex justify-center items-end origin-bottom z-20 backface-hidden ${topHalfStyle}`}
               style={{ backfaceVisibility: "hidden" }}
             >
-              <span className="text-3xl sm:text-5xl font-bold text-[#4E0113] translate-y-[50%] leading-none">
+              <span className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-[#4E0113] translate-y-[50%] leading-none">
                 {prevDigit}
               </span>
             </motion.div>
@@ -114,7 +111,7 @@ function FlipDigit({ digit, isMuted, getVolume }: FlipDigitProps) {
               className={`absolute bottom-0 left-0 w-full h-1/2 rounded-b-lg overflow-hidden flex justify-center items-start origin-top z-30 backface-hidden ${bottomHalfStyle}`}
               style={{ backfaceVisibility: "hidden" }}
             >
-              <span className="text-3xl sm:text-5xl font-bold text-[#4E0113] -translate-y-[50%] leading-none">
+              <span className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-[#4E0113] -translate-y-[50%] leading-none">
                 {digit}
               </span>
             </motion.div>
@@ -127,7 +124,7 @@ function FlipDigit({ digit, isMuted, getVolume }: FlipDigitProps) {
   );
 }
 
-// --- Reszta komponentów bez zmian ---
+// --- Reszta komponentów ---
 interface FlipUnitProps {
   value: number;
   label: string;
@@ -151,7 +148,8 @@ function FlipUnit({ value, label, isMuted, getVolume, minDigits = 2 }: FlipUnitP
           />
         ))}
       </div>
-      <p className="text-[#FBE4DA] text-xs sm:text-sm mt-3 font-medium tracking-widest uppercase drop-shadow-sm">
+      {/* ZMIANA: Powiększony font etykiet na desktopie (md:text-base lg:text-lg) i większy odstęp w dół */}
+      <p className="text-[#FDF9EC] font-serif text-xs sm:text-sm md:text-base lg:text-lg mt-4 lg:mt-6 tracking-[0.2em] uppercase drop-shadow-md">
         {label}
       </p>
     </div>
@@ -160,10 +158,11 @@ function FlipUnit({ value, label, isMuted, getVolume, minDigits = 2 }: FlipUnitP
 
 function Separator() {
   return (
-    <div className="h-14 sm:h-20 flex items-center justify-center px-1 sm:px-2 pb-2">
+    <div className="h-14 sm:h-20 md:h-28 lg:h-32 flex items-center justify-center px-1 sm:px-2 md:px-3 lg:px-4 pb-2">
+      {/* ZMIANA: Wysokość separatora dopasowana do nowych rozmiarów klapek oraz powiększone kropki */}
       <div className="flex flex-col gap-2 sm:gap-4 opacity-70">
-        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-[#FAD6C8] rounded-full shadow-[0_2px_4px_rgba(0,0,0,0.2)]" />
-        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-[#FAD6C8] rounded-full shadow-[0_2px_4px_rgba(0,0,0,0.2)]" />
+        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 md:w-2.5 md:h-2.5 lg:w-3 lg:h-3 bg-[#FDF9EC] rounded-full shadow-[0_2px_4px_rgba(0,0,0,0.4)]" />
+        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 md:w-2.5 md:h-2.5 lg:w-3 lg:h-3 bg-[#FDF9EC] rounded-full shadow-[0_2px_4px_rgba(0,0,0,0.4)]" />
       </div>
     </div>
   );
@@ -171,7 +170,6 @@ function Separator() {
 
 export default function Timer() {
   const [now, setNow] = useState(new Date());
-  const [currentTime, setCurrentTime] = useState<string | null>(null);
   const { isMuted } = useSound();
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -192,14 +190,6 @@ export default function Timer() {
   useEffect(() => {
     const update = () => {
       setNow(new Date());
-      setCurrentTime(
-        new Date().toLocaleTimeString("pl-PL", {
-          timeZone: "Europe/Warsaw",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        })
-      );
     };
     update();
     const interval = setInterval(update, 1000);
@@ -228,35 +218,29 @@ export default function Timer() {
           [mask-repeat:no-repeat] [mask-size:100%_100%]"
       />
 
-      <motion.h1
+      <motion.h2
         initial={{ opacity: 0, y: 40, scale: 0.95 }}
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
         viewport={{ once: true, amount: 0.6 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="text-3xl md:text-5xl font-bold mb-8 drop-shadow-lg"
+        className="font-script text-6xl md:text-7xl lg:text-8xl text-[#FDF9EC] mb-4 drop-shadow-lg"
       >
-        Nasz wielki dzień ❤️
-      </motion.h1>
+        Nasz wielki dzień
+      </motion.h2>
 
-      <motion.div
+      <motion.p 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.6 }}
-        transition={{ duration: 0.6, delay: 0.3 }}
-        className="text-lg md:text-2xl font-semibold mb-6 drop-shadow"
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className="font-serif text-base md:text-xl lg:text-2xl mb-12 uppercase tracking-[0.15em] text-[#FDF9EC] drop-shadow-md"
       >
-        Aktualna godzina w Polsce:{" "}
-        <span className="text-[#75897D] bg-white/70 px-2 py-1 rounded-lg shadow-sm">
-          {currentTime ?? "--:--:--"}
-        </span>
-      </motion.div>
-
-      <p className="text-base md:text-xl mb-12 italic text-[#FBE4DA] drop-shadow-sm">
-        Do rozpoczęcia naszego ślubu zostało jeszcze:
-      </p>
+        Do rozpoczęcia ślubu zostało:
+      </motion.p>
 
       {/* --- TIMER KONTENER --- */}
-      <div className="flex flex-row flex-wrap justify-center items-start gap-1 sm:gap-2">
+      {/* ZMIANA: Zwiększono odstępy (gap) pomiędzy sekcjami (dni, godziny) na desktopie */}
+      <div className="flex flex-row flex-wrap justify-center items-start gap-1 sm:gap-2 md:gap-4 lg:gap-6">
         <FlipUnit value={days} label="Dni" isMuted={isMuted} getVolume={getDynamicVolume} minDigits={days > 99 ? 3 : 2} />
         <Separator />
         <FlipUnit value={hours} label="Godzin" isMuted={isMuted} getVolume={getDynamicVolume} />
@@ -267,10 +251,15 @@ export default function Timer() {
       </div>
 
       {matchingEvent && (
-        <p className="mt-16 text-lg md:text-xl text-[#FBE4DA] font-semibold max-w-xl leading-relaxed px-4 drop-shadow-sm">
+        <motion.p 
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 0.5 }}
+          className="mt-16 font-serif text-lg md:text-xl text-[#FDF9EC] opacity-90 max-w-2xl leading-relaxed px-4 drop-shadow-md"
+        >
           Do naszego ślubu zostało już mniej czasu niż<br/>
-          <span className="font-bold">{matchingEvent.name}</span>
-        </p>
+          <span className="font-medium italic">{matchingEvent.name}</span>
+        </motion.p>
       )}
     </section>
   );
