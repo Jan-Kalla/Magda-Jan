@@ -14,7 +14,11 @@ export default function ProfilesSection() {
   const [isMerged, setIsMerged] = useState(false);
 
   const handleJohnyClick = () => {
-    if (isMerged) return; 
+    if (isMerged) {
+      setIsMerged(false);
+      setFlipJ(true);
+      return;
+    }
     
     if (!flipJ) {
       setFlipJ(true);
@@ -29,7 +33,11 @@ export default function ProfilesSection() {
   };
 
   const handleMagdaClick = () => {
-    if (isMerged) return;
+    if (isMerged) {
+      setIsMerged(false);
+      setFlipM(true);
+      return;
+    }
     
     if (!flipM) {
       setFlipM(true);
@@ -44,13 +52,13 @@ export default function ProfilesSection() {
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 my-32 flex flex-col items-center">
+    <div className="w-full max-w-5xl mx-auto px-4 mt-96 mb-32 flex flex-col items-center">
       
-      {/* Tytuł sekcji wjeżdżający przy scrollu */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "0px 0px -100px 0px" }}
+        // ZMIANA: Niezawodne wykrywanie viewportu oparte na proporcjach
+        viewport={{ once: true, amount: 0.3 }}
         className="text-center mb-12"
       >
         <h2 className="font-script text-5xl md:text-6xl text-[#4c4a1e] mb-4">Poznajmy się bliżej</h2>
@@ -59,49 +67,46 @@ export default function ProfilesSection() {
 
       <div className="relative w-full flex flex-col items-center justify-center perspective-[2000px]">
         
-        {/* KONTENER GŁÓWNY */}
         <div 
           className={`flex w-full justify-center h-[400px] md:h-[550px] transition-all duration-[1500ms] ease-in-out ${
             isMerged ? "gap-0 max-w-3xl" : "gap-10 md:gap-32 max-w-4xl"
           }`}
         >
           {/* ========================================== */}
-          {/* KARTA LEWA: JOHNY                          */}
+          {/* KARTA LEWA: JOHNY                            */}
           {/* ========================================== */}
           <motion.div
             initial={{ x: -600, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
-            viewport={{ once: true, margin: "0px 0px -150px 0px" }}
+            // ZMIANA: Niezawodne wykrywanie viewportu oparte na proporcjach
+            viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 1.2, ease: "easeOut" }}
             className="w-1/2 h-full group perspective-1000"
           >
             <motion.div
-              // ZMIANA: Dodano role="button" i tabIndex dla globalnych dźwięków!
-              role={!isMerged ? "button" : undefined}
-              tabIndex={!isMerged ? 0 : undefined}
+              role="button"
+              tabIndex={0}
               onKeyDown={(e) => {
-                if (!isMerged && (e.key === "Enter" || e.key === " ")) {
+                if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
                   handleJohnyClick();
                 }
               }}
-              className={`relative w-full h-full [transform-style:preserve-3d] ${!isMerged ? "cursor-pointer" : "cursor-default"}`}
+              className="relative w-full h-full [transform-style:preserve-3d] cursor-pointer"
               animate={{ rotateY: flipJ ? 180 : 0 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
               onClick={handleJohnyClick}
-              whileHover={{ scale: (flipJ || isMerged) ? 1 : 1.03 }}
+              whileHover={{ scale: flipJ ? 1 : 1.03 }}
             >
-              <div className="absolute inset-0 [backface-visibility:hidden] rounded-l-2xl overflow-hidden shadow-xl border-y-4 border-l-4 border-white/40 bg-black/5">
+              <div className="absolute inset-0 [backface-visibility:hidden] rounded-l-2xl overflow-hidden shadow-xl border-y-4 border-l-4 border-r-none border-white/40 bg-black/5">
                 <Image src="/fotki/johny_lewa.jpg" alt="Johny" fill className="object-cover object-right" />
                 
-                {!isMerged && (
-                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <p className="font-serif tracking-widest uppercase text-white border border-white px-4 py-2 rounded-full backdrop-blur-sm">Obróć</p>
-                  </div>
-                )}
+                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                  <p className="font-serif tracking-widest uppercase text-white border border-white px-4 py-2 rounded-full backdrop-blur-sm">Obróć</p>
+                </div>
               </div>
               
-              <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-l-2xl shadow-xl bg-[#FDF9EC] border-y-4 border-l-4 border-white/40 p-6 md:p-10 flex flex-col justify-center text-center">
+              <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-r-2xl rounded-l-none shadow-xl bg-[#FDF9EC] border-y-4 border-l-none border-r-4 border-white/40 p-6 md:p-10 flex flex-col justify-center text-center">
                 <h3 className="font-serif text-2xl md:text-3xl text-[#4c4a1e] mb-4 uppercase tracking-widest">Jaaaaan</h3>
                 <p className="font-serif font-normal text-sm md:text-base text-[#4c4a1e] leading-relaxed">
                   Świadomie i dobrowolnie zrzekamy się możliwości pójścia w inną stronę, nawet gdyby kiedyś miało być ciężko.
@@ -116,37 +121,35 @@ export default function ProfilesSection() {
           <motion.div
             initial={{ x: 600, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
-            viewport={{ once: true, margin: "0px 0px -150px 0px" }}
+            // ZMIANA: Niezawodne wykrywanie viewportu oparte na proporcjach
+            viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 1.2, ease: "easeOut" }}
             className="w-1/2 h-full group perspective-1000"
           >
             <motion.div
-              // ZMIANA: Dodano role="button" i tabIndex dla globalnych dźwięków!
-              role={!isMerged ? "button" : undefined}
-              tabIndex={!isMerged ? 0 : undefined}
+              role="button"
+              tabIndex={0}
               onKeyDown={(e) => {
-                if (!isMerged && (e.key === "Enter" || e.key === " ")) {
+                if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
                   handleMagdaClick();
                 }
               }}
-              className={`relative w-full h-full [transform-style:preserve-3d] ${!isMerged ? "cursor-pointer" : "cursor-default"}`}
+              className="relative w-full h-full [transform-style:preserve-3d] cursor-pointer"
               animate={{ rotateY: flipM ? -180 : 0 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
               onClick={handleMagdaClick}
-              whileHover={{ scale: (flipM || isMerged) ? 1 : 1.03 }}
+              whileHover={{ scale: flipM ? 1 : 1.03 }}
             >
-              <div className="absolute inset-0 [backface-visibility:hidden] rounded-r-2xl overflow-hidden shadow-xl border-y-4 border-r-4 border-white/40 bg-black/5">
+              <div className="absolute inset-0 [backface-visibility:hidden] rounded-r-2xl overflow-hidden shadow-xl border-y-4 border-r-4 border-l-none border-white/40 bg-black/5">
                 <Image src="/fotki/magda_prawa.jpg" alt="Magda" fill className="object-cover object-left" />
                 
-                {!isMerged && (
-                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <p className="font-serif tracking-widest uppercase text-white border border-white px-4 py-2 rounded-full backdrop-blur-sm">Obróć</p>
-                  </div>
-                )}
+                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                  <p className="font-serif tracking-widest uppercase text-white border border-white px-4 py-2 rounded-full backdrop-blur-sm">Obróć</p>
+                </div>
               </div>
               
-              <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(-180deg)] rounded-r-2xl shadow-xl bg-[#FDF9EC] border-y-4 border-r-4 border-white/40 p-6 md:p-10 flex flex-col justify-center text-center">
+              <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(-180deg)] rounded-l-2xl rounded-r-none shadow-xl bg-[#FDF9EC] border-y-4 border-r-none border-l-4 border-white/40 p-6 md:p-10 flex flex-col justify-center text-center">
                 <h3 className="font-serif text-2xl md:text-3xl text-[#4c4a1e] mb-4 uppercase tracking-widest">Madziaaaaa</h3>
                 <p className="font-serif font-normal text-sm md:text-base text-[#4c4a1e] leading-relaxed">
                   Ale mi się knur trafił! Nie dość, że taki parówiasty knur, to na dodatek taka knurzasta parówa! Hehehehe

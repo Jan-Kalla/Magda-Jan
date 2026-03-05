@@ -27,11 +27,12 @@ export default function Navbar() {
   const isMobile = useIsMobile();
   const { isMuted, toggleMute } = useSound();
 
+  // ZMIANA 1: Zaktualizowana kolejność podstron (Strefa dla gościa zaraz po stronie głównej)
   const navItems = [
     { label: "Strona główna", href: "/" },
-    { label: "Galeria", href: "/galeria", protected: true },
+    { label: "Wybory dla gościa", href: "/ankiety", protected: true },
     { label: "Harmonogram wesela", href: "/harmonogram", protected: true },
-    { label: "Strefa dla gościa", href: "/ankiety", protected: true },
+    { label: "Galeria", href: "/galeria", protected: true },
     { label: "Rywalizacja", href: "/rywalizacja", protected: true },
     { label: "FAQ", href: "/faq", protected: true },
     { label: "Kontakt", href: "/kontakt" },
@@ -50,10 +51,10 @@ export default function Navbar() {
 
   return (
   <nav className="sticky top-0 left-0 w-full bg-[#4E0113] text-white shadow-md z-50 md:fixed">
-    {/* ZMIANA 1: Rozciągnięcie na pełną szerokość z eleganckimi marginesami (w-full px-6 lg:px-16) */}
     <div className="w-full px-6 lg:px-16 py-3 flex justify-between items-center">
       
-      <Link href="/" className="text-4xl md:text-5xl font-script text-[#FAD6C8] hover:opacity-80 transition-opacity mt-1">
+      {/* ZMIANA 2: Dodano shrink-0 pr-12 md:pr-24, co "powiększa pole M&J" i tworzy barierę dla tekstu */}
+      <Link href="/" className="text-4xl md:text-5xl font-script text-[#FAD6C8] hover:opacity-80 transition-opacity mt-1 shrink-0 pr-12 md:pr-24">
         M&J
       </Link>
 
@@ -75,7 +76,6 @@ export default function Navbar() {
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  /* ZMIANA 2: Dodano font-medium, aby linki były nieco grubsze i bardziej czytelne */
                   className={`relative group transition-colors font-serif font-medium uppercase tracking-[0.15em] text-xs lg:text-sm ${
                     isActive ? "text-[#FAD6C8]" : "hover:text-[#FAD6C8]"
                   }`}
@@ -131,7 +131,6 @@ export default function Navbar() {
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  /* ZMIANA 3: Dodano font-medium również w menu mobilnym */
                   className={`block py-3 transition-colors font-serif font-medium uppercase tracking-widest text-sm ${
                     isActive
                       ? "text-[#FAD6C8]"

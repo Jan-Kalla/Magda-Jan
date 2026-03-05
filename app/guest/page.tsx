@@ -44,6 +44,7 @@ export default function GuestPage() {
     } else {
       setLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loading) {
@@ -55,8 +56,6 @@ export default function GuestPage() {
   }
 
   return (
-    // ZMIANA: Zamiast osobnych divów z tłami, przekazujemy formularz jako CHILD do SharedWeddingLayout.
-    // Dzięki temu formularz znajdzie się wewnątrz wielkiego, spójnego bloku z gradientem!
     <SharedWeddingLayout showNavbar={true}>
       <AnimatePresence mode="sync">
         {!guest && (
@@ -72,7 +71,8 @@ export default function GuestPage() {
             transition={{ duration: 0.6, ease: "easeInOut" }}
             className="w-full flex items-center justify-center overflow-hidden"
           >
-            <div className="w-full flex justify-center pb-12 relative z-10"> 
+            {/* ZMIANA: Zmieniono pb-12 na pb-2, by przy animacji wyjścia nie powstawała "dziura" na ekranie */}
+            <div className="w-full flex justify-center pb-2 relative z-10"> 
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}

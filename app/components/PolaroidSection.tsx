@@ -4,21 +4,36 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
-const PhotoCard = ({ photo, globalIndex }: { photo: any; globalIndex: number }) => {
+type Direction = "top" | "bottom" | "left" | "right" | "center";
+
+const PhotoCard = ({ photo, globalIndex, direction }: { photo: any; globalIndex: number; direction: Direction }) => {
   const [isFlipped, setIsFlipped] = useState(false);
+
+  const getInitialPosition = (dir: Direction) => {
+    switch (dir) {
+      case "top": return { opacity: 0, y: -200, x: 0 };
+      case "bottom": return { opacity: 0, y: 200, x: 0 };
+      case "left": return { opacity: 0, x: -200, y: 0 };
+      case "right": return { opacity: 0, x: 200, y: 0 };
+      case "center": return { opacity: 0, scale: 0.8, y: 0, x: 0 };
+      default: return { opacity: 0, y: 50, x: 0 };
+    }
+  };
+
+  const initialAnimation = getInitialPosition(direction);
 
   return (
     <motion.div
-      // ZMIANA: Dodano role="button", co automatycznie aktywuje dźwięki z naszego globalnego SoundContext!
       role="button"
       tabIndex={0}
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "0px 0px -50px 0px" }}
-      transition={{ duration: 0.6, delay: globalIndex * 0.1, ease: "easeOut" }}
-      className={`relative w-full group cursor-pointer perspective-1000 ${!isFlipped ? "hover:-translate-y-1 hover:scale-[1.03]" : ""} transition-transform duration-200`}
+      initial={initialAnimation}
+      whileInView={{ opacity: 1, y: 0, x: 0, scale: 1 }}
+      // ZMIANA: Zwiększony amount do 0.35 + ujemny margines dolny zmuszają użytkownika do głębszego zjechania w dół!
+      viewport={{ once: true, amount: 0.35, margin: "0px 0px -100px 0px" }}
+      transition={{ duration: 0.9, delay: globalIndex * 0.1, ease: "easeOut" }}
+      className="relative w-full group cursor-pointer perspective-1000"
+      whileHover={!isFlipped ? { y: -5, scale: 1.03, transition: { duration: 0.2 } } : {}}
       onClick={() => setIsFlipped(!isFlipped)}
-      // Dodano onKeyDown dla pełnej dostępności (obsługa klawiatury jak w prawdziwym przycisku)
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
@@ -84,18 +99,24 @@ export default function PolaroidSection() {
   ];
 
   return (
-    <section className="relative w-full max-w-7xl mx-auto px-4 md:px-8 pb-32 pt-16 z-10">
+   // ZMIANA: Dodano drastycznie większy margines dolny (mb-96 lg:mb-[400px]) i padding (pb-48 lg:pb-64)
+    // To utworzy potężny "oddech" przed przejściem do szczeliny z Timerem
+    <section className="relative w-full max-w-7xl mx-auto px-4 md:px-8 pb-48 lg:pb-64 pt-48 mb-96 lg:mb-[300px] z-10">
       
       {/* NAGŁÓWEK SEKCJI */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "0px 0px -100px 0px" }}
+        viewport={{ once: true, amount: 0.3 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="text-center mb-16 md:mb-24"
       >
         <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl uppercase tracking-[0.15em] text-[#4c4a1e] mb-6 px-4 leading-snug">
-          Wspólne chwile ulotne jak motyle
+         <p>
+          Wspólne chwile 
+         </p>
+          ulotne jak motyle
+         <p/>
         </h2>
         <div className="w-24 h-[1px] bg-[#4c4a1e]/40 mx-auto"></div>
       </motion.div>
@@ -103,40 +124,43 @@ export default function PolaroidSection() {
       {/* UKŁAD ZDJĘĆ Z FIZYCZNYM PODZIAŁEM NA BLOKI */}
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 w-full items-start">
         
-        {/* BLOK LEWY I ŚRODKOWY (Obejmuje ciasto na dole) */}
+        {/* BLOK LEWY I ŚRODKOWY */}
         <div className="flex flex-col w-full lg:w-2/3 gap-4 lg:gap-6">
           
-          {/* GÓRA: Dwie osobne kolumny */}
           <div className="flex flex-col sm:flex-row gap-4 lg:gap-6 w-full">
             
             {/* Kolumna Lewa (Index 0, 1) */}
             <div className="flex flex-col w-full sm:w-1/2 gap-4 lg:gap-6">
-              <PhotoCard photo={photos[0]} globalIndex={0} />
-              <PhotoCard photo={photos[1]} globalIndex={1} />
+              {/* ZMIANA: Indeksy podniesione na 4 i 5, by poczekały na środek */}
+              <PhotoCard photo={photos[0]} globalIndex={4} direction="left" />
+              <PhotoCard photo={photos[1]} globalIndex={5} direction="left" />
             </div>
 
             {/* Kolumna Środkowa (Index 3, 4, 5) */}
             <div className="flex flex-col w-full sm:w-1/2 gap-4 lg:gap-6">
-              <PhotoCard photo={photos[3]} globalIndex={3} />
-              <PhotoCard photo={photos[4]} globalIndex={4} />
-              <PhotoCard photo={photos[5]} globalIndex={5} />
+              {/* ZMIANA: Wszystkie z dołu, indeksy 0, 1, 2 = pojawiają się jako PIERWSZE */}
+              <PhotoCard photo={photos[3]} globalIndex={0} direction="bottom" />
+              <PhotoCard photo={photos[4]} globalIndex={1} direction="bottom" />
+              <PhotoCard photo={photos[5]} globalIndex={2} direction="bottom" />
             </div>
 
           </div>
 
-          {/* DÓŁ: Ciasto (Index 2) - Automatycznie rozciąga się pod kolumną lewą i środkową! */}
+          {/* DÓŁ: Ciasto (Index 2) */}
           <div className="w-full">
-            <PhotoCard photo={photos[2]} globalIndex={2} />
+            {/* Ciasto wjeżdża jako ostatnie */}
+            <PhotoCard photo={photos[2]} globalIndex={8} direction="bottom" />
           </div>
 
         </div>
 
-        {/* BLOK PRAWY: Oddzielna, długa kolumna (Index 6, 7, 8, 9) */}
+        {/* BLOK PRAWY */}
         <div className="flex flex-col w-full lg:w-1/3 gap-4 lg:gap-6">
-          <PhotoCard photo={photos[6]} globalIndex={6} />
-          <PhotoCard photo={photos[7]} globalIndex={7} />
-          <PhotoCard photo={photos[8]} globalIndex={8} />
-          <PhotoCard photo={photos[9]} globalIndex={9} />
+          {/* ZMIANA: Indeksy wyrównane z lewą kolumną, startują od 4 */}
+          <PhotoCard photo={photos[6]} globalIndex={4} direction="right" />
+          <PhotoCard photo={photos[7]} globalIndex={5} direction="right" />
+          <PhotoCard photo={photos[8]} globalIndex={6} direction="right" />
+          <PhotoCard photo={photos[9]} globalIndex={7} direction="right" />
         </div>
 
       </div>
