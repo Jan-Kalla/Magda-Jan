@@ -11,21 +11,26 @@ export default function ChildrenChoices({
   if (!children || children.length === 0) return null;
 
   return (
-    <div className="mt-12">
-      <h2 className="text-2xl font-semibold mb-6 text-[#4E0113]">Wybory dla dzieci</h2>
+    <div className="mt-16">
+      <h2 className="font-serif text-3xl md:text-4xl font-light text-[#4c4a1e] mb-10 text-center uppercase tracking-[0.1em] border-t border-[#4c4a1e]/20 pt-10">
+        Menu dla najmłodszych
+      </h2>
+      
       {children.map((child: any) => (
-        <div key={child.id} className="mb-8">
-          <h3 className="text-xl font-bold mb-4 text-[#4E0113]">
+        <div key={child.id} className="mb-12 bg-white/20 p-6 md:p-8 rounded-xl border border-white/40">
+          <h3 className="font-serif text-2xl md:text-3xl text-[#4c4a1e] mb-6 pb-2 border-b border-[#4c4a1e]/20 inline-block">
             {child.first_name} {child.last_name}
           </h3>
 
-          <h4 className="text-lg font-semibold text-[#4E0113] mb-2">Dania standardowe</h4>
-          <div className="space-y-4 mb-6">
+          <h4 className="font-sans font-light uppercase tracking-widest text-[#4c4a1e]/80 text-sm mb-4 mt-4">
+            Dania standardowe
+          </h4>
+          <div className="space-y-4 mb-10">
             {standardDishes.map((dish: any) => (
-              <label key={dish.name} className={`flex items-center gap-6 border rounded-lg p-6 cursor-pointer transition ${
+              <label key={dish.name} className={`flex flex-col sm:flex-row items-center gap-6 border rounded-xl p-4 md:p-6 cursor-pointer transition-all duration-300 ${
                 childrenChoices[child.id] === dish.name
-                  ? "border-[#4E0113] bg-[#FAD6C8]/40 shadow-lg scale-[1.02]"
-                  : "border-gray-300 hover:shadow-md hover:bg-gray-50"
+                  ? "border-[#4c4a1e] bg-white/60 shadow-lg scale-[1.01]"
+                  : "border-white/50 hover:border-[#4c4a1e]/50 hover:bg-white/30"
               }`}>
                 <input
                   type="radio"
@@ -35,19 +40,21 @@ export default function ChildrenChoices({
                   onChange={() => handleChildChoice(child.id, dish.name)}
                   className="hidden"
                 />
-                {dish.img && <img src={dish.img} alt={dish.name} className="w-24 h-24 object-cover rounded-lg" />}
-                <span className="text-[#4E0113] font-medium">{dish.name}</span>
+                {dish.img && <img src={dish.img} alt={dish.name} className="w-full sm:w-32 sm:h-32 md:w-40 md:h-40 object-cover rounded-lg shadow-md flex-shrink-0" />}
+                <span className="font-serif text-lg md:text-xl text-[#4c4a1e] text-center sm:text-left">{dish.name}</span>
               </label>
             ))}
           </div>
 
-          <h4 className="text-lg font-semibold text-[#4E0113] mb-2">Oferta dziecięca</h4>
+          <h4 className="font-sans font-light uppercase tracking-widest text-[#4c4a1e]/80 text-sm mb-4">
+            Specjalne Menu Dziecięce
+          </h4>
           <div className="space-y-4">
             {childrenDishes.map((dish: any) => (
-              <label key={dish.name} className={`flex items-center gap-6 border rounded-lg p-6 cursor-pointer transition ${
+              <label key={dish.name} className={`flex flex-col sm:flex-row items-center gap-6 border rounded-xl p-4 md:p-6 cursor-pointer transition-all duration-300 ${
                 childrenChoices[child.id] === dish.name
-                  ? "border-[#4E0113] bg-[#FAD6C8]/40 shadow-lg scale-[1.02]"
-                  : "border-gray-300 hover:shadow-md hover:bg-gray-50"
+                  ? "border-[#4c4a1e] bg-white/60 shadow-lg scale-[1.01]"
+                  : "border-white/50 hover:border-[#4c4a1e]/50 hover:bg-white/30"
               }`}>
                 <input
                   type="radio"
@@ -57,8 +64,8 @@ export default function ChildrenChoices({
                   onChange={() => handleChildChoice(child.id, dish.name)}
                   className="hidden"
                 />
-                {dish.img && <img src={dish.img} alt={dish.name} className="w-24 h-24 object-cover rounded-lg" />}
-                <span className="text-[#4E0113] font-medium">{dish.name}</span>
+                {dish.img && <img src={dish.img} alt={dish.name} className="w-full sm:w-32 sm:h-32 md:w-40 md:h-40 object-cover rounded-lg shadow-md flex-shrink-0" />}
+                <span className="font-serif text-lg md:text-xl text-[#4c4a1e] text-center sm:text-left">{dish.name}</span>
               </label>
             ))}
           </div>

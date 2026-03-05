@@ -20,8 +20,6 @@ export function useMealSurvey() {
   const [message, setMessage] = useState("");
   const [plusOne, setPlusOne] = useState<{ firstName: string; lastName: string } | null>(null);
 
-
-  // === Pobierz dzieci ===
   useEffect(() => {
     const fetchChildren = async () => {
       if (!guest) return;
@@ -35,7 +33,6 @@ export function useMealSurvey() {
     fetchChildren();
   }, [guest]);
 
-  // === Pobierz wcześniejsze wybory ===
   useEffect(() => {
     const fetchChoices = async () => {
       if (!guest) return;
@@ -64,12 +61,10 @@ export function useMealSurvey() {
     fetchChoices();
   }, [guest, children]);
 
-  // === Zmiana wyboru dziecka ===
   const handleChildChoice = (childId: number, dish: string) => {
     setChildrenChoices((prev) => ({ ...prev, [childId]: dish }));
   };
 
-  // === Zapis wyborów ===
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!guest) {
@@ -91,16 +86,15 @@ export function useMealSurvey() {
 
     if (error) {
       console.error(error);
-      setMessage("Błąd przy zapisie 😢");
+      setMessage("Wystąpił błąd podczas zapisywania.");
     } else {
-      setMessage("Wybory zostały zapisane! 🎉");
+      setMessage("Wybór został pomyślnie zapisany.");
       if (guest.id === 1 || guest.id === 2) fetchResults();
     }
 
     setLoading(false);
   };
 
-  // === Wyniki ankiety (dla Jan/Magda) ===
   const fetchResults = async () => {
     const { data, error } = await supabase.from("meal_choices").select("main_course");
     if (error) return console.error(error);

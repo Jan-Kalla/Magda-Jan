@@ -9,12 +9,10 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// Definiujemy możliwe statusy jako typ TypeScript
 export type RsvpStatus = 'confirmed' | 'ceremony_only' | 'declined' | null;
 
 interface RsvpSelectorProps {
   guestId?: number;
-  // Zmieniamy typ funkcji zwrotnej, teraz przekazuje string, a nie boolean
   onDecisionChange: (status: RsvpStatus) => void;
 }
 
@@ -40,7 +38,6 @@ export default function RsvpSelector({ guestId, onDecisionChange }: RsvpSelector
   useEffect(() => {
     const fetchDecision = async () => {
       if (!guestId) return;
-      // Pobieramy rsvp_status zamiast is_attending
       const { data, error } = await supabase
         .from("guests")
         .select("rsvp_decision_made, rsvp_status")
@@ -101,77 +98,77 @@ export default function RsvpSelector({ guestId, onDecisionChange }: RsvpSelector
       initial="hidden"
       animate="visible"
     >
-      <motion.h2 variants={fadeUp} className="text-3xl font-bold text-[#4E0113] mb-6">
+      <motion.h2 variants={fadeUp} className="font-serif text-3xl md:text-5xl font-light text-[#4c4a1e] mb-6 uppercase tracking-[0.15em] drop-shadow-md">
         Potwierdzenie przybycia
       </motion.h2>
 
       {!decisionMade && (
-        <motion.div variants={fadeUp} className="max-w-2xl">
-          <p className="text-gray-800 mb-6 text-lg">
-            Daj nam znać, czy będziesz z nami w tym dniu.{"\n\n"}
-            Prosimy o odpowiedź najlepiej do miesiąca przed ślubem.😊
+        <motion.div variants={fadeUp} className="max-w-2xl text-[#4c4a1e]/90 font-sans font-light text-lg">
+          <p className="mb-6 leading-relaxed">
+            Daj nam znać, czy zaszczycisz nas swoją obecnością w tym wyjątkowym dniu.{"\n\n"}
+            Prosimy o odpowiedź najlepiej do miesiąca przed uroczystością.
           </p>
         </motion.div>
       )}
 
       {decisionMade ? (
-        <motion.div variants={fadeUp} className="mt-4 p-6 bg-white/50 rounded-xl border border-[#4E0113]/10">
+        <motion.div variants={fadeUp} className="mt-4 p-8 bg-white/40 backdrop-blur-xl rounded-2xl border border-white/60 shadow-xl max-w-2xl w-full">
           {rsvpStatus === 'confirmed' && (
             <div>
-              <p className="text-xl font-bold text-[#4E0113] mb-2">
-                Super! Widzimy się na ślubie i weselu! 💃🕺
+              <p className="font-serif text-2xl text-[#4c4a1e] mb-2 tracking-wide">
+                Z przyjemnością gościć Cię będziemy na ślubie i weselu.
               </p>
-              <p className="text-gray-700">Poniżej wybierz posiłki.</p>
+              <p className="font-sans font-light text-[#4c4a1e]/80 mt-2">Poniżej prosimy o wybór preferowanego posiłku.</p>
             </div>
           )}
           {rsvpStatus === 'ceremony_only' && (
             <div>
-              <p className="text-xl font-bold text-[#4E0113] mb-2">
-                Cieszymy się, że będziesz z nami na ślubie! 💒
+              <p className="font-serif text-2xl text-[#4c4a1e] mb-2 tracking-wide">
+                Cieszymy się, że będziesz z nami podczas ceremonii zaślubin.
               </p>
-              <p className="text-gray-700">Dziękujemy za informację.</p>
+              <p className="font-sans font-light text-[#4c4a1e]/80 mt-2">Dziękujemy za przekazaną informację.</p>
             </div>
           )}
           {rsvpStatus === 'declined' && (
             <div>
-              <p className="text-xl font-bold text-gray-600 mb-2">
-                Szkoda, że Cię nie będzie. 😔
+              <p className="font-serif text-2xl text-[#4c4a1e]/80 mb-2 tracking-wide">
+                Z żalem przyjmujemy informację o Twojej nieobecności.
               </p>
-              <p className="text-gray-700">Dziękujemy za poinformowanie nas.</p>
+              <p className="font-sans font-light text-[#4c4a1e]/80 mt-2">Dziękujemy za odpowiedź.</p>
             </div>
           )}
           
           <button 
             onClick={() => setDecisionMade(false)}
-            className="text-sm text-gray-500 underline mt-4 hover:text-[#4E0113]"
+            className="text-sm text-[#4c4a1e]/60 underline mt-8 hover:text-[#4c4a1e] transition-colors font-sans uppercase tracking-widest"
           >
             Zmień decyzję
           </button>
         </motion.div>
       ) : (
-        <motion.div variants={fadeUp} className="flex flex-col md:flex-row gap-4 mt-4 w-full md:w-auto px-4">
+        <motion.div variants={fadeUp} className="flex flex-col md:flex-row gap-6 mt-6 w-full md:w-auto px-4">
           <button
             onClick={() => handleDecision('confirmed')}
             disabled={loading}
-            className="flex-1 px-8 py-4 rounded-lg font-bold text-white bg-[#4E0113] hover:bg-[#6b1326] shadow-lg transition transform hover:scale-105"
+            className="flex-1 px-8 py-5 rounded-xl font-serif uppercase tracking-widest text-[#FDF9EC] bg-[#4c4a1e] hover:bg-[#383716] shadow-lg transition-all hover:-translate-y-0.5"
           >
-            Będę na weselu! 🥂
+            Będę na weselu
           </button>
           
           <button
             onClick={() => handleDecision('ceremony_only')}
             disabled={loading}
-            className="flex-1 px-8 py-4 rounded-lg font-bold text-[#4E0113] bg-[#FAD6C8] hover:bg-[#ffc5af] shadow-lg transition transform hover:scale-105"
+            className="flex-1 px-8 py-5 rounded-xl font-serif uppercase tracking-widest text-[#4c4a1e] bg-white/60 backdrop-blur-sm border border-white/80 hover:bg-white shadow-lg transition-all hover:-translate-y-0.5"
           >
-            Będę tylko na ślubie 💒
+            Tylko ceremonia
           </button>
           
           <button
             onClick={() => handleDecision('declined')}
             disabled={loading}
-            className="flex-1 px-8 py-4 rounded-lg font-bold text-gray-700 bg-gray-200 hover:bg-gray-300 shadow-lg transition transform hover:scale-105"
+            className="flex-1 px-8 py-5 rounded-xl font-serif uppercase tracking-widest text-[#4c4a1e]/80 bg-white/30 backdrop-blur-sm hover:bg-white/50 border border-white/50 shadow-lg transition-all hover:-translate-y-0.5"
           >
-            Nie będzie mnie 😢
+            Niestety, nie będę
           </button>
         </motion.div>
       )}
