@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import Image from "next/image";
 
 export default function ProfilesSection() {
@@ -57,7 +57,6 @@ export default function ProfilesSection() {
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
-        // ZMIANA: Niezawodne wykrywanie viewportu oparte na proporcjach
         viewport={{ once: true, amount: 0.3 }}
         className="text-center mb-12"
       >
@@ -65,20 +64,20 @@ export default function ProfilesSection() {
         <div className="w-16 h-[1px] bg-[#4c4a1e]/30 mx-auto"></div>
       </motion.div>
 
-      <div className="relative w-full flex flex-col items-center justify-center perspective-[2000px]">
+      {/* Na mobile elementy mogą na siebie nieco bardziej najść, na desktopie perspective-[2000px] */}
+      <div className="relative w-full flex flex-col items-center justify-center perspective-1000 md:perspective-[2000px]">
         
         <div 
           className={`flex w-full justify-center h-[400px] md:h-[550px] transition-all duration-[1500ms] ease-in-out ${
-            isMerged ? "gap-0 max-w-3xl" : "gap-10 md:gap-32 max-w-4xl"
+            isMerged ? "gap-0 max-w-3xl" : "gap-4 md:gap-32 max-w-4xl"
           }`}
         >
           {/* ========================================== */}
           {/* KARTA LEWA: JOHNY                            */}
           {/* ========================================== */}
           <motion.div
-            initial={{ x: -600, opacity: 0 }}
+            initial={{ x: -200, opacity: 0 }} // Zmniejszono dystans animacji dla lepszej wydajności mobile
             whileInView={{ x: 0, opacity: 1 }}
-            // ZMIANA: Niezawodne wykrywanie viewportu oparte na proporcjach
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 1.2, ease: "easeOut" }}
             className="w-1/2 h-full group perspective-1000"
@@ -92,23 +91,27 @@ export default function ProfilesSection() {
                   handleJohnyClick();
                 }
               }}
+              // Usunięto overflow-hidden, zostawiono prezerwacje 3D
               className="relative w-full h-full [transform-style:preserve-3d] cursor-pointer"
               animate={{ rotateY: flipJ ? 180 : 0 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
               onClick={handleJohnyClick}
               whileHover={{ scale: flipJ ? 1 : 1.03 }}
             >
-              <div className="absolute inset-0 [backface-visibility:hidden] rounded-l-2xl overflow-hidden shadow-xl border-y-4 border-l-4 border-r-none border-white/40 bg-black/5">
-                <Image src="/fotki/johny_lewa.jpg" alt="Johny" fill className="object-cover object-right" />
+              {/* FRONT KARTY (Zdjęcie) */}
+              <div className="absolute inset-0 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] shadow-xl border-y-4 border-l-4 border-r-none border-white/40 bg-black/5 rounded-l-2xl">
+                {/* Zdjecie dostaje border-radius bezposrednio */}
+                <Image src="/fotki/johny_lewa.jpg" alt="Johny" fill className="object-cover object-right rounded-l-2xl" />
                 
-                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <p className="font-serif tracking-widest uppercase text-white border border-white px-4 py-2 rounded-full backdrop-blur-sm">Obróć</p>
+                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-l-2xl">
+                  <p className="font-serif tracking-widest uppercase text-white border border-white px-4 py-2 rounded-full backdrop-blur-sm text-xs md:text-base">Obróć</p>
                 </div>
               </div>
               
-              <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-r-2xl rounded-l-none shadow-xl bg-[#FDF9EC] border-y-4 border-l-none border-r-4 border-white/40 p-6 md:p-10 flex flex-col justify-center text-center">
-                <h3 className="font-serif text-2xl md:text-3xl text-[#4c4a1e] mb-4 uppercase tracking-widest">Jaaaaan</h3>
-                <p className="font-serif font-normal text-sm md:text-base text-[#4c4a1e] leading-relaxed">
+              {/* TYŁ KARTY (Opis) */}
+              <div className="absolute inset-0 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(180deg)] rounded-r-2xl rounded-l-none shadow-xl bg-[#FDF9EC] border-y-4 border-l-none border-r-4 border-white/40 p-4 md:p-10 flex flex-col justify-center text-center">
+                <h3 className="font-serif text-xl md:text-3xl text-[#4c4a1e] mb-4 uppercase tracking-widest break-words">Jaaaaan</h3>
+                <p className="font-serif font-normal text-xs md:text-base text-[#4c4a1e] leading-relaxed">
                   Świadomie i dobrowolnie zrzekamy się możliwości pójścia w inną stronę, nawet gdyby kiedyś miało być ciężko.
                 </p>
               </div>
@@ -119,9 +122,8 @@ export default function ProfilesSection() {
           {/* KARTA PRAWA: MAGDA                         */}
           {/* ========================================== */}
           <motion.div
-            initial={{ x: 600, opacity: 0 }}
+            initial={{ x: 200, opacity: 0 }} // Zmniejszono dystans dla mobile
             whileInView={{ x: 0, opacity: 1 }}
-            // ZMIANA: Niezawodne wykrywanie viewportu oparte na proporcjach
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 1.2, ease: "easeOut" }}
             className="w-1/2 h-full group perspective-1000"
@@ -141,17 +143,19 @@ export default function ProfilesSection() {
               onClick={handleMagdaClick}
               whileHover={{ scale: flipM ? 1 : 1.03 }}
             >
-              <div className="absolute inset-0 [backface-visibility:hidden] rounded-r-2xl overflow-hidden shadow-xl border-y-4 border-r-4 border-l-none border-white/40 bg-black/5">
-                <Image src="/fotki/magda_prawa.jpg" alt="Magda" fill className="object-cover object-left" />
+              {/* FRONT KARTY (Zdjęcie) */}
+              <div className="absolute inset-0 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] shadow-xl border-y-4 border-r-4 border-l-none border-white/40 bg-black/5 rounded-r-2xl">
+                <Image src="/fotki/magda_prawa.jpg" alt="Magda" fill className="object-cover object-left rounded-r-2xl" />
                 
-                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <p className="font-serif tracking-widest uppercase text-white border border-white px-4 py-2 rounded-full backdrop-blur-sm">Obróć</p>
+                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-r-2xl">
+                  <p className="font-serif tracking-widest uppercase text-white border border-white px-4 py-2 rounded-full backdrop-blur-sm text-xs md:text-base">Obróć</p>
                 </div>
               </div>
               
-              <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(-180deg)] rounded-l-2xl rounded-r-none shadow-xl bg-[#FDF9EC] border-y-4 border-r-none border-l-4 border-white/40 p-6 md:p-10 flex flex-col justify-center text-center">
-                <h3 className="font-serif text-2xl md:text-3xl text-[#4c4a1e] mb-4 uppercase tracking-widest">Madziaaaaa</h3>
-                <p className="font-serif font-normal text-sm md:text-base text-[#4c4a1e] leading-relaxed">
+              {/* TYŁ KARTY (Opis) */}
+              <div className="absolute inset-0 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(-180deg)] rounded-l-2xl rounded-r-none shadow-xl bg-[#FDF9EC] border-y-4 border-r-none border-l-4 border-white/40 p-4 md:p-10 flex flex-col justify-center text-center">
+                <h3 className="font-serif text-xl md:text-3xl text-[#4c4a1e] mb-4 uppercase tracking-widest break-words">Madziaaaaa</h3>
+                <p className="font-serif font-normal text-xs md:text-base text-[#4c4a1e] leading-relaxed">
                   Ale mi się knur trafił! Nie dość, że taki parówiasty knur, to na dodatek taka knurzasta parówa! Hehehehe
                 </p>
               </div>
