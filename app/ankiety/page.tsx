@@ -239,43 +239,45 @@ export default function MealSurveyPage() {
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.8, delay: 0.2 }}
-                      className="max-w-4xl mx-auto mt-24 bg-white/40 backdrop-blur-xl rounded-2xl p-8 md:p-14 border border-white/60 shadow-[0_8px_30px_rgba(0,0,0,0.06)] text-center relative z-10 text-[#4c4a1e]"
+                      // ZMIANA: Tło zmienione na przyciemnione szkło, tekst na #F6f4e5
+                      className="max-w-4xl mx-auto mt-24 bg-black/20 backdrop-blur-xl rounded-2xl p-8 md:p-14 border border-white/20 shadow-2xl text-center relative z-10 text-[#F6f4e5]"
                     >
                       <div className="flex justify-center mb-6">
-                          <Music className="text-[#4c4a1e]/60" size={32} />
+                          <Music className="text-[#F6f4e5]/80" size={32} />
                       </div>
-                      <h2 className="font-script text-5xl md:text-6xl text-[#4c4a1e] mb-6 drop-shadow-sm">
+                      <h2 className="font-script text-5xl md:text-6xl text-[#F6f4e5] mb-6 drop-shadow-sm">
                         Test Zgodności
                       </h2>
-                      <p className="font-sans font-light text-[#4c4a1e]/90 mb-10 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+                      <p className="font-sans font-light text-[#F6f4e5]/90 mb-10 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
                           Przed oczepinami zmierzymy się w klasycznym teście na zgodność. Jednak aby było to mniej sztampowe, chcemy, aby pytania zadawali goście! <br/><br/>
                           Masz pomysł na zabawne pytanie, które sprawdzi, jak dobrze znamy się jako para? A może chcesz zadać podchwytliwe pytanie, które nas zaskoczy? <br/><br/>
                           Śmiało – nie krępuj się. Im bardziej kreatywne pytanie, tym lepiej. Pamiętaj tylko o tym, aby było ono tak skonstruowane, żeby odpowiedź na nie mogła brzmieć: "Panna młoda" albo "Pan młody", ewentualnie "Oboje". <br/><br/>
                           Spokojnie, Para Młoda nie zobaczy tych pytań przed weselem, trafią one prosto do wodzireja.
                       </p>
                       
-                      <form onSubmit={handleGameQuestionSubmit} className="flex flex-col gap-5 max-w-xl mx-auto text-[#4c4a1e]">
+                      <form onSubmit={handleGameQuestionSubmit} className="flex flex-col gap-5 max-w-xl mx-auto text-[#F6f4e5]">
                           <input 
                             value={gameQuestion}
                             onChange={(e) => setGameQuestion(e.target.value)}
                             placeholder="Treść pytania..."
-                            className="w-full p-5 rounded-xl bg-white/60 border border-[#4c4a1e]/20 text-[#4c4a1e] placeholder-[#4c4a1e]/50 focus:outline-none focus:ring-2 focus:ring-[#4c4a1e]/40 transition-all font-sans text-center shadow-inner"
+                            // ZMIANA: Ciemniejszy input, dopasowany do białego tekstu
+                            className="w-full p-5 rounded-xl bg-white/10 border border-white/30 text-[#F6f4e5] placeholder-[#F6f4e5]/50 focus:outline-none focus:ring-2 focus:ring-[#F6f4e5]/40 transition-all font-sans text-center shadow-inner"
                           />
                           <button 
                             type="submit"
                             disabled={isSubmittingGame || !gameQuestion.trim()}
-                            className="flex items-center justify-center gap-3 bg-[#4c4a1e] text-[#FDF9EC] py-4 px-8 rounded-xl font-serif uppercase tracking-widest hover:bg-[#383716] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md font-bold"
+                            // ZMIANA: Przycisk jasny (#F6f4e5) z bordowym tekstem, żeby mocno kontrastował
+                            className="flex items-center justify-center gap-3 bg-[#F6f4e5] text-[#4E0113] py-4 px-8 rounded-xl font-serif uppercase tracking-widest hover:bg-white hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg font-bold"
                           >
                             {isSubmittingGame ? "Wysyłanie..." : "Wyślij pytanie"}
                             <Send size={16} />
                           </button>
                           
-                          {/* Usunięto całkowicie zielony i czerwony kolor dla elegancji - zastąpiono stylem "książkowym" */}
                           {gameSubmitStatus === "success" && (
-                            <p className="text-[#4c4a1e] font-serif italic mt-4 text-lg">Pytanie zostało wysłane. Dziękujemy!</p>
+                            <p className="text-[#F6f4e5] font-serif italic mt-4 text-lg drop-shadow-md">Pytanie zostało wysłane. Dziękujemy!</p>
                           )}
                           {gameSubmitStatus === "error" && (
-                            <p className="text-[#4c4a1e] font-serif italic font-bold mt-4 text-lg">Wystąpił błąd. Spróbuj ponownie.</p>
+                            <p className="text-red-300 font-serif italic font-bold mt-4 text-lg drop-shadow-md">Wystąpił błąd. Spróbuj ponownie.</p>
                           )}
                       </form>
                     </motion.div>
@@ -294,7 +296,7 @@ export default function MealSurveyPage() {
                                 Panel Wodzireja
                               </h2>
                               <p className="font-sans font-light text-white/60 text-sm mt-1">
-                                Zgłoszone pytania do testu zgodności (Para Młoda nie ma tu dostępu)
+                                Zgłoszone pytania do testu zgodności (Te parówy Janek z Magdą tego nie widzą 😉)
                               </p>
                             </div>
                          </div>

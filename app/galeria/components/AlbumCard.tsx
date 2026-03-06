@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { LockClosedIcon } from "@heroicons/react/24/solid";
+import { LockClosedIcon } from "@heroicons/react/24/outline"; // Zmieniono na outline dla lżejszego wyglądu
 import { Album } from "../data";
 
 type Props = {
@@ -16,7 +16,7 @@ export default function AlbumCard({ album, onClick }: Props) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -5 }}
-      className="group relative h-64 md:h-80 rounded-3xl overflow-hidden shadow-xl cursor-pointer bg-black"
+      className="group relative h-64 md:h-80 rounded-2xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.1)] cursor-pointer bg-black/5"
       onClick={() => !album.isLockedFuture && onClick(album)}
     >
       {/* TŁO (ZDJĘCIE) */}
@@ -26,8 +26,8 @@ export default function AlbumCard({ album, onClick }: Props) {
         fill 
         className={`object-cover transition-all duration-700 
           ${album.isLockedFuture 
-            ? "grayscale group-hover:grayscale-0 opacity-60 group-hover:opacity-40" 
-            : "group-hover:scale-110 opacity-80"
+            ? "grayscale group-hover:grayscale-[50%] opacity-50 group-hover:opacity-30" 
+            : "group-hover:scale-[1.03] opacity-90"
           }
         `}
       />
@@ -38,38 +38,51 @@ export default function AlbumCard({ album, onClick }: Props) {
           
           {/* Stan domyślny: Kłódka */}
           <div className="group-hover:opacity-0 transition-opacity duration-300 flex flex-col items-center">
-              <div className="bg-[#4E0113]/20 backdrop-blur-sm p-4 rounded-full mb-3 border border-white/20">
-                  <LockClosedIcon className="w-8 h-8 text-white/80" />
+              <div className="bg-black/20 backdrop-blur-md p-5 rounded-full mb-4 border border-white/20 shadow-lg">
+                  <LockClosedIcon className="w-8 h-8 text-[#FDF9EC]/90" />
               </div>
-              <h3 className="text-2xl font-bold text-white drop-shadow-md">{album.title}</h3>
+              <h3 className="font-serif text-2xl md:text-3xl font-light text-[#FDF9EC] drop-shadow-md tracking-wide">
+                {album.title}
+              </h3>
           </div>
 
           {/* Stan HOVER: Komunikat */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#4E0113]/95 opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-6">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500 p-8 border border-white/10">
               <ClockIconAnimated />
-              <h3 className="text-xl font-bold text-[#FAD6C8] mb-2">{album.title}</h3>
-              <p className="text-white text-sm leading-relaxed">
-                  Te zdjęcia pojawią się tutaj po wydarzeniu. <br/>
-                  Cierpliwości! 😉
+              <h3 className="font-serif text-2xl font-light text-[#FDF9EC] mb-4 tracking-widest uppercase">
+                {album.title}
+              </h3>
+              <div className="h-[1px] w-12 bg-[#FDF9EC]/30 mb-4" />
+              <p className="font-sans font-light text-[#FDF9EC]/80 text-sm leading-relaxed max-w-[80%] tracking-widest">
+                  Zdjęcia zostaną opublikowane po zakończeniu wydarzenia. Prosimy o cierpliwość.
               </p>
           </div>
         </div>
       ) : (
         /* --- WARIANT 2: ALBUM DOSTĘPNY --- */
-        <div className="absolute inset-0 flex flex-col justify-end p-6 bg-gradient-to-t from-black/90 via-black/30 to-transparent">
-          <div className="transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-              <div className="flex items-center gap-2 mb-1">
-                  <div className="bg-[#FAD6C8] p-1.5 rounded-lg text-[#4E0113]">
+        <div className="absolute inset-0 flex flex-col justify-end p-6 bg-gradient-to-t from-black/90 via-black/40 to-transparent">
+          <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 ease-out">
+              <div className="flex items-center gap-3 mb-3">
+                  <div className="bg-white/20 backdrop-blur-md p-2 rounded-xl text-[#FDF9EC] border border-white/20 shadow-sm">
+                      {/* Tutaj zakładałem, że przekazujesz w 'album.icon' komponent ikony (np. z Heroicons) */}
                       {album.icon}
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-white/20 text-white">
-                      {album.requiredLevel === 'vip' ? 'TOP SECRET' : 'ALBUM'}
-                  </span>
+                  {album.requiredLevel === 'vip' && (
+                    <span className="font-sans font-medium text-[9px] uppercase tracking-[0.2em] px-3 py-1.5 rounded-md bg-[#4E0113]/80 backdrop-blur-md border border-[#4E0113]/50 text-[#FDF9EC]">
+                        Poufne
+                    </span>
+                  )}
               </div>
-              <h3 className="text-2xl font-bold text-white mb-1">{album.title}</h3>
-              <p className="text-gray-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100 leading-snug">
-                  {album.description}
-              </p>
+              
+              <h3 className="font-serif text-2xl md:text-3xl font-light text-[#FDF9EC] mb-2 tracking-wide drop-shadow-md">
+                {album.title}
+              </h3>
+              
+              <div className="h-0 group-hover:h-auto overflow-hidden transition-all duration-500 opacity-0 group-hover:opacity-100">
+                <p className="font-sans font-light text-[#FDF9EC]/70 text-sm leading-relaxed mt-2 line-clamp-2">
+                    {album.description}
+                </p>
+              </div>
           </div>
         </div>
       )}
@@ -79,7 +92,7 @@ export default function AlbumCard({ album, onClick }: Props) {
 
 function ClockIconAnimated() {
   return (
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 text-[#FAD6C8] mb-3 animate-pulse">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-10 h-10 text-[#FDF9EC]/80 mb-4 animate-[spin_4s_linear_infinite]">
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
   )

@@ -85,6 +85,6 @@ export const ALBUMS: Album[] = [
     icon: <EyeSlashIcon className="w-6 h-6" />,
     isLockedFuture: false,
     requiredLevel: "vip",
-    description: "Prosimy nie udostępniać! 🤫"
+    description: "Top secret"
   }
 ];
