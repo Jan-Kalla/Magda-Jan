@@ -120,8 +120,9 @@ export default function SharedWeddingLayout({
         <div className="absolute inset-0 bg-black/20" /> 
       </div>
 
+      {/* ZMIANA KLUCZOWA: Usunięto mix-blend-overlay na urządzeniach mobilnych, który masakrował płynność (FPS) */}
       <div className="fixed inset-0 pointer-events-none z-[60]">
-        <div className="absolute inset-0 bg-noise mix-blend-overlay opacity-[0.6]" />
+        <div className="absolute inset-0 bg-noise opacity-10 md:opacity-[0.6] md:mix-blend-overlay" />
       </div>
 
       <main className="relative z-10">
@@ -233,7 +234,7 @@ export default function SharedWeddingLayout({
               >
                 <div className="relative w-full bg-gradient-to-b from-[#FDF9EC] via-[#F6EBE1] to-[#EBBFB8] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.1)]">
                   
-                  {/* ZMIANA: Szklane tafle i ciężkie rozmycia są teraz ładowane TYLKO na komputerach (klasa hidden md:block) */}
+                  {/* Szkła generują się tylko na komputerach */}
                   <div className="hidden md:block">
                     <OrganicGlassPattern />
                     <div className="absolute top-[0%] left-[-10%] w-[50%] h-[600px] bg-[#FDF9EC] blur-[100px] rounded-full mix-blend-overlay opacity-60 pointer-events-none z-0" />
@@ -252,7 +253,6 @@ export default function SharedWeddingLayout({
 
                 <div className="relative w-full bg-gradient-to-b from-[#EBBFB8] from-10% via-[#C97B78] via-60% to-[#904C4F] to-100% overflow-hidden shadow-[0_-10px_30px_rgba(0,0,0,0.1)]">
                   
-                  {/* ZMIANA: To samo tutaj, zablokowanie szkła i rozmycia na mobile */}
                   <div className="hidden md:block">
                     <OrganicGlassPattern />
                     <div className="absolute bottom-[5%] left-[-10%] w-[50%] h-[500px] bg-[#75897D] blur-[120px] rounded-full opacity-60 pointer-events-none z-0" />

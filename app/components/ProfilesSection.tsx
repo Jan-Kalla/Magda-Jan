@@ -52,7 +52,8 @@ export default function ProfilesSection() {
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 mt-96 mb-32 flex flex-col items-center">
+    // ZMIANA: mniejsze marginesy na mobile (mt-32), większe dla desktopów (md:mt-96)
+    <div className="w-full max-w-5xl mx-auto px-4 mt-32 md:mt-96 mb-24 md:mb-32 flex flex-col items-center">
       
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -64,7 +65,8 @@ export default function ProfilesSection() {
         <div className="w-16 h-[1px] bg-[#4c4a1e]/30 mx-auto"></div>
       </motion.div>
 
-      <div className="relative w-full flex flex-col items-center justify-center perspective-1000 md:perspective-[2000px]">
+      {/* ZMIANA: Zastosowanie [perspective:1000px] w formacie akceptowanym natywnie przez Tailwind */}
+      <div className="relative w-full flex flex-col items-center justify-center [perspective:1000px] md:[perspective:2000px]">
         
         <div 
           className={`flex w-full justify-center h-[400px] md:h-[550px] transition-all duration-[1500ms] ease-in-out ${
@@ -75,7 +77,8 @@ export default function ProfilesSection() {
           {/* KARTA LEWA: JOHNY                            */}
           {/* ========================================== */}
           <motion.div
-            initial={{ x: -200, opacity: 0 }}
+            // ZMIANA KLUCZOWA: x z -200 zmienione na -50, by karta nie wypadła poza viewport na małych ekranach
+            initial={{ x: -50, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 1.2, ease: "easeOut" }}
@@ -90,7 +93,6 @@ export default function ProfilesSection() {
                   handleJohnyClick();
                 }
               }}
-              // ZMIANA: Twarde wymuszenie środowiska 3D dla iOS
               style={{ transformStyle: "preserve-3d", WebkitTransformStyle: "preserve-3d" }}
               className="relative w-full h-full cursor-pointer"
               animate={{ rotateY: flipJ ? 180 : 0 }}
@@ -100,13 +102,7 @@ export default function ProfilesSection() {
             >
               {/* FRONT KARTY (Zdjęcie) */}
               <div 
-                className="absolute inset-0 shadow-xl border-y-4 border-l-4 border-r-none border-white/40 bg-black/5 rounded-l-2xl z-10"
-                style={{ 
-                  backfaceVisibility: "hidden", 
-                  WebkitBackfaceVisibility: "hidden", 
-                  transform: "translateZ(1px)", // Wymusza renderowanie sprzętowe na iPhonach
-                  WebkitTransform: "translateZ(1px)" 
-                }}
+                className="absolute inset-0 shadow-xl border-y-4 border-l-4 border-r-none border-white/40 bg-black/5 rounded-l-2xl z-10 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:translateZ(1px)] [-webkit-transform:translateZ(1px)]"
               >
                 <Image src="/fotki/johny_lewa.jpg" alt="Johny" fill className="object-cover object-right rounded-l-2xl" />
                 
@@ -117,13 +113,7 @@ export default function ProfilesSection() {
               
               {/* TYŁ KARTY (Opis) */}
               <div 
-                className="absolute inset-0 rounded-r-2xl rounded-l-none shadow-xl bg-[#FDF9EC] border-y-4 border-l-none border-r-4 border-white/40 p-4 md:p-10 flex flex-col justify-center text-center z-0"
-                style={{ 
-                  backfaceVisibility: "hidden", 
-                  WebkitBackfaceVisibility: "hidden", 
-                  transform: "rotateY(180deg) translateZ(1px)", 
-                  WebkitTransform: "rotateY(180deg) translateZ(1px)" 
-                }}
+                className="absolute inset-0 rounded-r-2xl rounded-l-none shadow-xl bg-[#FDF9EC] border-y-4 border-l-none border-r-4 border-white/40 p-4 md:p-10 flex flex-col justify-center text-center z-0 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(180deg)_translateZ(1px)] [-webkit-transform:rotateY(180deg)_translateZ(1px)]"
               >
                 <h3 className="font-serif text-xl md:text-3xl text-[#4c4a1e] mb-4 uppercase tracking-widest break-words">Jaaaaan</h3>
                 <p className="font-serif font-normal text-xs md:text-base text-[#4c4a1e] leading-relaxed">
@@ -137,7 +127,8 @@ export default function ProfilesSection() {
           {/* KARTA PRAWA: MAGDA                         */}
           {/* ========================================== */}
           <motion.div
-            initial={{ x: 200, opacity: 0 }}
+            // ZMIANA KLUCZOWA: x z 200 zmienione na 50
+            initial={{ x: 50, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 1.2, ease: "easeOut" }}
@@ -161,13 +152,7 @@ export default function ProfilesSection() {
             >
               {/* FRONT KARTY (Zdjęcie) */}
               <div 
-                className="absolute inset-0 shadow-xl border-y-4 border-r-4 border-l-none border-white/40 bg-black/5 rounded-r-2xl z-10"
-                style={{ 
-                  backfaceVisibility: "hidden", 
-                  WebkitBackfaceVisibility: "hidden", 
-                  transform: "translateZ(1px)", 
-                  WebkitTransform: "translateZ(1px)" 
-                }}
+                className="absolute inset-0 shadow-xl border-y-4 border-r-4 border-l-none border-white/40 bg-black/5 rounded-r-2xl z-10 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:translateZ(1px)] [-webkit-transform:translateZ(1px)]"
               >
                 <Image src="/fotki/magda_prawa.jpg" alt="Magda" fill className="object-cover object-left rounded-r-2xl" />
                 
@@ -178,13 +163,7 @@ export default function ProfilesSection() {
               
               {/* TYŁ KARTY (Opis) */}
               <div 
-                className="absolute inset-0 rounded-l-2xl rounded-r-none shadow-xl bg-[#FDF9EC] border-y-4 border-r-none border-l-4 border-white/40 p-4 md:p-10 flex flex-col justify-center text-center z-0"
-                style={{ 
-                  backfaceVisibility: "hidden", 
-                  WebkitBackfaceVisibility: "hidden", 
-                  transform: "rotateY(-180deg) translateZ(1px)", 
-                  WebkitTransform: "rotateY(-180deg) translateZ(1px)" 
-                }}
+                className="absolute inset-0 rounded-l-2xl rounded-r-none shadow-xl bg-[#FDF9EC] border-y-4 border-r-none border-l-4 border-white/40 p-4 md:p-10 flex flex-col justify-center text-center z-0 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(-180deg)_translateZ(1px)] [-webkit-transform:rotateY(-180deg)_translateZ(1px)]"
               >
                 <h3 className="font-serif text-xl md:text-3xl text-[#4c4a1e] mb-4 uppercase tracking-widest break-words">Madziaaaaa</h3>
                 <p className="font-serif font-normal text-xs md:text-base text-[#4c4a1e] leading-relaxed">
