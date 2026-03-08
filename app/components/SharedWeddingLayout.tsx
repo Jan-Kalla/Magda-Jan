@@ -127,7 +127,6 @@ export default function SharedWeddingLayout({
       <main className="relative z-10">
         <PageWrapper>
             
-            {/* ZMIANA 1: Zmieniono h-screen na h-[100dvh], aby naprawić glitch głównego zdjęcia na iOS/Android */}
             <section 
               className={`relative w-full h-[100dvh] flex flex-col items-center justify-center overflow-hidden ${!isUnlocked ? "cursor-pointer" : ""}`}
               onClick={() => !isUnlocked && handleUnlock()}
@@ -233,12 +232,14 @@ export default function SharedWeddingLayout({
                 transition={{ duration: 0.6, ease: "easeOut" }}
               >
                 <div className="relative w-full bg-gradient-to-b from-[#FDF9EC] via-[#F6EBE1] to-[#EBBFB8] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.1)]">
-                  <OrganicGlassPattern />
                   
-                  {/* ZMIANA 2: Odciążono tła na mobile. Zredukowano blury, wyłączono mix-blend, by ratować FPS-y */}
-                  <div className="absolute top-[0%] left-[-10%] w-[80%] md:w-[50%] h-[400px] md:h-[600px] bg-[#FDF9EC] blur-3xl md:blur-[100px] rounded-full mix-blend-normal md:mix-blend-overlay opacity-60 pointer-events-none z-0" />
-                  <div className="absolute bottom-[20%] right-[-10%] w-[80%] md:w-[50%] h-[300px] md:h-[500px] bg-[#EBBFB8] blur-3xl md:blur-[120px] rounded-full opacity-60 pointer-events-none z-0" />
-                  <div className="absolute top-[40%] left-[20%] w-[60%] md:w-[40%] h-[300px] md:h-[400px] bg-[#C97B78] blur-3xl md:blur-[150px] rounded-full opacity-30 md:opacity-20 mix-blend-normal md:mix-blend-multiply pointer-events-none z-0" />
+                  {/* ZMIANA: Szklane tafle i ciężkie rozmycia są teraz ładowane TYLKO na komputerach (klasa hidden md:block) */}
+                  <div className="hidden md:block">
+                    <OrganicGlassPattern />
+                    <div className="absolute top-[0%] left-[-10%] w-[50%] h-[600px] bg-[#FDF9EC] blur-[100px] rounded-full mix-blend-overlay opacity-60 pointer-events-none z-0" />
+                    <div className="absolute bottom-[20%] right-[-10%] w-[50%] h-[500px] bg-[#EBBFB8] blur-[120px] rounded-full opacity-60 pointer-events-none z-0" />
+                    <div className="absolute top-[40%] left-[20%] w-[40%] h-[400px] bg-[#C97B78] blur-[150px] rounded-full opacity-20 mix-blend-multiply pointer-events-none z-0" />
+                  </div>
 
                   <div className="relative z-10 w-full pt-16 md:pt-24 pb-8">
                     <AboutSection />
@@ -250,10 +251,13 @@ export default function SharedWeddingLayout({
                 <Timer />
 
                 <div className="relative w-full bg-gradient-to-b from-[#EBBFB8] from-10% via-[#C97B78] via-60% to-[#904C4F] to-100% overflow-hidden shadow-[0_-10px_30px_rgba(0,0,0,0.1)]">
-                  <OrganicGlassPattern />
                   
-                  {/* ZMIANA 2 ciąg dalszy: Lżejszy blur dla dolnego tła na mobile */}
-                  <div className="absolute bottom-[5%] left-[-10%] w-[80%] md:w-[50%] h-[300px] md:h-[500px] bg-[#75897D] blur-3xl md:blur-[120px] rounded-full opacity-60 pointer-events-none z-0" />
+                  {/* ZMIANA: To samo tutaj, zablokowanie szkła i rozmycia na mobile */}
+                  <div className="hidden md:block">
+                    <OrganicGlassPattern />
+                    <div className="absolute bottom-[5%] left-[-10%] w-[50%] h-[500px] bg-[#75897D] blur-[120px] rounded-full opacity-60 pointer-events-none z-0" />
+                  </div>
+                  
                   <div className="relative z-10">
                     <ChurchSection />
                     <MapSection />

@@ -65,7 +65,8 @@ const A_LITTLE_VALID_FINALS = [
 ];
 
 const BAWDY = [
-"jajczyć się", "noc poślubna", "noc poslubna", 
+"jajczyć się", "noc poślubna", "noc poslubna",
+"dzieci", "robić dzieci", "potomstwo",
 "seks", "sex", "uprawiać seks", "uprawiać sex",
 "współżyć", "współżycie", "konsumować małżeństwo", "konsumatacja małżeństwa",
 "ruchać się", "ruchanie"
@@ -82,7 +83,7 @@ const QUESTIONS_DATA = [
   { id: 6,  question: "Pierwsze miasto, w którym Magda z Johnym zamieszkają po ślubie?", valid: ["zabrze"], clue: "⛺" }, // Namiot
   { id: 7,  question: "Co Magda z Janem częściej wybierają, gdy się ich o to spyta: kawa czy herbata?", valid: ["kawa", "kawę"], clue: "🌊" }, // Fale
   { id: 8,  question: "Wymień chociaż jeden z trzech zespołów, na których występie na żywo byli wspólnie Magda z Janem?", valid: ["myslovitz", "myslowic", "strachy na lachy", "strachynalachy","tlove","t-love"], clue: "🔕" }, // Cisza
-  { id: 9,  question: "Danie, które Magda i Jan oboje lubią jeść?", valid: ["jajecznica","owsianka","bar gil","sushi","vifon","zupka chińska","kebab", "pizza", "burger", "burgery", "hamburger", "hamburgery", "wszystko","spaghetti"], clue: "🐟" }, // NOWE: Ryba (zamiast Kotwicy)
+  { id: 9,  question: "Danie, które Magda i Jan oboje lubią jeść?", valid: ["jajecznica","owsianka","bar gil","sushi","vifon","zupka chińska","kebab", "pizza","pizze","pizzę", "burger", "burgery", "hamburger", "hamburgery", "wszystko","spaghetti"], clue: "🐟" }, // NOWE: Ryba (zamiast Kotwicy)
   { id: 10, question: "Wspólne hobby Magdy i Jana?", valid: ["film", "kino", "chodzenie do kina", "oglądanie filmów", "oglądanie filmow", "kinematografia", "sauna", "sauny", "chodzenie na saune", "saunowanie", "taniec", "tanczenie", "tańczenie", "gory", "góry", "chodzenie po górach", "chodzenie po gorach", "gorskie wedrowki", "górskie wędrówki", "wedrowki gorskie", "trekking", "hiking", "spacery", "spacer", "chodzenie na spacery", "jedzenie", "chodzenie na jedzenie", "jedzenie na miescie", "food", "foodie", "muzyka", "sluchanie muzyki", "słuchanie muzyki", "koncerty", "zeglowanie", "żeglowanie", "plywanie zaglowka", "pływanie żaglówką", "zaglowka", "żaglówka", "standup", "stand-up", "oglądanie standupów", "oglądanie stand-upów", "standupy", "narty", "narciarstwo", "jazda na nartach", "gotowanie", "gotowanie razem", "gotuja razem", "gotują razem", "kuchnia", "biblia", "czytanie biblii", "pismo święte" , "czytanie pisma świętego"], clue: "🌲" }, // Drzewo
   { id: 11, question: "Marka samochodu, która często pojawiała się zarówno w rodzinie Magdy, jak i w rodzinie Jana?", valid: ["skoda", "škoda"], clue: "🕶️" }, // NOWE: Okulary (zamiast Koła)
   { id: 12, question: "Ulubiona księga Nowego Testamentu Johnego i Magdy?", valid: ["dzieje apostolskie"], clue: "🌅" }, // Zachód słońca

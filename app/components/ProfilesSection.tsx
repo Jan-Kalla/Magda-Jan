@@ -64,7 +64,6 @@ export default function ProfilesSection() {
         <div className="w-16 h-[1px] bg-[#4c4a1e]/30 mx-auto"></div>
       </motion.div>
 
-      {/* Na mobile elementy mogą na siebie nieco bardziej najść, na desktopie perspective-[2000px] */}
       <div className="relative w-full flex flex-col items-center justify-center perspective-1000 md:perspective-[2000px]">
         
         <div 
@@ -76,11 +75,11 @@ export default function ProfilesSection() {
           {/* KARTA LEWA: JOHNY                            */}
           {/* ========================================== */}
           <motion.div
-            initial={{ x: -200, opacity: 0 }} // Zmniejszono dystans animacji dla lepszej wydajności mobile
+            initial={{ x: -200, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 1.2, ease: "easeOut" }}
-            className="w-1/2 h-full group perspective-1000"
+            className="w-1/2 h-full group"
           >
             <motion.div
               role="button"
@@ -91,16 +90,24 @@ export default function ProfilesSection() {
                   handleJohnyClick();
                 }
               }}
-              // Usunięto overflow-hidden, zostawiono prezerwacje 3D
-              className="relative w-full h-full [transform-style:preserve-3d] cursor-pointer"
+              // ZMIANA: Twarde wymuszenie środowiska 3D dla iOS
+              style={{ transformStyle: "preserve-3d", WebkitTransformStyle: "preserve-3d" }}
+              className="relative w-full h-full cursor-pointer"
               animate={{ rotateY: flipJ ? 180 : 0 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
               onClick={handleJohnyClick}
               whileHover={{ scale: flipJ ? 1 : 1.03 }}
             >
               {/* FRONT KARTY (Zdjęcie) */}
-              <div className="absolute inset-0 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] shadow-xl border-y-4 border-l-4 border-r-none border-white/40 bg-black/5 rounded-l-2xl">
-                {/* Zdjecie dostaje border-radius bezposrednio */}
+              <div 
+                className="absolute inset-0 shadow-xl border-y-4 border-l-4 border-r-none border-white/40 bg-black/5 rounded-l-2xl z-10"
+                style={{ 
+                  backfaceVisibility: "hidden", 
+                  WebkitBackfaceVisibility: "hidden", 
+                  transform: "translateZ(1px)", // Wymusza renderowanie sprzętowe na iPhonach
+                  WebkitTransform: "translateZ(1px)" 
+                }}
+              >
                 <Image src="/fotki/johny_lewa.jpg" alt="Johny" fill className="object-cover object-right rounded-l-2xl" />
                 
                 <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-l-2xl">
@@ -109,7 +116,15 @@ export default function ProfilesSection() {
               </div>
               
               {/* TYŁ KARTY (Opis) */}
-              <div className="absolute inset-0 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(180deg)] rounded-r-2xl rounded-l-none shadow-xl bg-[#FDF9EC] border-y-4 border-l-none border-r-4 border-white/40 p-4 md:p-10 flex flex-col justify-center text-center">
+              <div 
+                className="absolute inset-0 rounded-r-2xl rounded-l-none shadow-xl bg-[#FDF9EC] border-y-4 border-l-none border-r-4 border-white/40 p-4 md:p-10 flex flex-col justify-center text-center z-0"
+                style={{ 
+                  backfaceVisibility: "hidden", 
+                  WebkitBackfaceVisibility: "hidden", 
+                  transform: "rotateY(180deg) translateZ(1px)", 
+                  WebkitTransform: "rotateY(180deg) translateZ(1px)" 
+                }}
+              >
                 <h3 className="font-serif text-xl md:text-3xl text-[#4c4a1e] mb-4 uppercase tracking-widest break-words">Jaaaaan</h3>
                 <p className="font-serif font-normal text-xs md:text-base text-[#4c4a1e] leading-relaxed">
                   Świadomie i dobrowolnie zrzekamy się możliwości pójścia w inną stronę, nawet gdyby kiedyś miało być ciężko.
@@ -122,11 +137,11 @@ export default function ProfilesSection() {
           {/* KARTA PRAWA: MAGDA                         */}
           {/* ========================================== */}
           <motion.div
-            initial={{ x: 200, opacity: 0 }} // Zmniejszono dystans dla mobile
+            initial={{ x: 200, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 1.2, ease: "easeOut" }}
-            className="w-1/2 h-full group perspective-1000"
+            className="w-1/2 h-full group"
           >
             <motion.div
               role="button"
@@ -137,14 +152,23 @@ export default function ProfilesSection() {
                   handleMagdaClick();
                 }
               }}
-              className="relative w-full h-full [transform-style:preserve-3d] cursor-pointer"
+              style={{ transformStyle: "preserve-3d", WebkitTransformStyle: "preserve-3d" }}
+              className="relative w-full h-full cursor-pointer"
               animate={{ rotateY: flipM ? -180 : 0 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
               onClick={handleMagdaClick}
               whileHover={{ scale: flipM ? 1 : 1.03 }}
             >
               {/* FRONT KARTY (Zdjęcie) */}
-              <div className="absolute inset-0 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] shadow-xl border-y-4 border-r-4 border-l-none border-white/40 bg-black/5 rounded-r-2xl">
+              <div 
+                className="absolute inset-0 shadow-xl border-y-4 border-r-4 border-l-none border-white/40 bg-black/5 rounded-r-2xl z-10"
+                style={{ 
+                  backfaceVisibility: "hidden", 
+                  WebkitBackfaceVisibility: "hidden", 
+                  transform: "translateZ(1px)", 
+                  WebkitTransform: "translateZ(1px)" 
+                }}
+              >
                 <Image src="/fotki/magda_prawa.jpg" alt="Magda" fill className="object-cover object-left rounded-r-2xl" />
                 
                 <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-r-2xl">
@@ -153,7 +177,15 @@ export default function ProfilesSection() {
               </div>
               
               {/* TYŁ KARTY (Opis) */}
-              <div className="absolute inset-0 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(-180deg)] rounded-l-2xl rounded-r-none shadow-xl bg-[#FDF9EC] border-y-4 border-r-none border-l-4 border-white/40 p-4 md:p-10 flex flex-col justify-center text-center">
+              <div 
+                className="absolute inset-0 rounded-l-2xl rounded-r-none shadow-xl bg-[#FDF9EC] border-y-4 border-r-none border-l-4 border-white/40 p-4 md:p-10 flex flex-col justify-center text-center z-0"
+                style={{ 
+                  backfaceVisibility: "hidden", 
+                  WebkitBackfaceVisibility: "hidden", 
+                  transform: "rotateY(-180deg) translateZ(1px)", 
+                  WebkitTransform: "rotateY(-180deg) translateZ(1px)" 
+                }}
+              >
                 <h3 className="font-serif text-xl md:text-3xl text-[#4c4a1e] mb-4 uppercase tracking-widest break-words">Madziaaaaa</h3>
                 <p className="font-serif font-normal text-xs md:text-base text-[#4c4a1e] leading-relaxed">
                   Ale mi się knur trafił! Nie dość, że taki parówiasty knur, to na dodatek taka knurzasta parówa! Hehehehe
