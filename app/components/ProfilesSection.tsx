@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
 export default function ProfilesSection() {
@@ -12,6 +12,20 @@ export default function ProfilesSection() {
   const [viewedJ, setViewedJ] = useState(false);
 
   const [isMerged, setIsMerged] = useState(false);
+  
+  const [isMobile, setIsMobile] = useState(false);
+  // ZMIANA 1: Dodajemy stan sprawdzający, czy komponent już się w pełni załadował w przeglądarce
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile(); 
+    // ZMIANA 2: Oznaczamy, że jesteśmy już po stronie klienta i znamy szerokość
+    setHasMounted(true); 
+
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const handleJohnyClick = () => {
     if (isMerged) {
@@ -51,37 +65,56 @@ export default function ProfilesSection() {
     }
   };
 
+  // ZMIANA 3: Jeśli komponent się jeszcze nie zamontował, zwracamy pusty div, żeby nie zepsuć animacji
+  if (!hasMounted) return <div className="min-h-[500px] w-full mt-64 mb-32" />;
+
   return (
-    // ZMIANA: mniejsze marginesy na mobile (mt-32), większe dla desktopów (md:mt-96)
-    <div className="w-full max-w-5xl mx-auto px-4 mt-32 md:mt-96 mb-24 md:mb-32 flex flex-col items-center">
+    <div className="w-full max-w-5xl mx-auto px-4 mt-64 md:mt-96 mb-24 md:mb-32 flex flex-col items-center overflow-x-hidden py-10">
       
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.3 }}
-        className="text-center mb-12"
+        // ZMIANA 4: Dodany klucz (key), który wymusza reset animacji w razie zmiany ekranu
+        key={isMobile ? "mobile-title" : "desktop-title"}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: isMobile ? 0.8 : 0.3 }}
+        variants={{
+          hidden: { opacity: 0, y: isMobile ? 40 : 30 },
+          visible: { 
+            opacity: 1, 
+            y: 0, 
+            transition: isMobile ? { duration: 1.5, ease: [0.16, 1, 0.3, 1] } : undefined 
+          }
+        }}
+        className="text-center mb-16 md:mb-12"
       >
         <h2 className="font-script text-5xl md:text-6xl text-[#4c4a1e] mb-4">Poznajmy się bliżej</h2>
         <div className="w-16 h-[1px] bg-[#4c4a1e]/30 mx-auto"></div>
       </motion.div>
 
-      {/* ZMIANA: Zastosowanie [perspective:1000px] w formacie akceptowanym natywnie przez Tailwind */}
       <div className="relative w-full flex flex-col items-center justify-center [perspective:1000px] md:[perspective:2000px]">
         
-        <div 
-          className={`flex w-full justify-center h-[400px] md:h-[550px] transition-all duration-[1500ms] ease-in-out ${
-            isMerged ? "gap-0 max-w-3xl" : "gap-4 md:gap-32 max-w-4xl"
+        <motion.div 
+          key={isMobile ? "mobile-container" : "desktop-container"}
+          initial="hidden"
+          whileInView="visible"
+          viewport={isMobile ? { once: true, margin: "0px 0px -30% 0px" } : { once: true, amount: 0.2 }}
+          variants={{
+            visible: { transition: { staggerChildren: isMobile ? 0.7 : 0 } }
+          }}
+          className={`flex w-full justify-center h-[350px] sm:h-[400px] md:h-[550px] transition-all duration-[1500ms] ease-in-out ${
+            isMerged ? "gap-0 max-w-3xl" : "gap-8 md:gap-32 max-w-4xl"
           }`}
         >
           {/* ========================================== */}
           {/* KARTA LEWA: JOHNY                            */}
           {/* ========================================== */}
           <motion.div
-            // ZMIANA KLUCZOWA: x z -200 zmienione na -50, by karta nie wypadła poza viewport na małych ekranach
-            initial={{ x: -50, opacity: 0 }}
-            whileInView={{ x: 0, opacity: 1 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
+            variants={{
+              hidden: isMobile ? { x: "-30vw", opacity: 0, y: 30, rotateZ: -5 } : { x: -200, opacity: 0, y: 0, rotateZ: 0 },
+              visible: isMobile 
+                ? { x: 0, opacity: 1, y: 0, rotateZ: 0, transition: { duration: 1.8, ease: [0.16, 1, 0.3, 1] } }
+                : { x: 0, opacity: 1, y: 0, rotateZ: 0, transition: { duration: 1.2, ease: "easeOut" } }
+            }}
             className="w-1/2 h-full group"
           >
             <motion.div
@@ -96,22 +129,41 @@ export default function ProfilesSection() {
               style={{ transformStyle: "preserve-3d", WebkitTransformStyle: "preserve-3d" }}
               className="relative w-full h-full cursor-pointer"
               animate={{ rotateY: flipJ ? 180 : 0 }}
-              transition={{ duration: 0.5, ease: "easeInOut" }}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
               onClick={handleJohnyClick}
               whileHover={{ scale: flipJ ? 1 : 1.03 }}
             >
-              {/* FRONT KARTY (Zdjęcie) */}
+              {/* FRONT KARTY */}
               <div 
                 className="absolute inset-0 shadow-xl border-y-4 border-l-4 border-r-none border-white/40 bg-black/5 rounded-l-2xl z-10 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:translateZ(1px)] [-webkit-transform:translateZ(1px)]"
               >
                 <Image src="/fotki/johny_lewa.jpg" alt="Johny" fill className="object-cover object-right rounded-l-2xl" />
                 
-                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-l-2xl">
-                  <p className="font-serif tracking-widest uppercase text-white border border-white px-4 py-2 rounded-full backdrop-blur-sm text-xs md:text-base">Obróć</p>
+                {/* Desktop Overlay */}
+                <div className="hidden md:flex absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-center justify-center rounded-l-2xl">
+                  <p className="font-serif tracking-widest uppercase text-white border border-white px-4 py-2 rounded-full backdrop-blur-sm text-base">Obróć</p>
                 </div>
+
+                {/* Mobilna Plakietka */}
+                <AnimatePresence>
+                  {!viewedJ && (
+                    <motion.div 
+                      variants={{
+                        hidden: { opacity: 0 },
+                        visible: { opacity: 1, transition: { delay: 2.5, duration: 0.8 } }
+                      }}
+                      exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.3 } }}
+                      className="flex md:hidden absolute bottom-3 left-1/2 -translate-x-1/2"
+                    >
+                      <p className="font-serif tracking-widest uppercase text-white bg-black/40 border border-white/60 px-3 py-1 rounded-full backdrop-blur-md text-[10px] shadow-lg animate-pulse">
+                        Obróć
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
               
-              {/* TYŁ KARTY (Opis) */}
+              {/* TYŁ KARTY */}
               <div 
                 className="absolute inset-0 rounded-r-2xl rounded-l-none shadow-xl bg-[#FDF9EC] border-y-4 border-l-none border-r-4 border-white/40 p-4 md:p-10 flex flex-col justify-center text-center z-0 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(180deg)_translateZ(1px)] [-webkit-transform:rotateY(180deg)_translateZ(1px)]"
               >
@@ -127,11 +179,12 @@ export default function ProfilesSection() {
           {/* KARTA PRAWA: MAGDA                         */}
           {/* ========================================== */}
           <motion.div
-            // ZMIANA KLUCZOWA: x z 200 zmienione na 50
-            initial={{ x: 50, opacity: 0 }}
-            whileInView={{ x: 0, opacity: 1 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
+            variants={{
+              hidden: isMobile ? { x: "30vw", opacity: 0, y: 30, rotateZ: 5 } : { x: 200, opacity: 0, y: 0, rotateZ: 0 },
+              visible: isMobile 
+                ? { x: 0, opacity: 1, y: 0, rotateZ: 0, transition: { duration: 1.8, ease: [0.16, 1, 0.3, 1] } }
+                : { x: 0, opacity: 1, y: 0, rotateZ: 0, transition: { duration: 1.2, ease: "easeOut" } }
+            }}
             className="w-1/2 h-full group"
           >
             <motion.div
@@ -146,22 +199,41 @@ export default function ProfilesSection() {
               style={{ transformStyle: "preserve-3d", WebkitTransformStyle: "preserve-3d" }}
               className="relative w-full h-full cursor-pointer"
               animate={{ rotateY: flipM ? -180 : 0 }}
-              transition={{ duration: 0.5, ease: "easeInOut" }}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
               onClick={handleMagdaClick}
               whileHover={{ scale: flipM ? 1 : 1.03 }}
             >
-              {/* FRONT KARTY (Zdjęcie) */}
+              {/* FRONT KARTY */}
               <div 
                 className="absolute inset-0 shadow-xl border-y-4 border-r-4 border-l-none border-white/40 bg-black/5 rounded-r-2xl z-10 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:translateZ(1px)] [-webkit-transform:translateZ(1px)]"
               >
                 <Image src="/fotki/magda_prawa.jpg" alt="Magda" fill className="object-cover object-left rounded-r-2xl" />
                 
-                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-r-2xl">
-                  <p className="font-serif tracking-widest uppercase text-white border border-white px-4 py-2 rounded-full backdrop-blur-sm text-xs md:text-base">Obróć</p>
+                {/* Desktop Overlay */}
+                <div className="hidden md:flex absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-center justify-center rounded-r-2xl">
+                  <p className="font-serif tracking-widest uppercase text-white border border-white px-4 py-2 rounded-full backdrop-blur-sm text-base">Obróć</p>
                 </div>
+
+                {/* Mobilna Plakietka */}
+                <AnimatePresence>
+                  {!viewedM && (
+                    <motion.div 
+                      variants={{
+                        hidden: { opacity: 0 },
+                        visible: { opacity: 1, transition: { delay: 2.5, duration: 0.8 } }
+                      }}
+                      exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.3 } }}
+                      className="flex md:hidden absolute bottom-3 left-1/2 -translate-x-1/2"
+                    >
+                      <p className="font-serif tracking-widest uppercase text-white bg-black/40 border border-white/60 px-3 py-1 rounded-full backdrop-blur-md text-[10px] shadow-lg animate-pulse">
+                        Obróć
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
               
-              {/* TYŁ KARTY (Opis) */}
+              {/* TYŁ KARTY */}
               <div 
                 className="absolute inset-0 rounded-l-2xl rounded-r-none shadow-xl bg-[#FDF9EC] border-y-4 border-r-none border-l-4 border-white/40 p-4 md:p-10 flex flex-col justify-center text-center z-0 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(-180deg)_translateZ(1px)] [-webkit-transform:rotateY(-180deg)_translateZ(1px)]"
               >
@@ -172,7 +244,7 @@ export default function ProfilesSection() {
               </div>
             </motion.div>
           </motion.div>
-        </div>
+        </motion.div>
 
       </div>
     </div>
