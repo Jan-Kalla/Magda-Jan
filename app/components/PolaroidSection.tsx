@@ -144,8 +144,8 @@ export default function PolaroidSection() {
     { src: "/fotki/2024.08.jpg", alt: "Kierunki", desc: "Sierpień 2024. Madzia mówi, że trzeba iść tam, a ewidentnie widać, że Johny jest innego zdania" },
     { src: "/fotki/2022.04.jpeg", alt: "Pierwszy rok studiów", desc: "Wspólne podróże w Smarcie" },
     { src: "/fotki/2024.09.jpeg", alt: "Czwarty rok studiów", desc: "Wrzesień 2024 - pierwsze wspólne Tatry" },
-    { src: "/fotki/2024.12_.jpg", alt: "Narty", desc: "Austria, Zillertal, grudzień 2024" },
-    { src: "/fotki/2022.09.jpg", alt: "Pierwsze Mazury", desc: "Wrzesień 2022. Oboje uwielbiamy Mazury! Razem żeglowaliśmy już tam cztery razy i aż dziw bierze, że mamy tak mało wspólnych zdjęć z tych wyjazdów. Ale ponownie pozdrawiamy Szczyrbixa, który też załapał się na to zdjęcie🤗" },
+    { src: "/fotki/2024.12.jpg", alt: "Narty", desc: "Austria, Zillertal, grudzień 2024" },
+    { src: "/fotki/2025.08__.jpg", alt: "Mazury", desc: "Wrzesień 2025. Oboje uwielbiamy Mazury!" },
   ];
 
   return (
