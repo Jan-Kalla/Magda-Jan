@@ -54,7 +54,6 @@ const PhotoCard = ({ photo, globalIndex, direction }: { photo: any; globalIndex:
       tabIndex={0}
       initial={initialAnimation}
       whileInView={{ opacity: 1, y: 0, x: 0, scale: 1 }}
-      // ZMIANA: Czyste amount: 0.1, usunięto ujemny margin, by wyzwalacz nie miał szans "przestrzelić"
       viewport={{ once: true, amount: 0.1 }}
       onViewportEnter={() => setIsInView(true)}
       transition={{ duration: 0.9, delay: globalIndex * 0.1, ease: "easeOut" }}
@@ -82,7 +81,6 @@ const PhotoCard = ({ photo, globalIndex, direction }: { photo: any; globalIndex:
             alt={photo.alt}
             width={800}
             height={800} 
-            // ZMIANA: Dodano optymalizację rozmiaru (sizes), by Next.js poprawnie załadował grafiki przed animacją
             sizes="(max-width: 768px) 50vw, 33vw"
             className="w-full h-full object-cover block"
           />
@@ -146,8 +144,8 @@ export default function PolaroidSection() {
   ];
 
   return (
-    <section className="relative w-full max-w-7xl mx-auto px-4 md:px-8 pb-48 lg:pb-64 pt-48 mb-96 lg:mb-[300px] z-10">
-      
+// ZMIANA: Zredukowano o połowę padding (pb-24 lg:pb-32) i margines (mb-48 lg:mb-[200px])
+    <section className="relative w-full max-w-7xl mx-auto px-4 md:px-8 pb-24 lg:pb-32 pt-48 mb-48 lg:mb-[200px] z-10"> 
       {/* NAGŁÓWEK SEKCJI */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}

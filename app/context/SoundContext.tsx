@@ -22,12 +22,12 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
   const buffersRef = useRef<Record<string, AudioBuffer>>({});
   const activeSourcesRef = useRef<Record<string, AudioBufferSourceNode>>({});
   
-  // Ref do śledzenia ostatniego elementu hover
+  // Refs do śledzenia stanu urządzeń wejściowych
   const lastHoveredRef = useRef<Element | null>(null);
+  const lastPointerType = useRef<string>("mouse"); // ZMIANA: Śledzi, czy to myszka, czy dotyk
 
-  // 1. WCZYTYWANIE USTAWIEŃ Z LOCALSTORAGE (Nowość)
+  // 1. WCZYTYWANIE USTAWIEŃ Z LOCALSTORAGE
   useEffect(() => {
-    // Sprawdzamy, czy w przeglądarce jest zapisane ustawienie
     const savedMuteState = localStorage.getItem("wedding_isMuted");
     
     if (savedMuteState === "true") {
@@ -78,7 +78,6 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
 
   // 3. ODTWARZANIE
   const playSound = useCallback((type: SoundType) => {
-    // Jeśli wyciszone - nie graj (nawet nie sprawdzaj reszty)
     if (isMuted || !audioCtxRef.current || !isReady) return;
 
     const ctx = audioCtxRef.current;
@@ -111,7 +110,6 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
     const buffer = buffersRef.current[bufferKey];
     if (!buffer) return;
 
-    // Anti-Machine-Gun dla Hovera
     if (type === "hover" && activeSourcesRef.current["last-hover"]) {
        try { activeSourcesRef.current["last-hover"].stop(); } catch(e){}
     }
@@ -147,16 +145,14 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
-  // 4. PRZEŁĄCZANIE WYCISZENIA + ZAPIS DO LOCALSTORAGE
+  // 4. PRZEŁĄCZANIE WYCISZENIA
   const toggleMute = () => {
-    // Jeśli odciszamy, musimy upewnić się, że kontekst wstanie
     if (isMuted && audioCtxRef.current?.state === "suspended") {
       audioCtxRef.current.resume();
     }
 
     setIsMuted((prev) => {
       const newState = !prev;
-      // Zapisujemy nowy stan do pamięci przeglądarki
       localStorage.setItem("wedding_isMuted", String(newState));
       return newState;
     });
@@ -164,12 +160,37 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
 
   // 5. GLOBALNE NASŁUCHIWANIE
   useEffect(() => {
-    const handleGlobalClick = () => {
+    
+    // ZMIANA: Obsługa dotknięcia ekranu (tylko rejestruje typ, ewentualnie odtwarza dla myszki)
+    const handlePointerDown = (e: PointerEvent) => {
+      lastPointerType.current = e.pointerType || "mouse"; // Zapamiętujemy czy to dotyk, rysik czy myszka
       if (audioCtxRef.current?.state === "suspended") audioCtxRef.current.resume();
-      playSound("click");
+
+      // Jeśli to myszka (Desktop), puszczamy dźwięk od razu dla idealnego czasu reakcji (zero lagów)
+      if (lastPointerType.current === "mouse") {
+        playSound("click");
+      }
+    };
+
+    // ZMIANA: Obsługa pełnego kliknięcia (wyzwala się TYLKO gdy nie było scrollowania)
+    const handleGlobalClick = (e: MouseEvent) => {
+      if (audioCtxRef.current?.state === "suspended") audioCtxRef.current.resume();
+
+      // Jeśli to był dotyk (Mobile), dźwięk puszczamy dopiero tutaj, bo jeśli był scroll, ten kod się nie wywoła
+      if (lastPointerType.current === "touch" || lastPointerType.current === "pen") {
+        const target = e.target as Element;
+        const interactiveElement = target.closest("button, a, input, [role='button'], .cursor-pointer");
+
+        if (interactiveElement) {
+          playSound("click");
+        }
+      }
     };
 
     const handleGlobalHover = (e: MouseEvent) => {
+      // ZMIANA: Ignorujemy "ghost hovery" na urządzeniach dotykowych, aby niepotrzebnie nie odtwarzać dźwięku
+      if (lastPointerType.current === "touch" || lastPointerType.current === "pen") return;
+
       const target = e.target as Element;
       const interactiveElement = target.closest("button, a, input, [role='button']");
 
@@ -183,11 +204,13 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    window.addEventListener("pointerdown", handleGlobalClick);
+    window.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("click", handleGlobalClick);
     window.addEventListener("mouseover", handleGlobalHover);
     
     return () => {
-      window.removeEventListener("pointerdown", handleGlobalClick);
+      window.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("click", handleGlobalClick);
       window.removeEventListener("mouseover", handleGlobalHover);
     };
   }, [playSound]);
