@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-// ZMIANA: Dodano import Variants z framer-motion, co eliminuje błąd TypeScripta
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { useState } from "react";
 
@@ -10,11 +9,8 @@ type Direction = "top" | "bottom" | "left" | "right" | "center";
 const PhotoCard = ({ photo, globalIndex, direction }: { photo: any; globalIndex: number; direction: Direction }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [hintVisible, setHintVisible] = useState(true);
-  
-  // ZMIANA: Stan śledzący, czy karta już pojawiła się na ekranie (dla timera 5 sekund)
   const [isInView, setIsInView] = useState(false);
 
-  // ZMIANA: Jawne otypowanie (Variants), dzięki czemu Typescript nie zgłasza błędów z "easeOut"
   const mobileHintVariants: Variants = {
     hidden: { opacity: 0, scale: 0.8 },
     visible: { 
@@ -34,11 +30,12 @@ const PhotoCard = ({ photo, globalIndex, direction }: { photo: any; globalIndex:
   };
 
   const getInitialPosition = (dir: Direction) => {
+    // ZMIANA: Zmniejszono dystans ze skrajnych 200 do 75, aby zdjęcia zawsze startowały w obrębie Viewportu
     switch (dir) {
-      case "top": return { opacity: 0, y: -200, x: 0 };
-      case "bottom": return { opacity: 0, y: 200, x: 0 };
-      case "left": return { opacity: 0, x: -200, y: 0 };
-      case "right": return { opacity: 0, x: 200, y: 0 };
+      case "top": return { opacity: 0, y: -75, x: 0 };
+      case "bottom": return { opacity: 0, y: 75, x: 0 };
+      case "left": return { opacity: 0, x: -75, y: 0 };
+      case "right": return { opacity: 0, x: 75, y: 0 };
       case "center": return { opacity: 0, scale: 0.8, y: 0, x: 0 };
       default: return { opacity: 0, y: 50, x: 0 };
     }
@@ -57,9 +54,8 @@ const PhotoCard = ({ photo, globalIndex, direction }: { photo: any; globalIndex:
       tabIndex={0}
       initial={initialAnimation}
       whileInView={{ opacity: 1, y: 0, x: 0, scale: 1 }}
-      // ZMIANA: Zmniejszono amount do 0.1, by wysokie kolumny zdjęć bez problemu odpalały się na telefonach
+      // ZMIANA: Czyste amount: 0.1, usunięto ujemny margin, by wyzwalacz nie miał szans "przestrzelić"
       viewport={{ once: true, amount: 0.1 }}
-      // ZMIANA: Aktywujemy timer pokazania etykiety "Obróć" dopiero gdy karta faktycznie znajdzie się w ekranie
       onViewportEnter={() => setIsInView(true)}
       transition={{ duration: 0.9, delay: globalIndex * 0.1, ease: "easeOut" }}
       className="relative w-full group cursor-pointer perspective-1000 flex flex-col flex-auto min-h-0"
@@ -86,6 +82,8 @@ const PhotoCard = ({ photo, globalIndex, direction }: { photo: any; globalIndex:
             alt={photo.alt}
             width={800}
             height={800} 
+            // ZMIANA: Dodano optymalizację rozmiaru (sizes), by Next.js poprawnie załadował grafiki przed animacją
+            sizes="(max-width: 768px) 50vw, 33vw"
             className="w-full h-full object-cover block"
           />
           
@@ -98,7 +96,6 @@ const PhotoCard = ({ photo, globalIndex, direction }: { photo: any; globalIndex:
 
           {/* MOBILNA PLAKIETKA */}
           <AnimatePresence>
-            {/* ZMIANA: Zależność od isInView wymusza poprawne 5-sekundowe odliczanie */}
             {isInView && hintVisible && !isFlipped && (
               <motion.div
                 variants={mobileHintVariants}
