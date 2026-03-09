@@ -14,13 +14,11 @@ export default function ProfilesSection() {
   const [isMerged, setIsMerged] = useState(false);
   
   const [isMobile, setIsMobile] = useState(false);
-  // ZMIANA 1: Dodajemy stan sprawdzający, czy komponent już się w pełni załadował w przeglądarce
   const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile(); 
-    // ZMIANA 2: Oznaczamy, że jesteśmy już po stronie klienta i znamy szerokość
     setHasMounted(true); 
 
     window.addEventListener("resize", checkMobile);
@@ -65,14 +63,12 @@ export default function ProfilesSection() {
     }
   };
 
-  // ZMIANA 3: Jeśli komponent się jeszcze nie zamontował, zwracamy pusty div, żeby nie zepsuć animacji
   if (!hasMounted) return <div className="min-h-[500px] w-full mt-64 mb-32" />;
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 mt-64 md:mt-96 mb-24 md:mb-32 flex flex-col items-center overflow-x-hidden py-10">
       
       <motion.div
-        // ZMIANA 4: Dodany klucz (key), który wymusza reset animacji w razie zmiany ekranu
         key={isMobile ? "mobile-title" : "desktop-title"}
         initial="hidden"
         whileInView="visible"
@@ -112,8 +108,8 @@ export default function ProfilesSection() {
             variants={{
               hidden: isMobile ? { x: "-30vw", opacity: 0, y: 30, rotateZ: -5 } : { x: -200, opacity: 0, y: 0, rotateZ: 0 },
               visible: isMobile 
-                ? { x: 0, opacity: 1, y: 0, rotateZ: 0, transition: { duration: 1.8, ease: [0.16, 1, 0.3, 1] } }
-                : { x: 0, opacity: 1, y: 0, rotateZ: 0, transition: { duration: 1.2, ease: "easeOut" } }
+                ? { x: 0, opacity: 1, y: 0, rotateZ: 0, transition: { duration: 2.8, ease: [0.16, 1, 0.3, 1] } }
+                : { x: 0, opacity: 1, y: 0, rotateZ: 0, transition: { duration: 2.2, ease: "easeOut" } }
             }}
             className="w-1/2 h-full group"
           >
@@ -137,7 +133,15 @@ export default function ProfilesSection() {
               <div 
                 className="absolute inset-0 shadow-xl border-y-4 border-l-4 border-r-none border-white/40 bg-black/5 rounded-l-2xl z-10 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:translateZ(1px)] [-webkit-transform:translateZ(1px)]"
               >
-                <Image src="/fotki/johny_lewa.jpg" alt="Johny" fill className="object-cover object-right rounded-l-2xl" />
+                {/* ZMIANA: Dodano priority oraz sizes */}
+                <Image 
+                  src="/fotki/johny_lewa.jpg" 
+                  alt="Johny" 
+                  fill 
+                  priority
+                  sizes="(max-width: 768px) 50vw, 50vw"
+                  className="object-cover object-right rounded-l-2xl" 
+                />
                 
                 {/* Desktop Overlay */}
                 <div className="hidden md:flex absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-center justify-center rounded-l-2xl">
@@ -150,9 +154,9 @@ export default function ProfilesSection() {
                     <motion.div 
                       variants={{
                         hidden: { opacity: 0 },
-                        visible: { opacity: 1, transition: { delay: 2.5, duration: 0.8 } }
+                        visible: { opacity: 1, transition: { delay: 3.5, duration: 0.8 } }
                       }}
-                      exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.3 } }}
+                      exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.9 } }}
                       className="flex md:hidden absolute bottom-3 left-1/2 -translate-x-1/2"
                     >
                       <p className="font-serif tracking-widest uppercase text-white bg-black/40 border border-white/60 px-3 py-1 rounded-full backdrop-blur-md text-[10px] shadow-lg animate-pulse">
@@ -182,8 +186,8 @@ export default function ProfilesSection() {
             variants={{
               hidden: isMobile ? { x: "30vw", opacity: 0, y: 30, rotateZ: 5 } : { x: 200, opacity: 0, y: 0, rotateZ: 0 },
               visible: isMobile 
-                ? { x: 0, opacity: 1, y: 0, rotateZ: 0, transition: { duration: 1.8, ease: [0.16, 1, 0.3, 1] } }
-                : { x: 0, opacity: 1, y: 0, rotateZ: 0, transition: { duration: 1.2, ease: "easeOut" } }
+                ? { x: 0, opacity: 1, y: 0, rotateZ: 0, transition: { duration: 2.8, ease: [0.16, 1, 0.3, 1] } }
+                : { x: 0, opacity: 1, y: 0, rotateZ: 0, transition: { duration: 2.2, ease: "easeOut" } }
             }}
             className="w-1/2 h-full group"
           >
@@ -207,7 +211,15 @@ export default function ProfilesSection() {
               <div 
                 className="absolute inset-0 shadow-xl border-y-4 border-r-4 border-l-none border-white/40 bg-black/5 rounded-r-2xl z-10 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:translateZ(1px)] [-webkit-transform:translateZ(1px)]"
               >
-                <Image src="/fotki/magda_prawa.jpg" alt="Magda" fill className="object-cover object-left rounded-r-2xl" />
+                {/* ZMIANA: Dodano priority oraz sizes */}
+                <Image 
+                  src="/fotki/magda_prawa.jpg" 
+                  alt="Magda" 
+                  fill 
+                  priority
+                  sizes="(max-width: 768px) 50vw, 50vw"
+                  className="object-cover object-left rounded-r-2xl" 
+                />
                 
                 {/* Desktop Overlay */}
                 <div className="hidden md:flex absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-center justify-center rounded-r-2xl">
@@ -220,9 +232,9 @@ export default function ProfilesSection() {
                     <motion.div 
                       variants={{
                         hidden: { opacity: 0 },
-                        visible: { opacity: 1, transition: { delay: 2.5, duration: 0.8 } }
+                        visible: { opacity: 1, transition: { delay: 3.5, duration: 0.8 } }
                       }}
-                      exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.3 } }}
+                      exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.9 } }}
                       className="flex md:hidden absolute bottom-3 left-1/2 -translate-x-1/2"
                     >
                       <p className="font-serif tracking-widest uppercase text-white bg-black/40 border border-white/60 px-3 py-1 rounded-full backdrop-blur-md text-[10px] shadow-lg animate-pulse">

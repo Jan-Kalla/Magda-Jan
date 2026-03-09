@@ -1,13 +1,37 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+// ZMIANA: Dodano import Variants z framer-motion, co eliminuje błąd TypeScripta
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import { useState } from "react";
 
 type Direction = "top" | "bottom" | "left" | "right" | "center";
 
 const PhotoCard = ({ photo, globalIndex, direction }: { photo: any; globalIndex: number; direction: Direction }) => {
   const [isFlipped, setIsFlipped] = useState(false);
+  const [hintVisible, setHintVisible] = useState(true);
+  
+  // ZMIANA: Stan śledzący, czy karta już pojawiła się na ekranie (dla timera 5 sekund)
+  const [isInView, setIsInView] = useState(false);
+
+  // ZMIANA: Jawne otypowanie (Variants), dzięki czemu Typescript nie zgłasza błędów z "easeOut"
+  const mobileHintVariants: Variants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: { 
+      opacity: 1, 
+      scale: 1, 
+      transition: { 
+        delay: 5, 
+        duration: 0.8, 
+        ease: "easeOut" 
+      } 
+    },
+    exit: { 
+      opacity: 0, 
+      scale: 0.5, 
+      transition: { duration: 0.3 } 
+    }
+  };
 
   const getInitialPosition = (dir: Direction) => {
     switch (dir) {
@@ -22,47 +46,73 @@ const PhotoCard = ({ photo, globalIndex, direction }: { photo: any; globalIndex:
 
   const initialAnimation = getInitialPosition(direction);
 
+  const handleInteraction = () => {
+    if (hintVisible) setHintVisible(false);
+    setIsFlipped(!isFlipped);
+  };
+
   return (
     <motion.div
       role="button"
       tabIndex={0}
       initial={initialAnimation}
       whileInView={{ opacity: 1, y: 0, x: 0, scale: 1 }}
-      // ZMIANA: Zwiększony amount do 0.35 + ujemny margines dolny zmuszają użytkownika do głębszego zjechania w dół!
-      viewport={{ once: true, amount: 0.35, margin: "0px 0px -100px 0px" }}
+      // ZMIANA: Zmniejszono amount do 0.1, by wysokie kolumny zdjęć bez problemu odpalały się na telefonach
+      viewport={{ once: true, amount: 0.1 }}
+      // ZMIANA: Aktywujemy timer pokazania etykiety "Obróć" dopiero gdy karta faktycznie znajdzie się w ekranie
+      onViewportEnter={() => setIsInView(true)}
       transition={{ duration: 0.9, delay: globalIndex * 0.1, ease: "easeOut" }}
-      className="relative w-full group cursor-pointer perspective-1000"
+      className="relative w-full group cursor-pointer perspective-1000 flex flex-col flex-auto min-h-0"
       whileHover={!isFlipped ? { y: -5, scale: 1.03, transition: { duration: 0.2 } } : {}}
-      onClick={() => setIsFlipped(!isFlipped)}
+      onClick={handleInteraction}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          setIsFlipped(!isFlipped);
+          handleInteraction();
         }
       }}
     >
       <motion.div
-        className="relative w-full [transform-style:preserve-3d]"
+        className="relative w-full h-full flex flex-col flex-auto [transform-style:preserve-3d]"
         animate={{ rotateY: isFlipped ? 180 : 0 }}
         transition={{ duration: 0.6, ease: "easeInOut" }}
       >
         {/* ========================================================= */}
         {/* PRZÓD: ZDJĘCIE */}
         {/* ========================================================= */}
-        <div className="relative w-full [backface-visibility:hidden] rounded-sm overflow-hidden shadow-lg group-hover:shadow-2xl transition-shadow duration-300 bg-black/5">
+        <div className="relative w-full h-full flex-auto [backface-visibility:hidden] rounded-sm overflow-hidden shadow-lg group-hover:shadow-2xl transition-shadow duration-300 bg-black/5 min-h-0">
           <Image
             src={photo.src}
             alt={photo.alt}
             width={800}
             height={800} 
-            className="w-full h-auto object-cover block"
+            className="w-full h-full object-cover block"
           />
           
-          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+          {/* Desktop Overlay */}
+          <div className="hidden md:flex absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-center justify-center">
             <p className="font-serif tracking-widest uppercase text-white border border-white px-4 py-2 rounded-full backdrop-blur-sm text-sm">
               Obróć
             </p>
           </div>
+
+          {/* MOBILNA PLAKIETKA */}
+          <AnimatePresence>
+            {/* ZMIANA: Zależność od isInView wymusza poprawne 5-sekundowe odliczanie */}
+            {isInView && hintVisible && !isFlipped && (
+              <motion.div
+                variants={mobileHintVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="flex md:hidden absolute bottom-2 left-1/2 -translate-x-1/2 pointer-events-none"
+              >
+                <p className="font-serif tracking-widest uppercase text-white bg-black/50 border border-white/60 px-2.5 py-1 rounded-full backdrop-blur-md text-[9px] shadow-lg animate-pulse whitespace-nowrap">
+                  Obróć
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* ========================================================= */}
@@ -99,8 +149,6 @@ export default function PolaroidSection() {
   ];
 
   return (
-   // ZMIANA: Dodano drastycznie większy margines dolny (mb-96 lg:mb-[400px]) i padding (pb-48 lg:pb-64)
-    // To utworzy potężny "oddech" przed przejściem do szczeliny z Timerem
     <section className="relative w-full max-w-7xl mx-auto px-4 md:px-8 pb-48 lg:pb-64 pt-48 mb-96 lg:mb-[300px] z-10">
       
       {/* NAGŁÓWEK SEKCJI */}
@@ -112,33 +160,29 @@ export default function PolaroidSection() {
         className="text-center mb-16 md:mb-24"
       >
         <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl uppercase tracking-[0.15em] text-[#4c4a1e] mb-6 px-4 leading-snug">
-         <p>
-          Wspólne chwile 
-         </p>
-          ulotne jak motyle
+         <p>Wspólne chwile</p>
+         ulotne jak motyle
          <p/>
         </h2>
         <div className="w-24 h-[1px] bg-[#4c4a1e]/40 mx-auto"></div>
       </motion.div>
 
       {/* UKŁAD ZDJĘĆ Z FIZYCZNYM PODZIAŁEM NA BLOKI */}
-      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 w-full items-start">
+      <div className="flex flex-col lg:flex-row gap-3 md:gap-4 lg:gap-6 w-full items-stretch">
         
         {/* BLOK LEWY I ŚRODKOWY */}
-        <div className="flex flex-col w-full lg:w-2/3 gap-4 lg:gap-6">
+        <div className="flex flex-col w-full lg:w-2/3 gap-3 md:gap-4 lg:gap-6 flex-auto min-h-0">
           
-          <div className="flex flex-col sm:flex-row gap-4 lg:gap-6 w-full">
+          <div className="flex flex-row gap-3 md:gap-4 lg:gap-6 w-full items-stretch flex-auto min-h-0">
             
             {/* Kolumna Lewa (Index 0, 1) */}
-            <div className="flex flex-col w-full sm:w-1/2 gap-4 lg:gap-6">
-              {/* ZMIANA: Indeksy podniesione na 4 i 5, by poczekały na środek */}
+            <div className="flex flex-col w-1/2 gap-3 md:gap-4 lg:gap-6 items-stretch flex-auto min-h-0">
               <PhotoCard photo={photos[0]} globalIndex={4} direction="left" />
               <PhotoCard photo={photos[1]} globalIndex={5} direction="left" />
             </div>
 
             {/* Kolumna Środkowa (Index 3, 4, 5) */}
-            <div className="flex flex-col w-full sm:w-1/2 gap-4 lg:gap-6">
-              {/* ZMIANA: Wszystkie z dołu, indeksy 0, 1, 2 = pojawiają się jako PIERWSZE */}
+            <div className="flex flex-col w-1/2 gap-3 md:gap-4 lg:gap-6 items-stretch flex-auto min-h-0">
               <PhotoCard photo={photos[3]} globalIndex={0} direction="bottom" />
               <PhotoCard photo={photos[4]} globalIndex={1} direction="bottom" />
               <PhotoCard photo={photos[5]} globalIndex={2} direction="bottom" />
@@ -147,20 +191,27 @@ export default function PolaroidSection() {
           </div>
 
           {/* DÓŁ: Ciasto (Index 2) */}
-          <div className="w-full">
-            {/* Ciasto wjeżdża jako ostatnie */}
+          <div className="w-full flex flex-col flex-auto min-h-0">
             <PhotoCard photo={photos[2]} globalIndex={8} direction="bottom" />
           </div>
 
         </div>
 
         {/* BLOK PRAWY */}
-        <div className="flex flex-col w-full lg:w-1/3 gap-4 lg:gap-6">
-          {/* ZMIANA: Indeksy wyrównane z lewą kolumną, startują od 4 */}
-          <PhotoCard photo={photos[6]} globalIndex={4} direction="right" />
-          <PhotoCard photo={photos[7]} globalIndex={5} direction="right" />
-          <PhotoCard photo={photos[8]} globalIndex={6} direction="right" />
-          <PhotoCard photo={photos[9]} globalIndex={7} direction="right" />
+        <div className="flex flex-row lg:flex-col w-full lg:w-1/3 gap-3 md:gap-4 lg:gap-6 items-stretch flex-auto min-h-0">
+          
+          {/* Kolumna 1 na telefonie (lewa strona tego bloku) */}
+          <div className="flex flex-col w-1/2 lg:w-full gap-3 md:gap-4 lg:gap-6 items-stretch flex-auto min-h-0">
+            <PhotoCard photo={photos[6]} globalIndex={4} direction="right" />
+            <PhotoCard photo={photos[7]} globalIndex={5} direction="right" />
+          </div>
+
+          {/* Kolumna 2 na telefonie (prawa strona tego bloku) */}
+          <div className="flex flex-col w-1/2 lg:w-full gap-3 md:gap-4 lg:gap-6 items-stretch flex-auto min-h-0">
+            <PhotoCard photo={photos[8]} globalIndex={6} direction="right" />
+            <PhotoCard photo={photos[9]} globalIndex={7} direction="right" />
+          </div>
+
         </div>
 
       </div>
