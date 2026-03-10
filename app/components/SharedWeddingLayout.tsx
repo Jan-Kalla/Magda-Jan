@@ -215,7 +215,8 @@ export default function SharedWeddingLayout({
                         initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 1.0, ease: "easeOut", delay: 1.6 }}
-                        className="absolute -bottom-12 md:-bottom-20 right-0 sm:right-16 md:right-24 lg:right-40 text-3xl md:text-4xl lg:text-5xl font-script text-[#FDF9EC] drop-shadow-md z-20 whitespace-nowrap"
+                        // ZMIANA: Z right-16 na right-0 dla najmniejszych ekranów
+                        className="absolute -bottom-12 md:-bottom-20 right-16 sm:right-20 md:right-24 lg:right-40 text-3xl md:text-4xl lg:text-5xl font-script text-[#FDF9EC] drop-shadow-md z-20 whitespace-nowrap"
                       >
                         Pobieramy się!
                       </motion.p>

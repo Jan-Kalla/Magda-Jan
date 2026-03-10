@@ -67,7 +67,7 @@ export default function Navbar() {
               e.stopPropagation();
               toggleMute();
             }}
-            className="p-2 rounded-full hover:bg-black/5 transition text-[#4c4a1e]"
+            className="p-2 rounded-full hover:bg-black/5 transition text-[#EBBFB8]"
             title={isMuted ? "Włącz dźwięki" : "Wycisz dźwięki"}
           >
             {isMuted ? (
@@ -79,7 +79,7 @@ export default function Navbar() {
 
           {/* PRZYCISK MENU (HAMBURGER) */}
           <button
-            className="focus:outline-none p-2 rounded-lg bg-[#4c4a1e] hover:bg-[#3b3917] transition shadow-sm flex items-center justify-center w-11 h-11"
+            className="focus:outline-none p-2 rounded-lg bg-[#EBBFB8] hover:bg-[#3b3917] transition shadow-sm flex items-center justify-center w-11 h-11"
             onClick={handleMenuClick}
             aria-label={isOpen ? "Zamknij menu" : "Otwórz menu"}
           >
@@ -111,13 +111,13 @@ export default function Navbar() {
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className={`relative group transition-colors font-serif font-medium uppercase tracking-[0.15em] text-xs lg:text-sm ${
-                    isActive ? "text-[#4c4a1e]" : "text-[#4c4a1e]/70 hover:text-[#4c4a1e]"
+                  className={`relative group transition-colors font-serif font-medium bold uppercase tracking-[0.15em] text-xs lg:text-sm ${
+                    isActive ? "text-[#4E0113]" : "text-[#4E0113]/70 hover:text-[#4E0113]"
                   }`}
                 >
                   {item.label}
                   <span
-                    className={`absolute left-0 -bottom-2 h-[1px] bg-[#4c4a1e] transition-all duration-300 ${
+                    className={`absolute left-0 -bottom-2 h-[1px] bg-[#4E0113] transition-all duration-300 ${
                       isActive ? "w-full" : "w-0 group-hover:w-full"
                     }`}
                   />
@@ -132,7 +132,7 @@ export default function Navbar() {
              e.stopPropagation();
              toggleMute();
            }}
-           className="p-2 rounded-full hover:bg-black/5 transition text-[#4c4a1e]"
+           className="p-2 rounded-full hover:bg-black/5 transition text-[#EBBFB8]"
            title={isMuted ? "Włącz dźwięki" : "Wycisz dźwięki"}
          >
            {isMuted ? (
@@ -146,7 +146,7 @@ export default function Navbar() {
             <li>
               <button
                 onClick={logout}
-                className="ml-2 bg-[#4c4a1e] hover:bg-[#3b3917] transition px-4 py-2 rounded-lg text-[#FDF9EC] text-xs font-serif font-medium uppercase tracking-widest shadow"
+                className="ml-2 bg-[#C97B78] hover:bg-[#3b3917] transition px-4 py-2 rounded-lg text-[#FDF9EC] text-xs font-serif font-medium uppercase tracking-widest shadow"
               >
                 Wyloguj się
               </button>
@@ -164,7 +164,7 @@ export default function Navbar() {
           animate={{ height: "auto", opacity: 1 }}
           exit={{ height: 0, opacity: 0 }}
           transition={{ duration: 0.4, ease: "easeInOut" }}
-          className="overflow-hidden bg-[#FDF9EC] border-t border-[#4c4a1e]/10 shadow-lg relative z-10"
+          className="overflow-hidden bg-[#FDF9EC] border-t border-[#4E0113]/10 shadow-lg relative z-10"
         >
           <div className="px-4 pb-4">
             <ul className="flex flex-col space-y-2 mt-2">
@@ -176,8 +176,8 @@ export default function Navbar() {
                       href={item.href}
                       className={`block py-3 transition-colors font-serif font-medium uppercase tracking-widest text-sm ${
                         isActive
-                          ? "text-[#4c4a1e] font-bold"
-                          : "text-[#4c4a1e]/80 hover:text-[#4c4a1e]"
+                          ? "text-[#4E0113] font-bold"
+                          : "text-[#4E0113]/80 hover:text-[#4E0113]"
                       }`}
                       onClick={() => setIsOpen(false)}
                     >
@@ -195,7 +195,7 @@ export default function Navbar() {
                       setIsOpen(false);
                     }}
                     // ZMIANA: Zrobiono z tego pełnoprawny, widoczny przycisk z tłem
-                    className="w-full text-center py-3 bg-[#4c4a1e] hover:bg-[#3b3917] transition-colors rounded-lg font-serif font-medium uppercase tracking-widest text-sm text-[#FDF9EC] shadow-md"
+                    className="w-full text-center py-3 bg-[4E0113] hover:bg-[#3b3917] transition-colors rounded-lg font-serif font-medium uppercase tracking-widest text-sm text-[#FDF9EC] shadow-md"
                   >
                     Wyloguj się
                   </button>
