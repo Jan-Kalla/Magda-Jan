@@ -30,7 +30,6 @@ const PhotoCard = ({ photo, globalIndex, direction }: { photo: any; globalIndex:
   };
 
   const getInitialPosition = (dir: Direction) => {
-    // ZMIANA: Zmniejszono dystans ze skrajnych 200 do 75, aby zdjęcia zawsze startowały w obrębie Viewportu
     switch (dir) {
       case "top": return { opacity: 0, y: -75, x: 0 };
       case "bottom": return { opacity: 0, y: 75, x: 0 };
@@ -113,15 +112,22 @@ const PhotoCard = ({ photo, globalIndex, direction }: { photo: any; globalIndex:
         {/* ========================================================= */}
         {/* TYŁ: OPIS (ODWRÓCONY) */}
         {/* ========================================================= */}
-        <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-sm overflow-hidden shadow-lg group-hover:shadow-2xl transition-shadow duration-300 bg-[#FDF9EC] flex items-center justify-center p-4 md:p-6 text-center border-2 border-[#4c4a1e]/10">
-          <div className="flex flex-col items-center justify-center space-y-3 overflow-y-auto w-full h-full custom-scrollbar">
-            <h3 className="font-serif font-medium text-base md:text-lg lg:text-xl text-[#4c4a1e] uppercase tracking-widest shrink-0">
-              {photo.alt}
-            </h3>
-            <div className="w-8 h-[1px] bg-[#4c4a1e]/40 shrink-0"></div>
-            <p className="font-serif font-normal text-xs md:text-sm lg:text-base text-[#4c4a1e] leading-relaxed">
-              {photo.desc}
-            </p>
+        <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-sm overflow-hidden shadow-lg group-hover:shadow-2xl transition-shadow duration-300 bg-[#FDF9EC] border-2 border-[#4c4a1e]/10">
+          {/* ZMIANA: Usunięto flex z tego poziomu i przeniesiono padding. Ustawiono przewijanie na cały kontener. */}
+          <div className="w-full h-full overflow-y-auto custom-scrollbar p-2.5 sm:p-4 md:p-6 flex flex-col">
+            
+            {/* ZMIANA: m-auto sprawia, że blok centruje się gdy jest mały, a gdy duży - zaczyna się od góry bez ucinania! */}
+            <div className="m-auto flex flex-col items-center justify-center w-full">
+              <h3 className="font-serif font-medium text-[11px] sm:text-sm md:text-lg lg:text-xl text-[#4c4a1e] uppercase tracking-widest shrink-0 text-center">
+                {photo.alt}
+              </h3>
+              <div className="w-6 sm:w-8 h-[1px] bg-[#4c4a1e]/40 shrink-0 my-1.5 sm:my-3"></div>
+              {/* ZMIANA: Mniejszy font (text-[10px]) i węższa interlinia (leading-[1.4]) dla mobile */}
+              <p className="font-serif font-normal text-[10px] sm:text-xs md:text-sm lg:text-base text-[#4c4a1e] leading-[1.4] md:leading-relaxed text-center">
+                {photo.desc}
+              </p>
+            </div>
+
           </div>
         </div>
       </motion.div>
@@ -134,7 +140,7 @@ export default function PolaroidSection() {
     { src: "/fotki/2020.jpg", alt: "Druga liceum", desc: "Siedzieliśmy w jednej ławce na polskim i na godzinie wychowawczej, do polskiego dzieliliśmy się jednym podręcznikiem" },
     { src: "/fotki/2024.05.jpg", alt: "Trzeci rok studiów", desc: "Maj 2024, gdzieś w krzokach." },
     { src: "/fotki/2025.05.jpg", alt: "Ciasta w naszym kolorze", desc: "Nie jest tajemnicą, że ciasta zwykle dobieramy pod swój kolor" },
-    { src: "/fotki/2021.05.jpeg", alt: "Po maturach!", desc: "Maj 2021, chwila, kiedy można było trochę odpocząć, poimprezować i wymienić się dobrymi memami" },
+    { src: "/fotki/2021.05.jpeg", alt: "Po maturach!", desc: "Maj 2021, odpoczynek po nauce i dzielenie się dobrymi memami" },
     { src: "/fotki/2019.02.jpg", alt: "Pierwsza liceum", desc: "Krynica-Zdrój, luty 2019, szkolny wyjazd narciarski. Nasze pierwsze wspólne zdjęcie! Oczywiście załapał się tu również Szczyrbix😁" },
     { src: "/fotki/2024.08.jpg", alt: "Kierunki", desc: "Sierpień 2024. Madzia mówi, że trzeba iść tam, a ewidentnie widać, że Johny jest innego zdania" },
     { src: "/fotki/2022.04.jpeg", alt: "Pierwszy rok studiów", desc: "Wspólne podróże w Smarcie" },
@@ -144,8 +150,8 @@ export default function PolaroidSection() {
   ];
 
   return (
-// ZMIANA: Zredukowano o połowę padding (pb-24 lg:pb-32) i margines (mb-48 lg:mb-[200px])
-    <section className="relative w-full max-w-7xl mx-auto px-4 md:px-8 pb-24 lg:pb-32 pt-48 mb-48 lg:mb-[200px] z-10"> 
+    <section className="relative w-full max-w-7xl mx-auto px-4 md:px-8 pb-24 lg:pb-32 pt-48 mb-48 lg:mb-[150px] z-10">
+      
       {/* NAGŁÓWEK SEKCJI */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -155,8 +161,10 @@ export default function PolaroidSection() {
         className="text-center mb-16 md:mb-24"
       >
         <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl uppercase tracking-[0.15em] text-[#4c4a1e] mb-6 px-4 leading-snug">
-         <p>Wspólne chwile</p>
-         ulotne jak motyle
+         <p>
+          Wspólne chwile 
+         </p>
+          ulotne jak motyle
          <p/>
         </h2>
         <div className="w-24 h-[1px] bg-[#4c4a1e]/40 mx-auto"></div>

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion, Variants } from "framer-motion";
-import { Fragment } from "react"; // ZMIANA: Importujemy Fragment do wstrzykiwania spacji
+import { Fragment } from "react";
 
 export default function AboutSection() {
   const paragraphText = "Czeeeeeeeeeść! To My! Magda i Johny! Znamy się od września 2018 roku i już całkiem sporo razem przeżyliśmy. Nadszedł w końcu ten czas, że podjęliśmy wspólnie decyzję o tym, że chcemy spędzić ze sobą resztę życia. Traktujemy jednak tę decyzję śmiertelnie poważnie, dlatego chcemy jawnie wyznać i zapieczętować ją przed Bogiem i przed ludźmi. Dobrze zdając sobie sprawę, z czym się to wiąże, chcemy pozostać ze sobą już do końca życia, bez możliwości rezygnacji z tej umowy. Chcemy, byście towarzyszyli nam w tym, być może, najważniejszym momencie naszego życia, bo zakładamy, że drugiego takiego już nie będzie. Dlatego zależy nam na Waszej obecności w tym dniu. Na naszym ślubie każdy, kto towarzyszył nam na tej drodze choćby przez moment, jest mile widziany! Super by było, jeżeli jak najwięcej z Was stanie się świadkami naszego sakramentalnego \"TAK\"!";
@@ -36,15 +36,14 @@ export default function AboutSection() {
   };
 
   return (
-    <div className="w-full text-[#4c4a1e]">
+    <div className="w-full text-[#4c4a1e] overflow-hidden">
       {/* --- SEKCJA 1: CYTAT --- */}
       <motion.div 
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.3 }}
         transition={{ duration: 1, ease: "easeOut" }}
-        // ZMIANA: Symetryczne marginesy dla idealnego wyśrodkowania (mt i mb są teraz równe)
-        className="max-w-3xl mx-auto px-6 mt-48 mb-60 md:mt-60 md:mb-80 text-center flex flex-col items-center"
+        className="max-w-3xl mx-auto px-6 mt-48 mb-48 md:mt-60 md:mb-60 text-center flex flex-col items-center"
       >
         <p className="font-serif italic text-xl md:text-2xl leading-relaxed mb-4">
           "Obleczcie się w serdeczne współczucie, w dobroć, pokorę, cichość, cierpliwość, znosząc jedni drugich i wybaczając sobie nawzajem..."
@@ -79,13 +78,13 @@ export default function AboutSection() {
           />
         </motion.div>
 
-        <div className="flex-1 flex flex-col items-start text-left pt-2">  
+        <div className="flex-1 flex flex-col items-start text-left pt-2 w-full">  
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="font-script text-xl md:text-2xl lg:text-3xl drop-shadow-sm mb-2 ml-4 md:ml-8 lg:ml-6"
+            className="font-script text-xl md:text-2xl lg:text-3xl drop-shadow-sm mb-2 ml-2 md:ml-8 lg:ml-6"
           >
             Poznajamy się
           </motion.p>
@@ -95,29 +94,28 @@ export default function AboutSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
-            className="font-serif font-light text-3xl md:text-4xl lg:text-5xl xl:text-6xl uppercase tracking-[0.1em] lg:tracking-[0.15em] mb-12 md:mb-20 whitespace-nowrap"
+            className="font-serif font-light text-3xl sm:text-4xl md:text-4xl lg:text-5xl uppercase tracking-[0.1em] lg:tracking-[0.15em] mb-12 md:mb-20 break-words w-full"
           >
-            Magdalena <span className="italic pr-1">&amp;</span> Johny
+            {/* ZMIANA: Dodano "whitespace-nowrap" obejmujące znak "&" i imię "Johny", dzięki czemu nie rozdzielą się na dwie linijki */}
+            Magda <span className="whitespace-nowrap"><span className="italic pr-1">&amp;</span> Johny</span>
           </motion.h2>
           
-          {/* ZMIANA KLUCZOWA: "block w-full text-justify" pozwala przeglądarce naciągnąć spacje */}
           <motion.div 
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
+            // ZMIANA: Przywrócono stałe "text-justify" zamiast "text-left sm:text-justify"
             className="font-serif font-normal text-lg md:text-xl leading-relaxed max-w-lg text-justify hyphens-auto block w-full"
           >
             {words.map((word, index) => (
               <Fragment key={index}>
                 <motion.span
                   variants={wordVariants}
-                  // ZMIANA: Usunięto margines w prawo
                   className="inline-block"
                 >
                   {word}
                 </motion.span>
-                {/* ZMIANA: Wstawienie naturalnej, tekstowej spacji między elementami */}
                 {index < words.length - 1 && " "}
               </Fragment>
             ))}

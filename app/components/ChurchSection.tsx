@@ -102,7 +102,6 @@ export default function ChurchSection() {
           transition={{ duration: 0.8 }}
           className="mb-8 flex flex-col items-center lg:items-start w-full"
         >
-          {/* ZMIANA: Usunięto max-w-[300px], aby tekst mógł się rozciągnąć na 1 linijkę, jeśli ekran jest szeroki */}
           <AnimatedText 
               text={"Kościół pw. św.\u00A0Piotra i\u00A0Pawła"} 
               className="font-serif font-normal w-full text-3xl md:text-4xl lg:text-5xl leading-tight mb-2 text-[#F6f4e5] mx-auto lg:mx-0" 
@@ -119,13 +118,13 @@ export default function ChurchSection() {
         </motion.div>
 
         <div className="mt-4 md:mt-12 flex flex-col items-center lg:items-start w-full">
-          {/* ZMIANA: Usunięto max-w-xs, aby również swobodniej układać datę na szerszych ekranach */}
+          {/* ZMIANA: "font-normal" odpali wersję Regular (400), a na spanach daliśmy "font-medium" (500) dla wariantu Medium */}
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="font-serif font-light text-2xl md:text-3xl mb-4 leading-snug text-[#F6f4e5] w-full mx-auto lg:mx-0"
+            className="font-serif font-normal text-2xl md:text-3xl mb-4 leading-snug text-[#F6f4e5] w-full mx-auto lg:mx-0"
           >
             Uroczystość rozpocznie się <br className="md:hidden" />
             <span className="font-medium whitespace-nowrap">19 lipca 2026</span> o&nbsp;godzinie <span className="font-medium">12:00</span>

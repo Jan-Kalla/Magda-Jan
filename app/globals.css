@@ -37,6 +37,15 @@
   font-display: swap;
 }
 
+/* 5. IvyOra Medium (Dodana specjalnie dla dat i wyróżnień w tekście) */
+@font-face {
+  font-family: 'IvyOra';
+  src: url('/fonts/IvyOraDisplay-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

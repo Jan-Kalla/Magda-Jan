@@ -120,7 +120,6 @@ export default function SharedWeddingLayout({
         <div className="absolute inset-0 bg-black/20" /> 
       </div>
 
-      {/* ZMIANA KLUCZOWA: Usunięto mix-blend-overlay na urządzeniach mobilnych, który masakrował płynność (FPS) */}
       <div className="fixed inset-0 pointer-events-none z-[60]">
         <div className="absolute inset-0 bg-noise opacity-10 md:opacity-[0.6] md:mix-blend-overlay" />
       </div>
@@ -209,14 +208,14 @@ export default function SharedWeddingLayout({
                         transition={{ duration: 1.2, ease: "easeOut", delay: 0.6 }}
                         className="text-4xl md:text-5xl lg:text-7xl font-serif font-light tracking-widest uppercase z-10"
                       >
-                        Magdalena <span className="whitespace-nowrap"><span className="italic pr-1">&amp;</span> Johny</span>
+                        Magdalena <span className="whitespace-nowrap"><span className="italic pr-1">&amp;</span> Jan</span>
                       </motion.h1>
                       
                       <motion.p 
                         initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 1.0, ease: "easeOut", delay: 1.6 }}
-                        className="absolute -bottom-12 md:-bottom-20 right-16 md:right-24 lg:right-40 text-3xl md:text-4xl lg:text-5xl font-script text-[#FDF9EC] drop-shadow-md z-20 whitespace-nowrap"
+                        className="absolute -bottom-12 md:-bottom-20 right-0 sm:right-16 md:right-24 lg:right-40 text-3xl md:text-4xl lg:text-5xl font-script text-[#FDF9EC] drop-shadow-md z-20 whitespace-nowrap"
                       >
                         Pobieramy się!
                       </motion.p>
@@ -236,7 +235,7 @@ export default function SharedWeddingLayout({
                   
                   {/* Szkła generują się tylko na komputerach */}
                   <div className="hidden md:block">
-                    <OrganicGlassPattern />
+                    <OrganicGlassPattern part="top" />
                     <div className="absolute top-[0%] left-[-10%] w-[50%] h-[600px] bg-[#FDF9EC] blur-[100px] rounded-full mix-blend-overlay opacity-60 pointer-events-none z-0" />
                     <div className="absolute bottom-[20%] right-[-10%] w-[50%] h-[500px] bg-[#EBBFB8] blur-[120px] rounded-full opacity-60 pointer-events-none z-0" />
                     <div className="absolute top-[40%] left-[20%] w-[40%] h-[400px] bg-[#C97B78] blur-[150px] rounded-full opacity-20 mix-blend-multiply pointer-events-none z-0" />
@@ -251,11 +250,13 @@ export default function SharedWeddingLayout({
 
                 <Timer />
 
-                <div className="relative w-full bg-gradient-to-b from-[#EBBFB8] from-10% via-[#C97B78] via-60% to-[#904C4F] to-100% overflow-hidden shadow-[0_-10px_30px_rgba(0,0,0,0.1)]">
+                {/* ZMIANA KLUCZOWA: Gradient kończy się na 75%, zapewniając czysty kolor stopki na samym dole! */}
+                <div className="relative w-full bg-gradient-to-b from-[#EBBFB8] from-[0%] via-[#C97B78] via-[45%] to-[#4E0113] to-[90%] overflow-hidden shadow-[0_-10px_30px_rgba(0,0,0,0.1)]">
                   
                   <div className="hidden md:block">
-                    <OrganicGlassPattern />
-                    <div className="absolute bottom-[5%] left-[-10%] w-[50%] h-[500px] bg-[#75897D] blur-[120px] rounded-full opacity-60 pointer-events-none z-0" />
+                    <OrganicGlassPattern part="bottom" />
+                    {/* ZMIANA: Kleks podniesiony na bottom-[25%], żeby nie zanieczyszczał połączenia ze stopką */}
+                    <div className="absolute bottom-[25%] left-[-10%] w-[50%] h-[500px] bg-[#75897D] blur-[120px] rounded-full opacity-30 pointer-events-none z-0" />
                   </div>
                   
                   <div className="relative z-10">

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { events } from "../data/events";
 import { useSound } from "@/app/context/SoundContext";
 
-// --- POJEDYNCZA CYFRA (Z DYNAMICZNYM CIENIEM) ---
+// --- POJEDYNCZA CYFRA ---
 interface FlipDigitProps {
   digit: string;
   isMuted: boolean;
@@ -31,13 +31,13 @@ function FlipDigit({ digit, isMuted, getVolume }: FlipDigitProps) {
             audio.playbackRate = 0.95 + Math.random() * 0.1;
             audio.play().catch(() => {});
           }
-        }, 300); // 300ms delay
+        }, 300);
       }
 
       const timeout = setTimeout(() => {
         setPrevDigit(digit);
         setFlipping(false);
-      }, 600); // 600ms duration
+      }, 600);
 
       return () => {
         clearTimeout(timeout);
@@ -52,22 +52,16 @@ function FlipDigit({ digit, isMuted, getVolume }: FlipDigitProps) {
 
   return (
     <div className={`relative w-10 sm:w-14 md:w-16 lg:w-20 h-14 sm:h-20 md:h-28 lg:h-32 bg-white rounded-lg ${containerShadow} mx-0.5 sm:mx-1 md:mx-1.5 perspective-1000`}>
-      {/* --- TŁO STATYCZNE --- */}
       <div className="absolute inset-0 flex flex-col rounded-lg overflow-hidden">
-        {/* Górna połowa */}
         <div className={`h-1/2 w-full relative overflow-hidden flex justify-center items-end ${topHalfStyle}`}>
           <span className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-[#4E0113] translate-y-[50%] leading-none">
             {flipping ? digit : prevDigit}
           </span>
         </div>
-        
-        {/* DOLNA POŁOWA */}
         <div className={`h-1/2 w-full relative overflow-hidden flex justify-center items-start ${bottomHalfStyle}`}>
           <span className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-[#4E0113] -translate-y-[50%] leading-none relative z-0">
             {flipping ? prevDigit : digit}
           </span>
-
-          {/* DYNAMICZNY CIEŃ */}
           <AnimatePresence>
             {flipping && (
               <motion.div
@@ -82,7 +76,6 @@ function FlipDigit({ digit, isMuted, getVolume }: FlipDigitProps) {
         </div>
       </div>
 
-      {/* --- KLAPKI ANIMOWANE --- */}
       <AnimatePresence>
         {flipping && (
           <>
@@ -114,13 +107,11 @@ function FlipDigit({ digit, isMuted, getVolume }: FlipDigitProps) {
           </>
         )}
       </AnimatePresence>
-      
       <div className="absolute inset-0 rounded-lg shadow-[inset_0_0_8px_rgba(0,0,0,0.1)] border border-white/40 pointer-events-none z-40" />
     </div>
   );
 }
 
-// --- Reszta komponentów ---
 interface FlipUnitProps {
   value: number;
   label: string;
@@ -136,12 +127,7 @@ function FlipUnit({ value, label, isMuted, getVolume, minDigits = 2 }: FlipUnitP
     <div className="flex flex-col items-center">
       <div className="flex">
         {digits.map((digit, index) => (
-          <FlipDigit
-            key={index}
-            digit={digit}
-            isMuted={isMuted}
-            getVolume={getVolume}
-          />
+          <FlipDigit key={index} digit={digit} isMuted={isMuted} getVolume={getVolume} />
         ))}
       </div>
       <p className="text-[#FDF9EC] font-serif text-xs sm:text-sm md:text-base lg:text-lg mt-4 lg:mt-6 tracking-[0.2em] uppercase drop-shadow-md">
@@ -182,9 +168,7 @@ export default function Timer() {
   const targetDate = new Date("2026-07-19T12:00:00+02:00");
 
   useEffect(() => {
-    const update = () => {
-      setNow(new Date());
-    };
+    const update = () => setNow(new Date());
     update();
     const interval = setInterval(update, 1000);
     return () => clearInterval(interval);
@@ -203,7 +187,8 @@ export default function Timer() {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full min-h-screen flex flex-col items-center justify-center p-4 text-center text-white overflow-hidden"
+      // ZMIANA: Usunięto p-4, dodano py-24 (gwarantowany górny i dolny margines niezależnie od wysokości urządzenia)
+      className="relative w-full min-h-screen flex flex-col items-center justify-center px-4 py-24 md:py-32 text-center text-white overflow-hidden"
     >
       <div
         className="absolute inset-0 -z-10
@@ -217,8 +202,8 @@ export default function Timer() {
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
         viewport={{ once: true, amount: 0.6 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        // ZMIANA: Dodano font-light oraz italic
-        className="font-serif font-light italic text-5xl md:text-6xl lg:text-7xl text-[#FDF9EC] -mt-16 md:-mt-24 mb-16 md:mb-24 uppercase tracking-[0.2em] drop-shadow-lg"
+        // ZMIANA: Usunięto ujemne marginesy (-mt-16), dodano bezpieczne mb-10
+        className="font-serif font-light italic text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-[#FDF9EC] mb-10 md:mb-16 uppercase tracking-[0.15em] md:tracking-[0.2em] drop-shadow-lg"
       >
         Nasz wielki dzień
       </motion.h2>
@@ -228,12 +213,11 @@ export default function Timer() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.6 }}
         transition={{ duration: 0.6, delay: 0.2 }}
-        className="font-serif text-base md:text-xl lg:text-2xl mb-12  tracking-[0.15em] text-[#FDF9EC] drop-shadow-md"
+        className="font-serif text-base md:text-xl lg:text-2xl mb-12 tracking-[0.15em] text-[#FDF9EC] drop-shadow-md"
       >
         Do rozpoczęcia ślubu zostało:
       </motion.p>
 
-      {/* --- TIMER KONTENER --- */}
       <div className="flex flex-row flex-wrap justify-center items-start gap-1 sm:gap-2 md:gap-4 lg:gap-6">
         <FlipUnit value={days} label="Dni" isMuted={isMuted} getVolume={getDynamicVolume} minDigits={days > 99 ? 3 : 2} />
         <Separator />
