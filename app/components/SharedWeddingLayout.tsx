@@ -109,8 +109,8 @@ export default function SharedWeddingLayout({
         )}
       </AnimatePresence>
 
-      {/* ZMIANA: Usunięto inset-0. Zamieniono na sztywne top-0 left-0 w-full h-[100svh] */}
-      <div className="fixed top-0 left-0 w-full h-[100svh] -z-20">
+      {/* ZMIANA: Tło zdjęcia zablokowane na max-wysokość (100lvh) by pokryć całą przestrzeń w ukryciu paska adresu */}
+      <div className="fixed top-0 left-0 w-full h-[100lvh] -z-20">
         <Image 
           src="/fotki/raczki.jpg" 
           alt="Tło szczeliny" 
@@ -121,8 +121,8 @@ export default function SharedWeddingLayout({
         <div className="absolute inset-0 bg-black/20" /> 
       </div>
 
-      {/* ZMIANA: Szum również otrzymał twarde 100svh, żeby nie migotał przy skalowaniu */}
-      <div className="fixed top-0 left-0 w-full h-[100svh] pointer-events-none z-[60]">
+      {/* ZMIANA: Szum zachowuje się tak samo jak zdjęcie (100lvh) */}
+      <div className="fixed top-0 left-0 w-full h-[100lvh] pointer-events-none z-[60]">
         <div className="absolute inset-0 bg-noise opacity-10 md:opacity-[0.6] md:mix-blend-overlay" />
       </div>
 
