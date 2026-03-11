@@ -109,7 +109,8 @@ export default function SharedWeddingLayout({
         )}
       </AnimatePresence>
 
-      <div className="fixed inset-0 -z-20">
+      {/* ZMIANA: Usunięto inset-0. Zamieniono na sztywne top-0 left-0 w-full h-[100svh] */}
+      <div className="fixed top-0 left-0 w-full h-[100svh] -z-20">
         <Image 
           src="/fotki/raczki.jpg" 
           alt="Tło szczeliny" 
@@ -120,7 +121,8 @@ export default function SharedWeddingLayout({
         <div className="absolute inset-0 bg-black/20" /> 
       </div>
 
-      <div className="fixed inset-0 pointer-events-none z-[60]">
+      {/* ZMIANA: Szum również otrzymał twarde 100svh, żeby nie migotał przy skalowaniu */}
+      <div className="fixed top-0 left-0 w-full h-[100svh] pointer-events-none z-[60]">
         <div className="absolute inset-0 bg-noise opacity-10 md:opacity-[0.6] md:mix-blend-overlay" />
       </div>
 
@@ -128,7 +130,6 @@ export default function SharedWeddingLayout({
         <PageWrapper>
             
             <section 
-              // ZMIANA: h-[100dvh] zamienione na stabilne h-[100svh]
               className={`relative w-full h-[100svh] flex flex-col items-center justify-center overflow-hidden ${!isUnlocked ? "cursor-pointer" : ""}`}
               onClick={() => !isUnlocked && handleUnlock()}
             >
