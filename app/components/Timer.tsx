@@ -187,8 +187,8 @@ export default function Timer() {
   return (
     <section
       ref={sectionRef}
-      // ZMIANA: Usunięto p-4, dodano py-24 (gwarantowany górny i dolny margines niezależnie od wysokości urządzenia)
-      className="relative w-full min-h-screen flex flex-col items-center justify-center px-4 py-24 md:py-32 text-center text-white overflow-hidden"
+      // ZMIANA: Zastosowano min-h-[100svh] - zapobiega to "skakaniu" wysokości na mobilkach przy chowającym się pasku adresu!
+      className="relative w-full min-h-[100svh] flex flex-col items-center justify-center px-4 py-24 md:py-32 text-center text-white overflow-hidden"
     >
       <div
         className="absolute inset-0 -z-10
@@ -202,7 +202,6 @@ export default function Timer() {
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
         viewport={{ once: true, amount: 0.6 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        // ZMIANA: Usunięto ujemne marginesy (-mt-16), dodano bezpieczne mb-10
         className="font-serif font-light italic text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-[#FDF9EC] mb-10 md:mb-16 uppercase tracking-[0.15em] md:tracking-[0.2em] drop-shadow-lg"
       >
         Nasz wielki dzień

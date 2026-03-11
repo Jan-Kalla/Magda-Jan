@@ -8,12 +8,13 @@ import Image from "next/image";
 export default function CustomCursor() {
   const { guest } = useGuest();
   const [isVisible, setIsVisible] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
   
-  // 1. Logika pozycji myszy (Framer Motion dla płynności)
+  // 1. Logika pozycji myszy
   const mouseX = useMotionValue(-100);
   const mouseY = useMotionValue(-100);
 
-  // 2. Fizyka sprężyny (Spring) - kursor będzie "pływał" za myszką
+  // 2. Fizyka sprężyny
   const springConfig = { damping: 25, stiffness: 400 };
   const x = useSpring(mouseX, springConfig);
   const y = useSpring(mouseY, springConfig);
@@ -22,28 +23,39 @@ export default function CustomCursor() {
     const moveCursor = (e: MouseEvent) => {
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
-      // Pokaż kursor dopiero po pierwszym ruchu myszą
       if (!isVisible) setIsVisible(true);
     };
 
+    const handleMouseOver = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const interactiveElement = target.closest("a, button, input, select, textarea, [role='button'], .cursor-pointer");
+      
+      if (interactiveElement) {
+        setIsHovering(true);
+      } else {
+        setIsHovering(false);
+      }
+    };
+
     window.addEventListener("mousemove", moveCursor);
-    return () => window.removeEventListener("mousemove", moveCursor);
+    window.addEventListener("mouseover", handleMouseOver);
+    
+    return () => {
+      window.removeEventListener("mousemove", moveCursor);
+      window.removeEventListener("mouseover", handleMouseOver);
+    };
   }, [mouseX, mouseY, isVisible]);
 
-  // 3. Wykrywanie płci na podstawie imienia (Polska zasada: kończy się na "a" = kobieta)
-  // Wyjątek: Kuba (ale to rzadki przypadek w oficjalnych zaproszeniach, zazwyczaj Jakub)
+  // 3. Wykrywanie płci
   const isFemale = guest?.first_name?.trim().endsWith("a");
-  
-  // Domyślnie świnka, jeśli nie rozpoznano
-  const cursorImage = isFemale ? "/cursors/madzi.jpg" : "/cursors/dzik.png";
+  const cursorImage = isFemale ? "/cursors/madzi.jpg" : "/cursors/winia_.png";
 
-  // Ukrywamy customowy kursor na telefonach i tabletach (dotyk)
   return (
     <>
-      {/* Globalny styl ukrywający systemowy kursor TYLKO na desktopie */}
+      {/* ZMIANA: Zastosowano selektor uniwersalny *, aby nadpisać WSZYSTKIE klasy wymuszające wskaźnik (np. cursor-pointer) */}
       <style jsx global>{`
         @media (min-width: 768px) {
-          body, a, button, input, select, textarea {
+          * {
             cursor: none !important;
           }
         }
@@ -54,22 +66,23 @@ export default function CustomCursor() {
         style={{
           x,
           y,
-          translateX: "-50%", // Wyśrodkowanie główki względem grota myszy
-          translateY: "-50%",
         }}
       >
-        {/* Animacja "pulsowania" główki dla efektu życia */}
         <motion.div
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          className="origin-top-left"
+          animate={{ scale: isHovering ? [1, 1.15, 1] : 1 }}
+          transition={{ 
+            duration: isHovering ? 1.2 : 0.3, 
+            repeat: isHovering ? Infinity : 0, 
+            ease: "easeInOut" 
+          }}
         >
-          {/* Upewnij się, że masz pliki w public/cursors/ */}
           <Image
             src={cursorImage}
             alt="Kursor"
-            width={48}  // Dostosuj wielkość
-            height={48}
-            className="drop-shadow-lg" // Cień dla lepszej widoczności
+            width={64}  
+            height={64}
+            className="drop-shadow-lg" 
             priority
           />
         </motion.div>

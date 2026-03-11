@@ -79,7 +79,7 @@ export default function SharedWeddingLayout({
 
   if (!isMounted || loading || !ready) {
     return (
-      <div className="flex items-center justify-center h-screen bg-[#FDF9EC] text-[#4E0113] text-lg fixed inset-0 z-50">
+      <div className="flex items-center justify-center h-[100svh] bg-[#FDF9EC] text-[#4E0113] text-lg fixed inset-0 z-50">
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -128,7 +128,8 @@ export default function SharedWeddingLayout({
         <PageWrapper>
             
             <section 
-              className={`relative w-full h-[100dvh] flex flex-col items-center justify-center overflow-hidden ${!isUnlocked ? "cursor-pointer" : ""}`}
+              // ZMIANA: h-[100dvh] zamienione na stabilne h-[100svh]
+              className={`relative w-full h-[100svh] flex flex-col items-center justify-center overflow-hidden ${!isUnlocked ? "cursor-pointer" : ""}`}
               onClick={() => !isUnlocked && handleUnlock()}
             >
               <Image 
@@ -215,7 +216,6 @@ export default function SharedWeddingLayout({
                         initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 1.0, ease: "easeOut", delay: 1.6 }}
-                        // ZMIANA: Z right-16 na right-0 dla najmniejszych ekranów
                         className="absolute -bottom-12 md:-bottom-20 right-16 sm:right-20 md:right-24 lg:right-40 text-3xl md:text-4xl lg:text-5xl font-script text-[#FDF9EC] drop-shadow-md z-20 whitespace-nowrap"
                       >
                         Pobieramy się!
@@ -251,12 +251,10 @@ export default function SharedWeddingLayout({
 
                 <Timer />
 
-                {/* ZMIANA KLUCZOWA: Gradient kończy się na 75%, zapewniając czysty kolor stopki na samym dole! */}
                 <div className="relative w-full bg-gradient-to-b from-[#EBBFB8] from-[0%] via-[#C97B78] via-[45%] to-[#4E0113] to-[90%] overflow-hidden shadow-[0_-10px_30px_rgba(0,0,0,0.1)]">
                   
                   <div className="hidden md:block">
                     <OrganicGlassPattern part="bottom" />
-                    {/* ZMIANA: Kleks podniesiony na bottom-[25%], żeby nie zanieczyszczał połączenia ze stopką */}
                     <div className="absolute bottom-[25%] left-[-10%] w-[50%] h-[500px] bg-[#75897D] blur-[120px] rounded-full opacity-30 pointer-events-none z-0" />
                   </div>
                   

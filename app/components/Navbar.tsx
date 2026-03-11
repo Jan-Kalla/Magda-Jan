@@ -79,7 +79,7 @@ export default function Navbar() {
 
           {/* PRZYCISK MENU (HAMBURGER) */}
           <button
-            className="focus:outline-none p-2 rounded-lg bg-[#EBBFB8] hover:bg-[#3b3917] transition shadow-sm flex items-center justify-center w-11 h-11"
+            className="focus:outline-none p-2 rounded-lg bg-[#EBBFB8] hover:bg-[#c99a93] transition shadow-sm flex items-center justify-center w-11 h-11"
             onClick={handleMenuClick}
             aria-label={isOpen ? "Zamknij menu" : "Otwórz menu"}
           >
@@ -111,13 +111,16 @@ export default function Navbar() {
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className={`relative group transition-colors font-serif font-medium bold uppercase tracking-[0.15em] text-xs lg:text-sm ${
-                    isActive ? "text-[#4E0113]" : "text-[#4E0113]/70 hover:text-[#4E0113]"
+                  className={`relative group transition-colors font-serif font-bold uppercase tracking-[0.15em] text-xs lg:text-sm ${
+                    isActive ? "text-[#C97B78]" : "text-[#4E0113]/70 hover:text-[#C97B78]"
                   }`}
                 >
+                  {/* ZMIANA: Niewidzialny bufor znacznie powiększający przestrzeń klikalną wokół tekstu */}
+                  <span className="absolute -inset-y-4 -inset-x-3 z-10 cursor-pointer" />
+                  
                   {item.label}
                   <span
-                    className={`absolute left-0 -bottom-2 h-[1px] bg-[#4E0113] transition-all duration-300 ${
+                    className={`absolute left-0 -bottom-2 h-[1px] bg-[#C97B78] transition-all duration-300 ${
                       isActive ? "w-full" : "w-0 group-hover:w-full"
                     }`}
                   />
@@ -146,7 +149,8 @@ export default function Navbar() {
             <li>
               <button
                 onClick={logout}
-                className="ml-2 bg-[#C97B78] hover:bg-[#3b3917] transition px-4 py-2 rounded-lg text-[#FDF9EC] text-xs font-serif font-medium uppercase tracking-widest shadow"
+                // ZMIANA: Hover buttonu wylogowania w wersji Desktop na #4E0113
+                className="ml-2 bg-[#EBBFB8] hover:bg-[#4E0113] transition px-4 py-2 rounded-lg text-[#FDF9EC] text-xs font-serif font-medium uppercase tracking-widest shadow"
               >
                 Wyloguj się
               </button>
@@ -194,8 +198,8 @@ export default function Navbar() {
                       logout();
                       setIsOpen(false);
                     }}
-                    // ZMIANA: Zrobiono z tego pełnoprawny, widoczny przycisk z tłem
-                    className="w-full text-center py-3 bg-[4E0113] hover:bg-[#3b3917] transition-colors rounded-lg font-serif font-medium uppercase tracking-widest text-sm text-[#FDF9EC] shadow-md"
+                    // ZMIANA: Odwrócone kolory przycisku wylogowania w wersji Mobile
+                    className="w-full text-center py-3 bg-[#EBBFB8] hover:bg-[#c99a93] transition-colors rounded-lg font-serif font-medium uppercase tracking-widest text-sm text-[#FDF9EC] shadow-sm"
                   >
                     Wyloguj się
                   </button>

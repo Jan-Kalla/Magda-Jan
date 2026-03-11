@@ -71,7 +71,7 @@ export default function AboutSection() {
           className="flex-shrink-0 relative w-full max-w-sm h-[460px] md:max-w-none md:w-[480px] md:h-[620px] lg:w-[520px] lg:h-[700px] overflow-hidden rounded-sm bg-black/5 shadow-lg"
         >
           <Image 
-            src="/fotki/para.jpg"
+            src="/fotki/para_1.jpg"
             alt="Magda i Johny"
             fill
             className="object-cover object-center"
