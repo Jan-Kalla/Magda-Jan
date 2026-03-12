@@ -29,6 +29,13 @@ export default function SharedWeddingLayout({
   const [isMounted, setIsMounted] = useState(false);
   const [ready, setReady] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
+
+  // Stany weryfikujące, czy fizyczne pliki graficzne się wczytały
+  const [bgImageLoaded, setBgImageLoaded] = useState(false);
+  const [heroImageLoaded, setHeroImageLoaded] = useState(false);
+  
+  // ZMIANA: Stan przechowujący sztywny styl dla zablokowanego tła
+  const [bgStyle, setBgStyle] = useState({ height: "100lvh", top: "0px" });
   
   const pathname = usePathname();
 
@@ -65,37 +72,89 @@ export default function SharedWeddingLayout({
     };
   }, [pathname]);
 
+  // Mechanizm ładowania aplikacji + Fallback awaryjny dla zdjęć
   useEffect(() => {
     if (isMounted && !loading) {
       const t = setTimeout(() => setReady(true), 300);
-      return () => clearTimeout(t);
+      
+      // FALLBACK: Jeśli czyjś internet po 5 sekundach wciąż nie pobierze obrazków, zdejmujemy blokadę.
+      const fallback = setTimeout(() => {
+        setBgImageLoaded(true);
+        setHeroImageLoaded(true);
+      }, 5000);
+
+      return () => {
+        clearTimeout(t);
+        clearTimeout(fallback);
+      };
     }
   }, [isMounted, loading]);
+
+  // ZMIANA: Magiczny skrypt blokujący tło na fizycznej wielkości ekranu (tylko na mobile)
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 768) {
+        // Obliczamy stałą, fizyczną wysokość szkła + 150px zapasu i przesuwamy do góry
+        setBgStyle({ 
+          height: `${window.screen.height + 150}px`, 
+          top: "-75px" 
+        });
+      } else {
+        // Desktop zostaje klasyczny
+        setBgStyle({ 
+          height: "100vh", 
+          top: "0px" 
+        });
+      }
+    };
+    
+    // Uruchamiamy przy starcie
+    if (isMounted) handleResize();
+    
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
+    
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
+    };
+  }, [isMounted]);
 
   const handleUnlock = () => {
     setIsUnlocked(true);
     sessionStorage.setItem("siteUnlocked", "true");
   };
 
-  if (!isMounted || loading || !ready) {
-    return (
-      <div className="flex items-center justify-center h-[100svh] bg-[#FDF9EC] text-[#4E0113] text-lg fixed inset-0 z-50">
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ repeat: Infinity, duration: 1.5, repeatType: "reverse" }}
-          className="font-serif tracking-widest"
-        >
-          Ładowanie strony...
-        </motion.p>
-      </div>
-    );
-  }
+  // Definiujemy główny warunek ładowania - strona ładuje się dopóki React, Kontekst ORAZ oba obrazki nie będą gotowe.
+  const isAppLoading = !isMounted || loading || !ready || !bgImageLoaded || !heroImageLoaded;
 
   return (
     <>
       <CustomCursor />
+
+      {/* Ekran ładowania nałożony absolutnie na całą stronę (z-[9999]). Dzięki temu kod HTML pod spodem fizycznie istnieje i może zacząć ładować zdjęcia! */}
+      <AnimatePresence>
+        {isAppLoading && (
+          <motion.div
+            key="global-loader"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            className="flex items-center justify-center w-full h-[100svh] bg-[#FDF9EC] text-[#4E0113] text-lg fixed inset-0 z-[9999]"
+          >
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ repeat: Infinity, duration: 1.5, repeatType: "reverse" }}
+              className="font-serif tracking-widest"
+            >
+              Ładowanie strony...
+            </motion.p>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
+      {/* Reszta strony, która generuje się w tle, póki kurtyna (powyżej) jest opuszczona */}
       <AnimatePresence>
         {showNavbar && isUnlocked && (
           <motion.div
@@ -109,20 +168,21 @@ export default function SharedWeddingLayout({
         )}
       </AnimatePresence>
 
-      {/* ZMIANA: Tło zdjęcia zablokowane na max-wysokość (100lvh) by pokryć całą przestrzeń w ukryciu paska adresu */}
-      <div className="fixed top-0 left-0 w-full h-[100lvh] -z-20">
+      {/* ZMIANA: Zdjęcie korzysta teraz z wstrzykniętego dynamicznie stylu (bgStyle) pozbawionego klasy top-0 */}
+      <div className="fixed left-0 w-full -z-20" style={bgStyle}>
         <Image 
           src="/fotki/raczki.jpg" 
           alt="Tło szczeliny" 
           fill 
           priority 
           className="object-cover object-center" 
+          onLoad={() => setBgImageLoaded(true)}
         />
         <div className="absolute inset-0 bg-black/20" /> 
       </div>
 
-      {/* ZMIANA: Szum zachowuje się tak samo jak zdjęcie (100lvh) */}
-      <div className="fixed top-0 left-0 w-full h-[100lvh] pointer-events-none z-[60]">
+      {/* ZMIANA: Szum działa na tej samej zasadzie co tło pod nim */}
+      <div className="fixed left-0 w-full pointer-events-none z-[60]" style={bgStyle}>
         <div className="absolute inset-0 bg-noise opacity-10 md:opacity-[0.6] md:mix-blend-overlay" />
       </div>
 
@@ -139,6 +199,7 @@ export default function SharedWeddingLayout({
                 fill 
                 priority
                 className="object-cover object-center z-0" 
+                onLoad={() => setHeroImageLoaded(true)}
               />
               
               <div className="absolute inset-0 bg-black/20 transition-opacity duration-1000 z-1" />
@@ -235,7 +296,6 @@ export default function SharedWeddingLayout({
               >
                 <div className="relative w-full bg-gradient-to-b from-[#FDF9EC] via-[#F6EBE1] to-[#EBBFB8] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.1)]">
                   
-                  {/* Szkła generują się tylko na komputerach */}
                   <div className="hidden md:block">
                     <OrganicGlassPattern part="top" />
                     <div className="absolute top-[0%] left-[-10%] w-[50%] h-[600px] bg-[#FDF9EC] blur-[100px] rounded-full mix-blend-overlay opacity-60 pointer-events-none z-0" />

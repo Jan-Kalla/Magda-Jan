@@ -1,6 +1,5 @@
 "use client";
 
-// ZMIANA: Dodano useRef do importów
 import { useEffect, useState, useRef } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import { useGuest } from "@/app/context/GuestContext";
@@ -11,11 +10,9 @@ export default function CustomCursor() {
   const [isVisible, setIsVisible] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   
-  // ZMIANA: Nowe stany do obsługi klikania i fazy animacji
   const [isClicking, setIsClicking] = useState(false);
   const [isPulseLarge, setIsPulseLarge] = useState(false);
   
-  // Referencja zapobiegająca niepotrzebnym renderowaniom podczas animacji
   const isLargeRef = useRef(false);
   
   // 1. Logika pozycji myszy
@@ -28,44 +25,52 @@ export default function CustomCursor() {
   const y = useSpring(mouseY, springConfig);
 
   useEffect(() => {
+    // ZMIANA: Funkcja sprawdzająca, co dokładnie znajduje się pod wskaźnikiem myszy
+    const checkHoverState = (clientX: number, clientY: number, targetElement?: HTMLElement) => {
+      // Jeśli mamy target z eventu to go używamy, w przeciwnym razie skanujemy koordynaty
+      const el = targetElement || (document.elementFromPoint(clientX, clientY) as HTMLElement);
+      if (el) {
+        const interactiveElement = el.closest("a, button, input, select, textarea, [role='button'], .cursor-pointer");
+        setIsHovering(!!interactiveElement);
+      }
+    };
+
     const moveCursor = (e: MouseEvent) => {
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
       if (!isVisible) setIsVisible(true);
-    };
-
-    const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const interactiveElement = target.closest("a, button, input, select, textarea, [role='button'], .cursor-pointer");
       
-      if (interactiveElement) {
-        setIsHovering(true);
-      } else {
-        setIsHovering(false);
-      }
+      // ZMIANA: Sprawdzamy stan najechania przy każdym ruchu (mousemove), a nie tylko na wejściu (mouseover)
+      checkHoverState(e.clientX, e.clientY, e.target as HTMLElement);
     };
 
-    // ZMIANA: Funkcje wykrywające wciśnięcie i puszczenie LPM
     const handleMouseDown = () => setIsClicking(true);
-    const handleMouseUp = () => setIsClicking(false);
+    
+    const handleMouseUp = (e: MouseEvent) => {
+      setIsClicking(false);
+      
+      // ZMIANA: Gdy użytkownik kliknie, DOM ulega zmianie (usunięcie klasy cursor-pointer z tła).
+      // Dajemy systemowi 100ms na zaktualizowanie HTMLa i sprawdzamy ponownie, by wyłączyć pulsowanie.
+      setTimeout(() => {
+        checkHoverState(e.clientX, e.clientY);
+      }, 100);
+    };
 
+    // Nasłuchiwacze (usunięto stary mouseover, by nie duplikować zapytań)
     window.addEventListener("mousemove", moveCursor);
-    window.addEventListener("mouseover", handleMouseOver);
     window.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("mouseup", handleMouseUp);
     
     return () => {
       window.removeEventListener("mousemove", moveCursor);
-      window.removeEventListener("mouseover", handleMouseOver);
       window.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [mouseX, mouseY, isVisible]);
+  }, [isVisible]);
 
-  // ZMIANA: Funkcja wyłapująca moment, gdy kursor podczas pulsowania jest "większy" (powyżej połowy skali)
+  // Funkcja wyłapująca fazę pulsowania świnki
   const handleAnimationUpdate = (latest: { scale?: number }) => {
     if (latest.scale !== undefined) {
-      // Skala pulsuje od 1 do 1.15. Wartość 1.075 to dokładnie połowa tego cyklu.
       const currentIsLarge = latest.scale > 1.075;
       if (currentIsLarge !== isLargeRef.current) {
         isLargeRef.current = currentIsLarge;
@@ -77,12 +82,9 @@ export default function CustomCursor() {
   // 3. Wykrywanie płci
   const isFemale = guest?.first_name?.trim().endsWith("a");
   
-  // ZMIANA: Dwie osobne klatki animacji!
-  // PS. Jeśli w przyszłości dodasz "madzi2.jpg" z otwartymi ustami, wystarczy wpisać to poniżej zamiast powielać "madzi.jpg"
   const frame1 = isFemale ? "/cursors/madzi.jpg" : "/cursors/swinia1.png";
   const frame2 = isFemale ? "/cursors/madzi.jpg" : "/cursors/swinia2.png"; 
 
-  // Świnia otwiera ryjek, jeśli użytkownik klika LPM *ALBO* (najechał na przycisk i świnia jest w fazie bycia dużą)
   const cursorImage = (isClicking || (isHovering && isPulseLarge)) ? frame2 : frame1;
 
   return (
@@ -110,11 +112,9 @@ export default function CustomCursor() {
             repeat: isHovering ? Infinity : 0, 
             ease: "easeInOut" 
           }}
-          // ZMIANA: Nasłuchujemy zmian skali na żywo w trakcie animacji
           onUpdate={handleAnimationUpdate}
         >
           <Image
-            // ZMIANA: Źródło obrazka jest teraz dynamiczne!
             src={cursorImage}
             alt="Kursor"
             width={64}  

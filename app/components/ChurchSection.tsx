@@ -103,7 +103,7 @@ export default function ChurchSection() {
           className="mb-8 flex flex-col items-center lg:items-start w-full"
         >
           <AnimatedText 
-              text={"Kościół pw. św.\u00A0Piotra i\u00A0Pawła"} 
+              text={"Kościół pw. św.\u00A0 Apostołów Piotra i\u00A0Pawła"} 
               className="font-serif font-normal w-full text-3xl md:text-4xl lg:text-5xl leading-tight mb-2 text-[#F6f4e5] mx-auto lg:mx-0" 
               delay={0.2} 
               mode="line" 
