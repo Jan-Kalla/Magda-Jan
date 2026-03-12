@@ -5,8 +5,7 @@ import { motion, Variants } from "framer-motion";
 import { Fragment } from "react";
 
 export default function AboutSection() {
-  const paragraphText = "Czeeeeeeeeeść! To My! Magda i Johny! Znamy się od września 2018 roku i już całkiem sporo razem przeżyliśmy. Nadszedł w końcu ten czas, że podjęliśmy wspólnie decyzję o tym, że chcemy spędzić ze sobą resztę życia. Traktujemy jednak tę decyzję śmiertelnie poważnie, dlatego chcemy jawnie wyznać i zapieczętować ją przed Bogiem i przed ludźmi. Dobrze zdając sobie sprawę, z czym się to wiąże, chcemy pozostać ze sobą już do końca życia, bez możliwości rezygnacji z tej umowy. Chcemy, byście towarzyszyli nam w tym, być może, najważniejszym momencie naszego życia, bo zakładamy, że drugiego takiego już nie będzie. Dlatego zależy nam na Waszej obecności w tym dniu. Na naszym ślubie każdy, kto towarzyszył nam na tej drodze choćby przez moment, jest mile widziany! Super by było, jeżeli jak najwięcej z Was stanie się świadkami naszego sakramentalnego \"TAK\"!";
-  
+  const paragraphText = "Czeeeeeeeeeść! To My! Magda i Johny! Znamy się od września 2018 roku i już całkiem sporo razem przeżyliśmy. Nadszedł w końcu ten czas, że podjęliśmy wspólnie decyzję o tym, że chcemy spędzić ze sobą resztę życia. Traktujemy jednak tę decyzję śmiertelnie poważnie, dlatego chcemy jawnie wyznać oraz zapieczętować ją przed Bogiem i przed ludźmi. Pragniemy, by KAŻDY, kto towarzyszył nam w naszej drodze choćby przez moment, był również z nami w tym, być może, najważniejszym momencie naszego życia, bo zakładamy, że drugiego takiego już nie będzie! Super by było, jeżeli jak najwięcej z Was stanie się świadkami naszego sakramentalnego \"TAK\"!";
   const words = paragraphText.split(" ");
 
   const containerVariants: Variants = {

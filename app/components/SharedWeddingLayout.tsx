@@ -135,21 +135,22 @@ export default function SharedWeddingLayout({
         )}
       </AnimatePresence>
 
-      {/* ZMIANA: Zdjęcie przesunięte o 72px w dół (top-[72px]) oraz ustawione na kadr "object-top", by chronić palce u góry */}
-      <div className="fixed top-[72px] left-0 w-full h-[calc(100dvh-72px)] -z-20">
+      {/* ZMIANA: Przywrócono sztywne 100lvh aby zapobiec skakaniu i czarnym paskom na mobile.
+          Zastosowano object-top na mobile (chroni palce), ale na desktopie (md:) wracamy do object-center (równe przycinanie)! */}
+      <div className="fixed top-[72px] left-0 w-full h-[calc(100lvh-72px)] -z-20">
         <Image 
           src="/fotki/raczki.jpg" 
           alt="Tło szczeliny" 
           fill 
           priority 
-          className="object-cover object-top" 
+          className="object-cover object-top md:object-center" 
           onLoad={() => setBgImageLoaded(true)}
         />
         <div className="absolute inset-0 bg-black/20" /> 
       </div>
 
-      {/* ZMIANA: Szum przesunięty dokładnie tak samo, żeby w pełni pokrywał się ze zdjęciem pod nim */}
-      <div className="fixed top-[72px] left-0 w-full h-[calc(100dvh-72px)] pointer-events-none z-[60]">
+      {/* ZMIANA: Szum używa tych samych, twardych parametrów co tło pod nim */}
+      <div className="fixed top-[72px] left-0 w-full h-[calc(100lvh-72px)] pointer-events-none z-[60]">
         <div className="absolute inset-0 bg-noise opacity-10 md:opacity-[0.6] md:mix-blend-overlay" />
       </div>
 

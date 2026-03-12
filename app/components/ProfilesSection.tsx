@@ -173,7 +173,7 @@ export default function ProfilesSection() {
               >
                 <h3 className="font-serif text-xl md:text-3xl text-[#4c4a1e] mb-4 uppercase tracking-widest break-words">Johny</h3>
                 <p className="font-serif font-normal text-xs md:text-base text-[#4c4a1e] leading-relaxed">
-                  Świadomie i dobrowolnie zrzekamy się możliwości pójścia w inną stronę, nawet gdyby kiedyś miało być ciężko.
+                  Jan - dali mi rodzice na imię, choć dla większości znajomych i krewnych jestem: Johny (jak mówi tytuł karty), dla swojej wybranki: Knur lub Parówa. Jestem inżynierem informatyki na wydziale AEI Politechniki Śląskiej, obecnie również dyplomantem studiów magisterskich tego samego kierunku tamże. Taką Madzię sobie wybrałem i to właśnie z nią planuję wytrwać aż do śmierci, świadomie i dobrowolnie zrzekam się możliwości pójścia w inną stronę, nawet gdyby kiedyś miało być ciężko.
                 </p>
               </div>
             </motion.div>
