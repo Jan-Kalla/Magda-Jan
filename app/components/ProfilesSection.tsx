@@ -67,7 +67,9 @@ export default function ProfilesSection() {
 
   return (
     <div className="w-full overflow-x-hidden">
-      <div className="w-full max-w-5xl mx-auto mt-64 md:mt-96 mb-24 md:mb-32 flex flex-col items-center py-10">
+      {/* ZMIANA: Zastąpienie py-10 i mb-24/32 nowymi, głębokimi paddingami (pt-10 i pb-48/56), 
+          aby pomieścić powiększającą się kartę i jej cień wewnątrz kontenera */}
+      <div className="w-full max-w-5xl mx-auto mt-64 md:mt-96 pt-10 pb-48 md:pb-56 flex flex-col items-center">
         
         <motion.div
           key={isMobile ? "mobile-title" : "desktop-title"}
@@ -192,10 +194,9 @@ export default function ProfilesSection() {
                         <h3 className="font-serif text-xl md:text-2xl text-[#4c4a1e] mb-2 sm:mb-3 uppercase tracking-widest break-words text-center">
                           Johny
                         </h3>
-                        {/* ZMIANA: Zwiększono rozmiar fontu z text-[11px] sm:text-xs md:text-sm na text-[13px] sm:text-sm md:text-base */}
                         <p className="font-serif font-normal text-[13px] sm:text-sm md:text-base text-[#4c4a1e] leading-relaxed text-justify">
                           Jan - dali mi rodzice na imię, choć dla większości znajomych i krewnych jestem: Johny. Jestem inżynierem informatyki na wydziale AEI Politechniki Śląskiej, obecnie również dyplomantem studiów magisterskich tego samego kierunku tamże. Jestem raczej bazodanowcem, tworzenie stron internetowych trochę mi nie idzie :P. Taką Madzię sobie wybrałem, to właśnie z nią planuję wytrwać aż do śmierci i z pełną świadomością zamykam za sobą wszelkie inne drzwi.
-                          </p>
+                        </p>
                       </motion.div>
                     </div>
                   </div>
@@ -291,7 +292,6 @@ export default function ProfilesSection() {
                         <h3 className="font-serif text-xl md:text-2xl text-[#4c4a1e] mb-2 sm:mb-3 uppercase tracking-widest break-words text-center">
                           Magda
                         </h3>
-                        {/* ZMIANA: Zwiększono rozmiar fontu z text-[11px] sm:text-xs md:text-sm na text-[13px] sm:text-sm md:text-base */}
                         <p className="font-serif font-normal text-[13px] sm:text-sm md:text-base text-[#4c4a1e] leading-relaxed text-justify">
                           Kończyliśmy z Janem to samo liceum na profilu matematyczno-fizycznym, ja jednak postanowiłam obrać inną ścieżkę i obecnie studiuję malarstwo na katowickiej Akademii Sztuk Pięknych. Poza głównym kierunkiem zajmuję się głównie rysunkiem i ilustracją, a ostatnio coraz więcej czasu poświęcam projektowaniu graficznemu, zwłaszcza projektowaniu książek. Lubię taniec, długie spacery oraz wyjątkowe koty – takie jak Bercik. Chciałabym kiedyś zobaczyć te prawdziwe wąwozy lessowe.
                         </p>
