@@ -9,25 +9,31 @@ export default function CustomCursor() {
   const { guest } = useGuest();
   const [isVisible, setIsVisible] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
-  
   const [isClicking, setIsClicking] = useState(false);
   const [isPulseLarge, setIsPulseLarge] = useState(false);
   
+  // ZMIANA: Stan przechowujący informację o tym, czy to urządzenie dotykowe
+  const [isTouch, setIsTouch] = useState(false);
+  
   const isLargeRef = useRef(false);
   
-  // 1. Logika pozycji myszy
   const mouseX = useMotionValue(-100);
   const mouseY = useMotionValue(-100);
 
-  // 2. Fizyka sprężyny
   const springConfig = { damping: 25, stiffness: 400 };
   const x = useSpring(mouseX, springConfig);
   const y = useSpring(mouseY, springConfig);
 
   useEffect(() => {
-    // ZMIANA: Funkcja sprawdzająca, co dokładnie znajduje się pod wskaźnikiem myszy
+    // Sprawdzamy fizyczną obecność ekranu dotykowego
+    const checkTouch = () => "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    const isDeviceTouch = checkTouch();
+    setIsTouch(isDeviceTouch);
+
+    // ZMIANA: Jeśli to telefon/tablet, natychmiast przerywamy nasłuchiwanie myszki!
+    if (isDeviceTouch) return;
+
     const checkHoverState = (clientX: number, clientY: number, targetElement?: HTMLElement) => {
-      // Jeśli mamy target z eventu to go używamy, w przeciwnym razie skanujemy koordynaty
       const el = targetElement || (document.elementFromPoint(clientX, clientY) as HTMLElement);
       if (el) {
         const interactiveElement = el.closest("a, button, input, select, textarea, [role='button'], .cursor-pointer");
@@ -40,7 +46,6 @@ export default function CustomCursor() {
       mouseY.set(e.clientY);
       if (!isVisible) setIsVisible(true);
       
-      // ZMIANA: Sprawdzamy stan najechania przy każdym ruchu (mousemove), a nie tylko na wejściu (mouseover)
       checkHoverState(e.clientX, e.clientY, e.target as HTMLElement);
     };
 
@@ -48,15 +53,11 @@ export default function CustomCursor() {
     
     const handleMouseUp = (e: MouseEvent) => {
       setIsClicking(false);
-      
-      // ZMIANA: Gdy użytkownik kliknie, DOM ulega zmianie (usunięcie klasy cursor-pointer z tła).
-      // Dajemy systemowi 100ms na zaktualizowanie HTMLa i sprawdzamy ponownie, by wyłączyć pulsowanie.
       setTimeout(() => {
         checkHoverState(e.clientX, e.clientY);
       }, 100);
     };
 
-    // Nasłuchiwacze (usunięto stary mouseover, by nie duplikować zapytań)
     window.addEventListener("mousemove", moveCursor);
     window.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("mouseup", handleMouseUp);
@@ -68,7 +69,6 @@ export default function CustomCursor() {
     };
   }, [isVisible]);
 
-  // Funkcja wyłapująca fazę pulsowania świnki
   const handleAnimationUpdate = (latest: { scale?: number }) => {
     if (latest.scale !== undefined) {
       const currentIsLarge = latest.scale > 1.075;
@@ -79,18 +79,20 @@ export default function CustomCursor() {
     }
   };
 
-  // 3. Wykrywanie płci
   const isFemale = guest?.first_name?.trim().endsWith("a");
-  
   const frame1 = isFemale ? "/cursors/madzi.jpg" : "/cursors/swinia1.png";
   const frame2 = isFemale ? "/cursors/madzi.jpg" : "/cursors/swinia2.png"; 
 
   const cursorImage = (isClicking || (isHovering && isPulseLarge)) ? frame2 : frame1;
 
+  // ZMIANA: Zabezpieczenie ostateczne. Jeśli urządzenie ma ekran dotykowy, w ogóle nie renderujemy komponentu kursora (zwracamy null).
+  if (isTouch) return null;
+
   return (
     <>
       <style jsx global>{`
-        @media (min-width: 768px) {
+        /* ZMIANA: Chowamy standardowy kursor tylko na urządzeniach potrafiących precyzyjnie "najechać" (mających myszkę) */
+        @media (hover: hover) and (pointer: fine) {
           * {
             cursor: none !important;
           }
@@ -98,7 +100,8 @@ export default function CustomCursor() {
       `}</style>
 
       <motion.div
-        className="fixed top-0 left-0 pointer-events-none z-[9999] hidden md:block"
+        // ZMIANA: Usunięto wadliwą klasę 'hidden md:block'. Teraz kursor pojawia się zawsze, chyba że urządzenie jest dotykowe.
+        className="fixed top-0 left-0 pointer-events-none z-[9999]"
         style={{
           x,
           y,

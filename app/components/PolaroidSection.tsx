@@ -142,7 +142,7 @@ export default function PolaroidSection() {
     { src: "/fotki/2025.05.jpg", alt: "Ciasta w naszym kolorze", desc: "Nie jest tajemnicą, że ciasta zwykle dobieramy pod swój kolor" },
     { src: "/fotki/2021.05.jpg", alt: "Po maturach!", desc: "Maj 2021, odpoczynek po nauce i dzielenie się dobrymi memami" },
     { src: "/fotki/2019.02.jpg", alt: "Pierwsza liceum", desc: "Krynica-Zdrój, luty 2019, szkolny wyjazd narciarski. Nasze pierwsze wspólne selfie! Oczywiście załapał się tu również Szczyrbix😁" },
-    { src: "/fotki/2024.08.jpg", alt: "Kierunki", desc: "Sierpień 2024, Madzia mówi, że trzeba iść tam, a ewidentnie widać, że Johny jest innego zdania" },
+    { src: "/fotki/2024.08.jpg", alt: "Kierunki", desc: "Sierpień 2024, Madzia mówi, że trzeba iść tam, a przecież ewidentnie widać, że Johny jest innego zdania" },
     { src: "/fotki/2022.04.jpg", alt: "Pierwszy rok studiów", desc: "Wspólne podróże w Smarcie" },
     { src: "/fotki/2024.09.jpg", alt: "Czwarty rok studiów", desc: "Wrzesień 2024 - pierwsze wspólne Tatry" },
     { src: "/fotki/2024.12.jpg", alt: "Narty", desc: "Austria, Zillertal, grudzień 2024" },
