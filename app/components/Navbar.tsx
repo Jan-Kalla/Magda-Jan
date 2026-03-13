@@ -67,7 +67,7 @@ export default function Navbar() {
               e.stopPropagation();
               toggleMute();
             }}
-            className="p-2 rounded-full hover:bg-black/5 transition text-[#C05C54]"
+            className="p-2 rounded-full hover:bg-black/5 transition text-[#C05454]"
             title={isMuted ? "Włącz dźwięki" : "Wycisz dźwięki"}
           >
             {isMuted ? (
@@ -79,7 +79,7 @@ export default function Navbar() {
 
           {/* PRZYCISK MENU (HAMBURGER) */}
           <button
-            className="focus:outline-none p-2 rounded-lg bg-[#C05C54] hover:bg-[#c99a93] transition shadow-sm flex items-center justify-center w-11 h-11"
+            className="focus:outline-none p-2 rounded-lg bg-[#C05454] hover:bg-[#c99a93] transition shadow-sm flex items-center justify-center w-11 h-11"
             onClick={handleMenuClick}
             aria-label={isOpen ? "Zamknij menu" : "Otwórz menu"}
           >
@@ -135,7 +135,7 @@ export default function Navbar() {
              e.stopPropagation();
              toggleMute();
            }}
-           className="p-2 rounded-full hover:bg-black/5 transition text-[#C05C54]"
+           className="p-2 rounded-full hover:bg-black/5 transition text-[#C05454]"
            title={isMuted ? "Włącz dźwięki" : "Wycisz dźwięki"}
          >
            {isMuted ? (
@@ -150,7 +150,7 @@ export default function Navbar() {
               <button
                 onClick={logout}
                 // ZMIANA: Hover buttonu wylogowania w wersji Desktop na #4E0113
-                className="ml-2 bg-[#C05C54] hover:bg-[#4E0113] transition px-4 py-2 rounded-lg text-[#FDF9EC] text-xs font-serif font-medium uppercase tracking-widest shadow"
+                className="ml-2 bg-[#C05454] hover:bg-[#4E0113] transition px-4 py-2 rounded-lg text-[#FDF9EC] text-xs font-serif font-medium uppercase tracking-widest shadow"
               >
                 Wyloguj się
               </button>
@@ -198,7 +198,7 @@ export default function Navbar() {
                       logout();
                       setIsOpen(false);
                     }}
-                    className="w-full text-center py-3 bg-[#C05C54] hover:bg-[#c99a93] transition-colors rounded-lg font-serif font-medium uppercase tracking-widest text-sm text-[#FDF9EC] shadow-sm"
+                    className="w-full text-center py-3 bg-[#C05454] hover:bg-[#c99a93] transition-colors rounded-lg font-serif font-medium uppercase tracking-widest text-sm text-[#FDF9EC] shadow-sm"
                   >
                     Wyloguj się
                   </button>

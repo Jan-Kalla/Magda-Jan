@@ -66,8 +66,6 @@ export default function ProfilesSection() {
   if (!hasMounted) return <div className="min-h-[500px] w-full mt-64 mb-32" />;
 
   return (
-    // ZMIANA: Dodano globalny wrapper z overflow-x-hidden, aby elementy wylatujące z 100vw nie robiły paska przewijania,
-    // a jednocześnie nie były ucinane przez ograniczenie max-w-5xl
     <div className="w-full overflow-x-hidden">
       <div className="w-full max-w-5xl mx-auto mt-64 md:mt-96 mb-24 md:mb-32 flex flex-col items-center py-10">
         
@@ -100,7 +98,7 @@ export default function ProfilesSection() {
             variants={{
               visible: { transition: { staggerChildren: isMobile ? 0.7 : 0 } }
             }}
-            className={`flex justify-center h-[350px] sm:h-[400px] md:h-[550px] transition-all duration-[1500ms] ease-in-out ${
+            className={`flex justify-center items-stretch h-[350px] sm:h-[400px] md:h-[550px] transition-all duration-[1500ms] ease-in-out ${
               isMerged 
                 ? "w-[90%] sm:w-[90%] md:w-full max-w-3xl gap-0" 
                 : "w-[95%] sm:w-[95%] md:w-full max-w-4xl gap-4 sm:gap-8 md:gap-32"
@@ -111,14 +109,13 @@ export default function ProfilesSection() {
             {/* ========================================== */}
             <motion.div
               variants={{
-                // ZMIANA: Desktopowy 'x' zmieniony z -200 na "-100vw"
                 hidden: isMobile ? { x: "-30vw", opacity: 0, y: 30, rotateZ: -5 } : { x: "-100vw", opacity: 0, y: 0, rotateZ: 0 },
                 visible: isMobile 
                   ? { x: 0, opacity: 1, y: 0, rotateZ: 0, transition: { duration: 2.8, ease: [0.16, 1, 0.3, 1] } }
-                  // ZMIANA: Wydłużono duration do 2.5 i dodano niestandardowy krzywy ease dla lepszego wjazdu z daleka
                   : { x: 0, opacity: 1, y: 0, rotateZ: 0, transition: { duration: 2.5, ease: [0.16, 1, 0.3, 1] } }
               }}
-              className="w-1/2 h-full group"
+              className="flex-1 min-w-0 group relative"
+              style={{ zIndex: flipJ ? 50 : 10 }}
             >
               <motion.div
                 role="button"
@@ -129,23 +126,35 @@ export default function ProfilesSection() {
                     handleJohnyClick();
                   }
                 }}
+                className="cursor-pointer absolute top-0 left-0 w-full h-full"
                 style={{ transformStyle: "preserve-3d", WebkitTransformStyle: "preserve-3d" }}
-                className="relative w-full h-full cursor-pointer"
-                animate={{ rotateY: flipJ ? 180 : 0 }}
-                transition={{ duration: 0.6, ease: "easeInOut" }}
+                animate={
+                  isMobile 
+                    ? { 
+                        rotateY: flipJ ? 180 : 0,
+                        width: flipJ ? "180%" : "100%",
+                        height: flipJ ? "180%" : "100%",
+                        top: flipJ ? "-40%" : "0%"
+                      }
+                    : { 
+                        rotateY: flipJ ? 180 : 0,
+                        width: "100%",
+                        height: "100%",
+                        top: "0%"
+                      }
+                }
+                transition={{ duration: isMobile ? 2.4 : 0.6, ease: isMobile ? [0.16, 1, 0.3, 1] : "easeInOut" }}
                 onClick={handleJohnyClick}
-                whileHover={{ scale: flipJ ? 1 : 1.03 }}
+                whileHover={isMobile ? {} : { scale: flipJ ? 1 : 1.03 }}
               >
                 {/* FRONT KARTY */}
-                <div 
-                  className="absolute inset-0 shadow-xl border-y-4 border-l-4 border-r-none border-white/40 bg-black/5 rounded-l-2xl z-10 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:translateZ(1px)] [-webkit-transform:translateZ(1px)]"
-                >
+                <div className="absolute inset-0 shadow-xl border-y-4 border-l-4 border-r-0 border-white/40 bg-black/5 rounded-l-2xl z-10 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:translateZ(1px)] [-webkit-transform:translateZ(1px)]">
                   <Image 
                     src="/fotki/johny_lewa.jpg" 
                     alt="Johny" 
                     fill 
                     priority
-                    sizes="(max-width: 768px) 60vw, 50vw"
+                    sizes="(max-width: 768px) 100vw, 80vw"
                     className="object-cover object-right rounded-l-2xl" 
                   />
                   
@@ -172,17 +181,22 @@ export default function ProfilesSection() {
                 </div>
                 
                 {/* TYŁ KARTY */}
-                <div 
-                  className="absolute inset-0 rounded-r-2xl rounded-l-none shadow-xl bg-[#FDF9EC] border-y-4 border-l-none border-r-4 border-white/40 z-0 overflow-hidden [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(180deg)_translateZ(1px)] [-webkit-transform:rotateY(180deg)_translateZ(1px)]"
-                >
-                  <div className="w-full h-full overflow-y-auto p-4 sm:p-6 md:p-8 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-[#4c4a1e]/20 [&::-webkit-scrollbar-thumb]:rounded-full">
-                    <div className="min-h-full flex flex-col justify-center items-center text-center">
-                      <h3 className="font-serif text-xl md:text-2xl text-[#4c4a1e] mb-2 sm:mb-3 uppercase tracking-widest break-words">
-                        Johny
-                      </h3>
-                      <p className="font-serif font-normal text-[11px] sm:text-xs md:text-sm text-[#4c4a1e] leading-relaxed">
-                        Jan - dali mi rodzice na imię, choć dla większości znajomych i krewnych jestem: Johny. Jestem inżynierem informatyki na wydziale AEI Politechniki Śląskiej, obecnie również dyplomantem studiów magisterskich tego samego kierunku tamże. Taką Madzię sobie wybrałem, to właśnie z nią planuję wytrwać aż do śmierci i z pełną świadomością zamykam za sobą wszelkie inne drzwi.
-                      </p>
+                <div className="absolute inset-0 rounded-r-2xl rounded-l-none shadow-xl bg-[#FDF9EC] border-y-4 border-l-0 border-r-4 border-white/40 z-0 overflow-hidden [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(180deg)_translateZ(1px)] [-webkit-transform:rotateY(180deg)_translateZ(1px)]">
+                  <div className="w-full h-full overflow-y-auto overflow-x-hidden p-4 sm:p-6 md:p-8 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-[#4c4a1e]/20 [&::-webkit-scrollbar-thumb]:rounded-full">
+                    <div className="min-h-full flex flex-col justify-center items-center">
+                      <motion.div 
+                        animate={isMobile ? { scale: flipJ ? 1 : 0.85, opacity: flipJ ? 1 : 0.5 } : {}}
+                        transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1] }}
+                        className="w-[70vw] md:w-full flex-shrink-0 flex flex-col justify-center items-center"
+                      >
+                        <h3 className="font-serif text-xl md:text-2xl text-[#4c4a1e] mb-2 sm:mb-3 uppercase tracking-widest break-words text-center">
+                          Johny
+                        </h3>
+                        {/* ZMIANA: Zwiększono rozmiar fontu z text-[11px] sm:text-xs md:text-sm na text-[13px] sm:text-sm md:text-base */}
+                        <p className="font-serif font-normal text-[13px] sm:text-sm md:text-base text-[#4c4a1e] leading-relaxed text-justify">
+                          Jan - dali mi rodzice na imię, choć dla większości znajomych i krewnych jestem: Johny. Jestem inżynierem informatyki na wydziale AEI Politechniki Śląskiej, obecnie również dyplomantem studiów magisterskich tego samego kierunku tamże. Jestem raczej bazodanowcem, tworzenie stron internetowych trochę mi nie idzie :P. Taką Madzię sobie wybrałem, to właśnie z nią planuję wytrwać aż do śmierci i z pełną świadomością zamykam za sobą wszelkie inne drzwi.
+                          </p>
+                      </motion.div>
                     </div>
                   </div>
                 </div>
@@ -194,14 +208,13 @@ export default function ProfilesSection() {
             {/* ========================================== */}
             <motion.div
               variants={{
-                // ZMIANA: Desktopowy 'x' zmieniony z 200 na "100vw"
                 hidden: isMobile ? { x: "30vw", opacity: 0, y: 30, rotateZ: 5 } : { x: "100vw", opacity: 0, y: 0, rotateZ: 0 },
                 visible: isMobile 
                   ? { x: 0, opacity: 1, y: 0, rotateZ: 0, transition: { duration: 2.8, ease: [0.16, 1, 0.3, 1] } }
-                  // ZMIANA: Wydłużono duration do 2.5 i dodano niestandardowy krzywy ease
                   : { x: 0, opacity: 1, y: 0, rotateZ: 0, transition: { duration: 2.5, ease: [0.16, 1, 0.3, 1] } }
               }}
-              className="w-1/2 h-full group"
+              className="flex-1 min-w-0 group relative"
+              style={{ zIndex: flipM ? 50 : 10 }}
             >
               <motion.div
                 role="button"
@@ -212,23 +225,35 @@ export default function ProfilesSection() {
                     handleMagdaClick();
                   }
                 }}
+                className="cursor-pointer absolute top-0 right-0 w-full h-full"
                 style={{ transformStyle: "preserve-3d", WebkitTransformStyle: "preserve-3d" }}
-                className="relative w-full h-full cursor-pointer"
-                animate={{ rotateY: flipM ? -180 : 0 }}
-                transition={{ duration: 0.6, ease: "easeInOut" }}
+                animate={
+                  isMobile 
+                    ? { 
+                        rotateY: flipM ? -180 : 0,
+                        width: flipM ? "180%" : "100%",
+                        height: flipM ? "180%" : "100%",
+                        top: flipM ? "-40%" : "0%"
+                      }
+                    : { 
+                        rotateY: flipM ? -180 : 0,
+                        width: "100%",
+                        height: "100%",
+                        top: "0%"
+                      }
+                }
+                transition={{ duration: isMobile ? 2.4 : 0.6, ease: isMobile ? [0.16, 1, 0.3, 1] : "easeInOut" }}
                 onClick={handleMagdaClick}
-                whileHover={{ scale: flipM ? 1 : 1.03 }}
+                whileHover={isMobile ? {} : { scale: flipM ? 1 : 1.03 }}
               >
                 {/* FRONT KARTY */}
-                <div 
-                  className="absolute inset-0 shadow-xl border-y-4 border-r-4 border-l-none border-white/40 bg-black/5 rounded-r-2xl z-10 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:translateZ(1px)] [-webkit-transform:translateZ(1px)]"
-                >
+                <div className="absolute inset-0 shadow-xl border-y-4 border-r-4 border-l-0 border-white/40 bg-black/5 rounded-r-2xl z-10 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:translateZ(1px)] [-webkit-transform:translateZ(1px)]">
                   <Image 
                     src="/fotki/magda_prawa.jpg" 
                     alt="Magda" 
                     fill 
                     priority
-                    sizes="(max-width: 768px) 60vw, 50vw"
+                    sizes="(max-width: 768px) 100vw, 80vw"
                     className="object-cover object-left rounded-r-2xl" 
                   />
                   
@@ -255,17 +280,22 @@ export default function ProfilesSection() {
                 </div>
                 
                 {/* TYŁ KARTY */}
-                <div 
-                  className="absolute inset-0 rounded-l-2xl rounded-r-none shadow-xl bg-[#FDF9EC] border-y-4 border-r-none border-l-4 border-white/40 z-0 overflow-hidden [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(-180deg)_translateZ(1px)] [-webkit-transform:rotateY(-180deg)_translateZ(1px)]"
-                >
-                  <div className="w-full h-full overflow-y-auto p-4 sm:p-6 md:p-8 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-[#4c4a1e]/20 [&::-webkit-scrollbar-thumb]:rounded-full">
-                    <div className="min-h-full flex flex-col justify-center items-center text-center">
-                      <h3 className="font-serif text-xl md:text-2xl text-[#4c4a1e] mb-2 sm:mb-3 uppercase tracking-widest break-words">
-                        Magda
-                      </h3>
-                      <p className="font-serif font-normal text-[11px] sm:text-xs md:text-sm text-[#4c4a1e] leading-relaxed">
-                        Kończyliśmy z Janem to samo liceum na profilu matematyczno-fizycznym, ja jednak postanowiłam obrać inną ścieżkę i obecnie studiuję malarstwo na katowickiej Akademii Sztuk Pięknych. Poza głównym kierunkiem zajmuję się głównie rysunkiem i ilustracją, a ostatnio coraz więcej czasu poświęcam projektowaniu graficznemu, zwłaszcza projektowaniu książek. Lubię taniec, długie spacery oraz wyjątkowe koty – takie jak Bercik. Chciałabym kiedyś zobaczyć  te prawdziwe wąwozy lessowe.
-                      </p>
+                <div className="absolute inset-0 rounded-l-2xl rounded-r-none shadow-xl bg-[#FDF9EC] border-y-4 border-r-0 border-l-4 border-white/40 z-0 overflow-hidden [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(-180deg)_translateZ(1px)] [-webkit-transform:rotateY(-180deg)_translateZ(1px)]">
+                  <div className="w-full h-full overflow-y-auto overflow-x-hidden p-4 sm:p-6 md:p-8 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-[#4c4a1e]/20 [&::-webkit-scrollbar-thumb]:rounded-full">
+                    <div className="min-h-full flex flex-col justify-center items-center">
+                      <motion.div 
+                        animate={isMobile ? { scale: flipM ? 1 : 0.85, opacity: flipM ? 1 : 0.5 } : {}}
+                        transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1] }}
+                        className="w-[70vw] md:w-full flex-shrink-0 flex flex-col justify-center items-center"
+                      >
+                        <h3 className="font-serif text-xl md:text-2xl text-[#4c4a1e] mb-2 sm:mb-3 uppercase tracking-widest break-words text-center">
+                          Magda
+                        </h3>
+                        {/* ZMIANA: Zwiększono rozmiar fontu z text-[11px] sm:text-xs md:text-sm na text-[13px] sm:text-sm md:text-base */}
+                        <p className="font-serif font-normal text-[13px] sm:text-sm md:text-base text-[#4c4a1e] leading-relaxed text-justify">
+                          Kończyliśmy z Janem to samo liceum na profilu matematyczno-fizycznym, ja jednak postanowiłam obrać inną ścieżkę i obecnie studiuję malarstwo na katowickiej Akademii Sztuk Pięknych. Poza głównym kierunkiem zajmuję się głównie rysunkiem i ilustracją, a ostatnio coraz więcej czasu poświęcam projektowaniu graficznemu, zwłaszcza projektowaniu książek. Lubię taniec, długie spacery oraz wyjątkowe koty – takie jak Bercik. Chciałabym kiedyś zobaczyć te prawdziwe wąwozy lessowe.
+                        </p>
+                      </motion.div>
                     </div>
                   </div>
                 </div>
