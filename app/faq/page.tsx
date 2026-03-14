@@ -11,14 +11,14 @@ import { useSound } from "@/app/context/SoundContext";
 import PageWrapper from "@/app/components/PageWrapper";
 import { createClient } from "@supabase/supabase-js";
 import OrganicGlassPattern from "@/app/components/OrganicGlassPattern";
+// ZMIANA: Import customowego kursora
+import CustomCursor from "@/app/components/CustomCursor";
 
-// --- INICJALIZACJA BAZY DANYCH ---
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// --- DANE PYTAŃ STATYCZNYCH (Wyczyszczone z emoji, wygładzony język) ---
 const faqData = [
   {
     id: 1,
@@ -47,11 +47,6 @@ const faqData = [
   },
   {
     id: 6,
-    question: "Jaki obowiązuje Dress Code?",
-    answer: "Styl: Semi-Formal / Cocktail. Chcemy, żebyście czuli się elegancko, ale też swobodnie. Prosimy jedynie, aby kolor biały i écru zostawić w tym dniu dla Panny Młodej."
-  },
-  {
-    id: 7,
     question: "Mam dietę wegetariańską. Co robić?",
     answer: "W zakładce 'Wybory dla gościa' znajdziecie miejsce, gdzie możecie zaznaczyć swoje preferencje żywieniowe. Postaramy się, aby każdy znalazł coś dla siebie."
   },
@@ -60,20 +55,16 @@ const faqData = [
 export default function FaqPage() {
   const { guest, loading } = useGuest();
   const { playSound } = useSound();
-  const router = useRouter(); // DODANE
+  const router = useRouter();
   
   const [openId, setOpenId] = useState<number | null>(null);
-  
-  // Stany formularza i pytań
   const [customQuestion, setCustomQuestion] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
   const [suggestedQuestions, setSuggestedQuestions] = useState<any[]>([]);
 
-  // Weryfikacja Pary Młodej
   const isBrideOrGroom = guest?.code === "FC3818" || guest?.code === "8DD06D";
 
-  // Pobieranie pytań z bazy (tylko dla Pary Młodej)
   useEffect(() => {
     if (isBrideOrGroom) {
       const fetchQuestions = async () => {
@@ -87,7 +78,6 @@ export default function FaqPage() {
     }
   }, [isBrideOrGroom]);
 
-  // DODANE: Zabezpieczenie ścieżki
   useEffect(() => {
     if (!loading && !guest) {
       router.push("/");
@@ -116,6 +106,8 @@ export default function FaqPage() {
       },
     ]);
 
+    
+
     setIsSubmitting(false);
 
     if (error) {
@@ -125,7 +117,6 @@ export default function FaqPage() {
       setCustomQuestion("");
       playSound("success"); 
       
-      // Jeśli PM testuje formularz, odświeżamy listę w locie
       if (isBrideOrGroom) {
         const { data } = await supabase.from("faq_suggestions").select("*").order("created_at", { ascending: false });
         if (data) setSuggestedQuestions(data);
@@ -133,7 +124,6 @@ export default function FaqPage() {
     }
   };
 
-  // ZMIANA: Zmodyfikowany stan ładowania – teraz chroni też widok przed wylogowanymi uciekinierami
   if (loading || !guest) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#FDF9EC] text-[#4c4a1e]">
@@ -143,13 +133,16 @@ export default function FaqPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen relative">
+      {/* ZMIANA: Dodany kursor */}
+      <CustomCursor />
+
       <Navbar />
 
-      {/* GŁÓWNY KONTENER Z PŁYNNYM GRADIENTEM I SZKŁEM */}
       <section className="relative flex-grow bg-gradient-to-b from-[#FDF9EC] via-[#A46C6E] to-[#4E0113] pt-24 md:pt-32 pb-32 overflow-hidden text-[#4c4a1e]">
         
-        <div className="absolute inset-0 z-0 pointer-events-none">
+        {/* ZMIANA: Ukrycie wzoru tafli szkła na mobile */}
+        <div className="absolute inset-0 z-0 pointer-events-none hidden md:block">
           <OrganicGlassPattern part="top" />
         </div>
 
@@ -163,15 +156,17 @@ export default function FaqPage() {
               transition={{ duration: 0.8 }}
               className="text-center mb-16"
             >
-              <h1 className="font-script text-6xl md:text-7xl mb-6 flex items-center justify-center gap-4 text-[#4c4a1e] drop-shadow-sm">
-                Częste Pytania <HelpCircle className="text-[#4c4a1e]/80" size={48} />
+              {/* ZMIANA: Font IvyOra, uppercase, tracking-widest */}
+              <h1 className="font-serif font-light text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-6 flex items-center justify-center gap-4 text-[#4c4a1e] drop-shadow-sm uppercase tracking-widest">
+                Częste Pytania 
               </h1>
-              <p className="font-sans font-light tracking-[0.15em] text-[#4c4a1e]/80 text-sm md:text-base">
+              {/* ZMIANA: Usunięto uppercase i nienaturalny rozstaw liter */}
+              <p className="font-sans font-light text-[#4c4a1e]/90 text-base md:text-lg max-w-2xl mx-auto">
                 Wszystko, co chcielibyście wiedzieć, a o co boicie się zapytać
               </p>
             </motion.div>
 
-            {/* LISTA PYTAŃ - Jasne szkło na jasnym/przejściowym tle */}
+            {/* LISTA PYTAŃ */}
             <div className="space-y-5 mb-24">
               {faqData.map((item, index) => (
                 <motion.div
@@ -218,7 +213,7 @@ export default function FaqPage() {
               ))}
             </div>
 
-            {/* FORMULARZ ZADAWANIA PYTAŃ DLA GOŚCI - Ciemne szkło na bordowym tle */}
+            {/* FORMULARZ ZADAWANIA PYTAŃ DLA GOŚCI */}
             <motion.div
                initial={{ opacity: 0, y: 40 }}
                whileInView={{ opacity: 1, y: 0 }}

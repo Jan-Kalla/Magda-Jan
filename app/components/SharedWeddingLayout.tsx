@@ -30,9 +30,10 @@ export default function SharedWeddingLayout({
   const [ready, setReady] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
 
-  // Stany weryfikujące, czy fizyczne pliki graficzne się wczytały
   const [bgImageLoaded, setBgImageLoaded] = useState(false);
   const [heroImageLoaded, setHeroImageLoaded] = useState(false);
+  
+  const [greeting, setGreeting] = useState("Cześć");
   
   const pathname = usePathname();
 
@@ -69,12 +70,19 @@ export default function SharedWeddingLayout({
     };
   }, [pathname]);
 
-  // Mechanizm ładowania aplikacji + Fallback awaryjny dla zdjęć
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour >= 3 && hour < 18) {
+      setGreeting("Dzień dobry");
+    } else {
+      setGreeting("Dobry wieczór");
+    }
+  }, []);
+
   useEffect(() => {
     if (isMounted && !loading) {
       const t = setTimeout(() => setReady(true), 300);
       
-      // FALLBACK: Jeśli czyjś internet po 5 sekundach wciąż nie pobierze obrazków, zdejmujemy blokadę.
       const fallback = setTimeout(() => {
         setBgImageLoaded(true);
         setHeroImageLoaded(true);
@@ -92,14 +100,12 @@ export default function SharedWeddingLayout({
     sessionStorage.setItem("siteUnlocked", "true");
   };
 
-  // Definiujemy główny warunek ładowania - strona ładuje się dopóki React, Kontekst ORAZ oba obrazki nie będą gotowe.
   const isAppLoading = !isMounted || loading || !ready || !bgImageLoaded || !heroImageLoaded;
 
   return (
     <>
       <CustomCursor />
 
-      {/* Ekran ładowania nałożony absolutnie na całą stronę */}
       <AnimatePresence>
         {isAppLoading && (
           <motion.div
@@ -121,7 +127,6 @@ export default function SharedWeddingLayout({
         )}
       </AnimatePresence>
       
-      {/* Navbar wjeżdżający po załadowaniu */}
       <AnimatePresence>
         {showNavbar && isUnlocked && (
           <motion.div
@@ -135,8 +140,6 @@ export default function SharedWeddingLayout({
         )}
       </AnimatePresence>
 
-      {/* ZMIANA: Przywrócono sztywne 100lvh aby zapobiec skakaniu i czarnym paskom na mobile.
-          Zastosowano object-top na mobile (chroni palce), ale na desktopie (md:) wracamy do object-center (równe przycinanie)! */}
       <div className="fixed top-[72px] left-0 w-full h-[calc(100lvh-72px)] -z-20">
         <Image 
           src="/fotki/raczki.jpg" 
@@ -149,7 +152,6 @@ export default function SharedWeddingLayout({
         <div className="absolute inset-0 bg-black/20" /> 
       </div>
 
-      {/* ZMIANA: Szum używa tych samych, twardych parametrów co tło pod nim */}
       <div className="fixed top-[72px] left-0 w-full h-[calc(100lvh-72px)] pointer-events-none z-[60]">
         <div className="absolute inset-0 bg-noise opacity-10 md:opacity-[0.6] md:mix-blend-overlay" />
       </div>
@@ -198,12 +200,33 @@ export default function SharedWeddingLayout({
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
                       transition={{ duration: 0.5 }}
-                      className="pointer-events-auto px-4"
+                      className="pointer-events-auto px-4 w-full max-w-[320px] md:max-w-[400px]"
                     >
-                      <div className="bg-white/20 backdrop-blur-md border border-white/40 rounded-full shadow-2xl px-6 md:px-8 py-3">
-                        <p className="text-lg md:text-xl font-serif text-[#FDF9EC] drop-shadow-md">
-                          Cześć, <span className="font-bold font-sans">{guest.first_name} {guest.last_name}</span>! 💐
-                        </p>
+                      <div className="relative overflow-hidden bg-white/20 backdrop-blur-md border border-white/30 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.15)] p-6 md:p-8 flex flex-col items-center justify-center min-h-[120px] md:min-h-[140px] w-full">
+                        
+                        <div className="absolute inset-0 w-full h-full pointer-events-none opacity-90 z-0">
+                          <Image 
+                            src="/fotki/kawiatki__3.png" 
+                            alt="Kwiaty" 
+                            fill 
+                            className="object-cover object-center" 
+                          />
+                        </div>
+
+                        {/* ZMIANA: Wyśrodkowana całość, przesunięta w górę. Powitanie wyrównane precyzyjnie w lewo za pomocą translate */}
+                        <div className="relative z-10 w-full flex flex-col items-center -mt-6 md:-mt-8">
+                          
+                          <span className="text-lg md:text-xl font-serif text-[#FDF9EC] drop-shadow-md -translate-x-8 md:-translate-x-12">
+                            {greeting},
+                          </span>
+                          
+                          {/* ZMIANA: Imię i nazwisko na środku, podciągnięte do góry */}
+                          <span className="text-xl md:text-2xl font-bold font-sans text-[#FDF9EC] drop-shadow-md text-center -mt-1 md:-mt-2 tracking-wide">
+                            {guest.first_name} {guest.last_name}!
+                          </span>
+                          
+                        </div>
+
                       </div>
                     </motion.div>
                   )}

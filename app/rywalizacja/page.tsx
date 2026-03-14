@@ -25,6 +25,30 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
+// --- 1. KONTENERY (Zarządzają kaskadą) ---
+// Zaktualizowany listContainer
+const listContainer: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2, // To zapewni kaskadę, nawet gdy kafelki wjadą jednocześnie
+      delayChildren: 0.1,
+    },
+  },
+};
+
+// Nowy wariant dla pojedynczego kafelka na mobile, by wymusić kaskadę przy wejściu w viewport
+const mobileRowContainer: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+    }
+  }
+};
+
 const headerVariant: Variants = {
   hidden: { opacity: 0, y: -20 },
   visible: { 
@@ -34,21 +58,20 @@ const headerVariant: Variants = {
   }
 };
 
-// ZMIANA: Zmodyfikowany wariant kart - dodano możliwość sterowania opóźnieniem (delay) oraz wydłużono czas trwania (duration: 1.6) i dystans (200px)
+// --- 2. ELEMENTY (Karty) ---
 const cardVariant: Variants = {
-  hidden: (custom: { dir: number; delay: number }) => ({ 
+  hidden: (dir: number) => ({ 
     opacity: 0, 
-    x: custom.dir === -1 ? -200 : 200 
+    x: dir === -1 ? -200 : 200 
   }),
-  visible: (custom: { dir: number; delay: number }) => ({ 
+  visible: { 
     opacity: 1, 
     x: 0,
     transition: { 
-      delay: custom.delay,
       duration: 1.6, 
       ease: [0.22, 1, 0.36, 1] 
     }
-  }),
+  },
 };
 
 export default function CompetitionPage() {
@@ -59,10 +82,11 @@ export default function CompetitionPage() {
   const [showTournamentMessage, setShowTournamentMessage] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   
-  // ZMIANA: Stan wykrywający mobilki po to, by idealnie dostroić moment wyzwalania animacji
   const [isMobile, setIsMobile] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener("resize", checkMobile);
@@ -99,7 +123,6 @@ export default function CompetitionPage() {
 
   const handleQuizClick = (e: React.MouseEvent) => {
     e.preventDefault();
-
     if (isAdmin) {
       router.push("/rywalizacja/quiz"); 
     } else if (isTester || isOpen) {
@@ -117,18 +140,21 @@ export default function CompetitionPage() {
 
   const isQuizUnlocked = isAdmin || isTester || isOpen;
   
-  if (loading || !guest) {
+  if (loading || !guest || !isMounted) {
     return <div className="min-h-screen bg-gradient-to-b from-[#FDF9EC] via-[#A46C6E] to-[#4E0113]" />;
   }
+
+  // Bufor wyzwalania dla wersji mobilnej
+  const mobileViewport = { once: true, margin: "0px 0px -150px 0px" };
 
   return (
     <div className="flex flex-col min-h-screen">
       <CustomCursor />
-
       <Navbar />
 
       <section className="relative flex-grow bg-gradient-to-b from-[#FDF9EC] via-[#A46C6E] to-[#4E0113] pt-24 md:pt-32 pb-32 overflow-hidden">
         
+        {/* Wzór szkła widoczny tylko na desktopie, aby nie obciążać słabszych telefonów */}
         <div className="absolute inset-0 z-0 pointer-events-none hidden md:block">
           <OrganicGlassPattern part="top" />
         </div>
@@ -136,47 +162,43 @@ export default function CompetitionPage() {
         <div className="relative z-10 px-4 md:px-8">
           <PageWrapper className="max-w-2xl mx-auto">
             
-            {/* ZMIANA: Usunięto z głównego kontenera "variants" i "animate", teraz każdy element decyduje za siebie */}
-            <div className="flex flex-col items-center gap-6 md:gap-8">
+            {/* GŁÓWNY KONTENER ANIMACJI 
+                Dzięki whileInView i staggerChildren, dzieci wjadą po kolei (kaskadowo), 
+                nawet jeśli kilka z nich pojawi się w widoku jednocześnie.
+            */}
+            <motion.div 
+              className="flex flex-col items-center gap-6 md:gap-8"
+              variants={listContainer}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.1 }} // Animacja startuje, gdy 10% kontenera jest w widoku
+            >
             
-              {/* NAGŁÓWEK */}
               <motion.h1 
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
                 variants={headerVariant} 
                 className="font-serif font-light text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-[#4c4a1e] mb-4 text-center drop-shadow-sm uppercase tracking-widest"
               >
                 Strefa Rywalizacji
               </motion.h1>
 
-              {/* === KOMUNIKAT WSTĘPNY (Z LEWEJ) === */}
-              {/* ZMIANA: Dodano whileInView, initial oraz custom konfiguracyjny (kierunek i opóźnienie) */}
+              {/* KAFELEK: KOMUNIKAT WSTĘPNY */}
               <motion.div
-                custom={{ dir: -1, delay: isMobile ? 0 : 0.15 }}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: isMobile ? 0.3 : 0.1 }}
+                custom={-1}
                 variants={cardVariant}
                 className="bg-white/40 backdrop-blur-xl p-8 md:p-10 rounded-2xl border border-white/60 text-center shadow-[0_8px_30px_rgba(0,0,0,0.06)] w-full"
               >
-                 <div className="flex justify-center mb-4">
-                    <GiftIcon className="w-8 h-8 text-[#4c4a1e]" />
-                 </div>
-                 <p className="text-[#4c4a1e] text-sm md:text-base leading-relaxed font-sans font-light">
-                    Włączcie ducha walki! <br/><br/>
-                    Przygotowaliśmy dla Was kilka angażujących konkurencji. 
-                    Liczy się przede wszystkim dobra zabawa, ale jest też o co walczyć.
-                    W każdej konkurencji <strong className="font-[system-ui] font-bold text-[#4c4a1e] tracking-wide">TOP 3 </strong>graczy zgarnia wyjątkowe<strong className="font-[system-ui] font-bold text-[#4c4a1e] tracking-wide"> nagrody</strong>, które zostaną wręczone podczas uroczystości weselnej.
-                 </p>
+                <div className="flex justify-center mb-4">
+                  <GiftIcon className="w-8 h-8 text-[#4c4a1e]" />
+                </div>
+                <p className="text-[#4c4a1e] text-sm md:text-base leading-relaxed font-sans font-light">
+                  Włączcie ducha walki! Przygotowaliśmy dla Was kilka angażujących konkurencji. 
+                  TOP 3 graczy zgarnia wyjątkowe nagrody.
+                </p>
               </motion.div>
 
-              {/* === 1. QUIZ (Z PRAWEJ) === */}
+              {/* KAFELEK: QUIZ */}
               <motion.div
-                custom={{ dir: 1, delay: isMobile ? 0 : 0.3 }}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: isMobile ? 0.4 : 0.1 }}
+                custom={1}
                 variants={cardVariant}
                 whileHover={isQuizUnlocked ? { scale: 1.02 } : {}}
                 whileTap={isQuizUnlocked ? { scale: 0.98 } : {}}
@@ -185,7 +207,7 @@ export default function CompetitionPage() {
                 <div
                   onClick={handleQuizClick}
                   className={`
-                    relative w-full p-6 md:p-8 rounded-2xl shadow-lg border-2 flex items-center justify-between cursor-pointer transition-all duration-300 overflow-hidden backdrop-blur-md
+                    relative w-full p-6 md:p-8 rounded-2xl shadow-lg border-2 flex items-center justify-between cursor-pointer transition-all duration-300 overflow-hidden backdrop-blur-md 
                     ${isQuizUnlocked 
                       ? "bg-white/30 border-white/50 text-[#4c4a1e] hover:bg-white/50" 
                       : "bg-black/5 border-[#4c4a1e]/10 text-[#4c4a1e]/70"
@@ -194,169 +216,122 @@ export default function CompetitionPage() {
                 >
                   <div className="flex items-center gap-6 z-10">
                     <div className={`p-4 rounded-full ${isQuizUnlocked ? 'bg-white/40' : 'bg-[#4c4a1e]/5'}`}>
-                      {isAdmin ? <PlayCircleIcon className="w-8 h-8" /> :
-                       isTester ? <BeakerIcon className="w-8 h-8" /> :
-                       isQuizUnlocked ? <PlayCircleIcon className="w-8 h-8" /> :
-                       <LockClosedIcon className="w-8 h-8 opacity-60" />}
+                      {isAdmin || isTester || isQuizUnlocked ? (
+                        <PlayCircleIcon className="w-8 h-8" />
+                      ) : (
+                        <LockClosedIcon className="w-8 h-8 opacity-60" />
+                      )}
                     </div>
                     <div className="text-left">
                       <h2 className="font-serif text-2xl md:text-3xl tracking-wide mb-1">Quiz</h2>
                       <p className="font-sans font-light uppercase tracking-widest text-xs md:text-sm opacity-80">
-                        {isAdmin ? "Panel Wodzireja" : isTester ? "Tryb Testowy" : "Sprawdź wiedzę o Parze Młodej"}
+                        {isAdmin ? "Panel Wodzireja" : "Sprawdź wiedzę o Parze Młodej"}
                       </p>
                     </div>
                   </div>
-
-                  {!isQuizUnlocked && (
-                    <div className="absolute inset-0 bg-white/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-20 backdrop-blur-sm">
-                      <p className="text-[#4c4a1e] font-serif italic text-lg px-4 text-center">
-                        Quiz zostanie odblokowany w trakcie wesela.
-                      </p>
-                    </div>
-                  )}
                 </div>
-
-                <AnimatePresence>
-                {showLockedMessage && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute -bottom-14 left-0 right-0 text-center z-30"
-                  >
-                    <span className="bg-[#4c4a1e] text-[#FDF9EC] text-sm md:text-base font-serif italic px-6 py-3 rounded-xl shadow-xl border border-white/10 inline-block">
-                      Quiz jest obecnie zamknięty.
-                    </span>
-                  </motion.div>
-                )}
-                </AnimatePresence>
               </motion.div>
 
-              {/* === 2. TETRIS (Z LEWEJ) === */}
-              <motion.div 
-                  custom={{ dir: -1, delay: isMobile ? 0 : 0.45 }}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true, amount: isMobile ? 0.4 : 0.1 }}
-                  variants={cardVariant} 
-                  className="w-full"
-              >
-                  <Link href="/rywalizacja/tetris" className="w-full block">
+              {/* KAFELEK: TETRIS */}
+              <motion.div custom={-1} variants={cardVariant} className="w-full">
+                <Link href="/rywalizacja/tetris" className="w-full block">
                   <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="w-full p-6 md:p-8 bg-black/10 backdrop-blur-md border border-white/20 text-[#FDF9EC] rounded-2xl shadow-xl flex items-center gap-6 hover:bg-black/20 transition-all duration-300"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full p-6 md:p-8 bg-black/10 backdrop-blur-md border border-white/20 text-[#FDF9EC] rounded-2xl shadow-xl flex items-center gap-6 hover:bg-black/20 transition-all duration-300"
                   >
-                      <div className="p-4 bg-white/10 rounded-full">
+                    <div className="p-4 bg-white/10 rounded-full">
                       <PuzzlePieceIcon className="w-8 h-8 text-[#FDF9EC]" />
-                      </div>
-                      <div className="text-left">
+                    </div>
+                    <div className="text-left">
                       <h2 className="font-serif text-2xl md:text-3xl tracking-wide mb-1">Tetris</h2>
                       <p className="font-sans font-light uppercase tracking-widest text-xs md:text-sm opacity-80">
                         Klasyczna rozgrywka, zacięta rywalizacja
                       </p>
-                      </div>
+                    </div>
                   </motion.div>
-                  </Link>
+                </Link>
               </motion.div>
 
-              {/* === 3. ZAGADKA (Z PRAWEJ) === */}
-              <motion.div 
-                  custom={{ dir: 1, delay: isMobile ? 0 : 0.6 }}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true, amount: isMobile ? 0.4 : 0.1 }}
-                  variants={cardVariant} 
-                  className="w-full"
-              >
-                  <Link href="/rywalizacja/wyprawa" className="w-full block">
+              {/* KAFELEK: ZAGADKA */}
+              <motion.div custom={1} variants={cardVariant} className="w-full">
+                <Link href="/rywalizacja/wyprawa" className="w-full block">
                   <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="w-full p-6 md:p-8 bg-black/15 backdrop-blur-md border border-white/20 text-[#FDF9EC] rounded-2xl shadow-xl flex items-center gap-6 hover:bg-black/25 transition-all duration-300"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full p-6 md:p-8 bg-black/15 backdrop-blur-md border border-white/20 text-[#FDF9EC] rounded-2xl shadow-xl flex items-center gap-6 hover:bg-black/25 transition-all duration-300"
                   >
-                      <div className="p-4 bg-white/10 rounded-full">
+                    <div className="p-4 bg-white/10 rounded-full">
                       <MagnifyingGlassIcon className="w-8 h-8 text-[#FDF9EC]" />
-                      </div>
-                      <div className="text-left">
+                    </div>
+                    <div className="text-left">
                       <h2 className="font-serif text-2xl md:text-3xl tracking-wide mb-1">Zagadka</h2>
                       <p className="font-sans font-light uppercase tracking-widest text-xs md:text-sm opacity-80">
                         Mniej zręczności, więcej myślenia
                       </p>
-                      </div>
+                    </div>
                   </motion.div>
-                  </Link>
+                </Link>
               </motion.div>
 
-               {/* === 4. Gra melodyjna (Z LEWEJ) === */}
+              {/* KAFELEK: GRA MELODYJNA (ZABLOKOWANA) */}
               <motion.div
-                 custom={{ dir: -1, delay: isMobile ? 0 : 0.75 }}
-                 initial="hidden"
-                 whileInView="visible"
-                 viewport={{ once: true, amount: isMobile ? 0.4 : 0.1 }}
-                 variants={cardVariant}
-                 whileHover={{ scale: 1.02 }}
-                 whileTap={{ scale: 0.98 }}
-                 className="w-full relative group cursor-not-allowed"
+                custom={-1}
+                variants={cardVariant}
+                className="w-full relative group cursor-not-allowed"
               >
-                 <div className="w-full p-6 md:p-8 bg-black/20 backdrop-blur-md border border-white/10 text-[#FDF9EC]/60 rounded-2xl shadow-md flex items-center gap-6 transition-all duration-300">
-                    <div className="p-4 bg-white/5 rounded-full">
-                       <LockClosedIcon className="w-8 h-8 opacity-60" />
-                    </div>
-                    <div className="text-left">
-                       <h2 className="font-serif text-2xl md:text-3xl tracking-wide mb-1">Gra melodyjna</h2>
-                       <p className="font-sans font-light uppercase tracking-widest text-xs md:text-sm opacity-80">
-                         Konkurencja muzyczna na weselu
-                       </p>
-                    </div>
-                 </div>
+                <div className="w-full p-6 md:p-8 bg-black/20 backdrop-blur-md border border-white/10 text-[#FDF9EC]/60 rounded-2xl shadow-md flex items-center gap-6 transition-all duration-300">
+                  <div className="p-4 bg-white/5 rounded-full">
+                    <LockClosedIcon className="w-8 h-8 opacity-60" />
+                  </div>
+                  <div className="text-left">
+                    <h2 className="font-serif text-2xl md:text-3xl tracking-wide mb-1">Gra melodyjna</h2>
+                    <p className="font-sans font-light uppercase tracking-widest text-xs md:text-sm opacity-80">
+                      Konkurencja muzyczna na weselu
+                    </p>
+                  </div>
+                </div>
               </motion.div>
 
-              {/* === 5. TURNIEJ II (Z PRAWEJ) === */}
+              {/* KAFELEK: WIELKI TURNIEJ II (ZABLOKOWANY) */}
               <motion.div
-                 custom={{ dir: 1, delay: isMobile ? 0 : 0.9 }}
-                 initial="hidden"
-                 whileInView="visible"
-                 viewport={{ once: true, amount: isMobile ? 0.4 : 0.1 }}
-                 variants={cardVariant}
-                 whileHover={{ scale: 1.02 }}
-                 whileTap={{ scale: 0.98 }}
-                 onClick={handleTournamentClick}
-                 className="w-full relative group cursor-pointer"
+                custom={1}
+                variants={cardVariant}
+                onClick={handleTournamentClick}
+                className="w-full relative group cursor-pointer"
               >
-                 <div className="w-full p-6 md:p-8 bg-black/20 backdrop-blur-md border border-white/10 text-[#FDF9EC]/60 rounded-2xl shadow-md flex items-center gap-6 transition-all duration-300">
-                    <div className="p-4 bg-white/5 rounded-full">
-                       <LockClosedIcon className="w-8 h-8 opacity-60" />
-                    </div>
-                    <div className="text-left">
-                       <h2 className="font-serif text-2xl md:text-3xl tracking-wide mb-1">Wielki Turniej II</h2>
-                       <p className="font-sans font-light uppercase tracking-widest text-xs md:text-sm opacity-80">
-                         Dostępne po uroczystości
-                       </p>
-                    </div>
-                 </div>
-                 
-                 <AnimatePresence>
-                 {showTournamentMessage && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute -bottom-14 left-0 right-0 text-center z-30"
-                  >
-                    <span className="bg-[#4c4a1e] text-[#FDF9EC] text-sm md:text-base font-serif italic px-6 py-3 rounded-xl shadow-xl border border-white/10 inline-block">
-                      Wyniki pojawią się tutaj po zakończeniu wesela.
-                    </span>
-                  </motion.div>
-                 )}
-                 </AnimatePresence>
+                <div className="w-full p-6 md:p-8 bg-black/20 backdrop-blur-md border border-white/10 text-[#FDF9EC]/60 rounded-2xl shadow-md flex items-center gap-6 transition-all duration-300">
+                  <div className="p-4 bg-white/5 rounded-full">
+                    <LockClosedIcon className="w-8 h-8 opacity-60" />
+                  </div>
+                  <div className="text-left">
+                    <h2 className="font-serif text-2xl md:text-3xl tracking-wide mb-1">Wielki Turniej II</h2>
+                    <p className="font-sans font-light uppercase tracking-widest text-xs md:text-sm opacity-80">
+                      Dostępne po uroczystości
+                    </p>
+                  </div>
+                </div>
+                
+                <AnimatePresence>
+                  {showTournamentMessage && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="absolute -bottom-14 left-0 right-0 text-center z-30"
+                    >
+                      <span className="bg-[#4c4a1e] text-[#FDF9EC] text-sm md:text-base font-serif italic px-6 py-3 rounded-xl shadow-xl border border-white/10 inline-block">
+                        Wyniki pojawią się tutaj po zakończeniu wesela.
+                      </span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
 
-            </div>
+            </motion.div>
           </PageWrapper>
         </div>
       </section>
-
       <Footer />
     </div>
   );
