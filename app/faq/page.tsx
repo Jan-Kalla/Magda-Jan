@@ -2,6 +2,7 @@
 
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { ChevronDown, HelpCircle, Send, ShieldCheck } from "lucide-react";
@@ -27,7 +28,7 @@ const faqData = [
   {
     id: 2,
     question: "Co z prezentami?",
-    answer: "Dla nas, jako Młodej Pary, która musi dopiero poukładać sobie nowe życie i wyremontować mieszkanie, zdecydowanie najpraktyczniejszym wsparciem będzie po prostu gotówka."
+    answer: "Nie ma co ukrywać, dla nas, jako Młodej Pary, która musi dopiero poukładać sobie nowe życie i wyremontować mieszkanie, zdecydowanie najpraktyczniejszym wsparciem będzie po prostu nieco pieniążków."
   },
   {
     id: 3,
@@ -37,12 +38,12 @@ const faqData = [
   {
     id: 4,
     question: "Czy przewidziany jest transport?",
-    answer: "Oczywiście! Na pewno będą zorganizowane busy, które po zakończeniu przyjęcia rozwiozą gości do domów."
+    answer: "Coś ogarniemy! Generalnie, to na pewno będą zorganizowane busy, które po zakończeniu przyjęcia rozwiozą gości do domów."
   },
   {
     id: 5,
     question: "Czy na weselu będzie coś przewidziane specjalnie dla dzieci?",
-    answer: "Jak najbardziej! W godzinach około 17:00-22:00 będzie dostępny kącik zabaw z animatorkami, gdzie dzieci będą mogły się bawić pod profesjonalną opieką, podczas gdy dorośli będą cieszyć się zabawą na parkiecie."
+    answer: "Jeszcze jak! W godzinach około 17:00-22:00 będzie dostępny kącik zabaw z animatorkami, gdzie dzieci będą mogły się bawić pod profesjonalną opieką, podczas gdy dorośli będą cieszyć się zabawą na parkiecie."
   },
   {
     id: 6,
@@ -59,6 +60,7 @@ const faqData = [
 export default function FaqPage() {
   const { guest, loading } = useGuest();
   const { playSound } = useSound();
+  const router = useRouter(); // DODANE
   
   const [openId, setOpenId] = useState<number | null>(null);
   
@@ -84,6 +86,13 @@ export default function FaqPage() {
       fetchQuestions();
     }
   }, [isBrideOrGroom]);
+
+  // DODANE: Zabezpieczenie ścieżki
+  useEffect(() => {
+    if (!loading && !guest) {
+      router.push("/");
+    }
+  }, [guest, loading, router]);
 
   const toggleItem = (id: number) => {
     playSound("click");
@@ -124,7 +133,8 @@ export default function FaqPage() {
     }
   };
 
-  if (loading) {
+  // ZMIANA: Zmodyfikowany stan ładowania – teraz chroni też widok przed wylogowanymi uciekinierami
+  if (loading || !guest) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#FDF9EC] text-[#4c4a1e]">
         <p className="font-serif italic text-xl tracking-widest uppercase">Ładowanie...</p>

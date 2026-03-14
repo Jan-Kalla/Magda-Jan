@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react"; 
+import { useRouter } from "next/navigation"; 
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import { useGuest } from "@/app/context/GuestContext";
@@ -10,6 +11,7 @@ import AlbumModal from "./components/AlbumModal";
 import PageWrapper from "@/app/components/PageWrapper";
 import { motion, Variants } from "framer-motion";
 import OrganicGlassPattern from "@/app/components/OrganicGlassPattern";
+import CustomCursor from "@/app/components/CustomCursor";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -34,6 +36,14 @@ const itemVariants: Variants = {
 export default function GalleryPage() {
   const { guest, loading } = useGuest();
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
+  const router = useRouter();
+
+  // Nasłuchiwanie na wylogowanie / brak dostępu
+  useEffect(() => {
+    if (!loading && !guest) {
+      router.push("/");
+    }
+  }, [guest, loading, router]);
 
   const hasAccess = (requiredLevel: AccessLevel) => {
     if (!guest) return false;
@@ -43,7 +53,8 @@ export default function GalleryPage() {
     return userWeight >= requiredWeight;
   };
 
-  if (loading) {
+  // Blokada renderowania zanim sprawdzimy autoryzację lub podczas przekierowania
+  if (loading || !guest) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#FDF9EC] text-[#4c4a1e]">
         <p className="font-serif italic text-xl tracking-widest uppercase">Ładowanie...</p>
@@ -52,13 +63,14 @@ export default function GalleryPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen relative">
+      <CustomCursor />
+
       <Navbar />
       
-      {/* GŁÓWNY KONTENER Z PŁYNNYM GRADIENTEM I SZKŁEM */}
       <section className="relative flex-grow bg-gradient-to-b from-[#FDF9EC] via-[#A46C6E] to-[#4E0113] pt-24 md:pt-32 pb-32 overflow-hidden text-[#4c4a1e]">
         
-        <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 z-0 pointer-events-none hidden md:block">
           <OrganicGlassPattern part="top" />
         </div>
 
@@ -70,7 +82,8 @@ export default function GalleryPage() {
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, ease: "easeOut" }}
-                  className="font-script text-6xl md:text-7xl text-[#4c4a1e] mb-6 drop-shadow-sm"
+                  // ZMIANA: Z font-script na font-serif (IvyOra), dodane uppercase i tracking-widest
+                  className="font-serif font-light text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-[#4c4a1e] mb-6 drop-shadow-sm uppercase tracking-widest"
                 >
                   Galeria Wspomnień
                 </motion.h1>
@@ -78,7 +91,8 @@ export default function GalleryPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-                  className="font-sans font-light uppercase tracking-[0.15em] text-[#4c4a1e]/80 text-sm md:text-base max-w-2xl mx-auto"
+                  // ZMIANA: Usunięto uppercase i nienaturalny rozstrzał liter, tekst jest teraz czytelniejszy
+                  className="font-sans font-light text-[#4c4a1e]/90 text-base md:text-lg max-w-2xl mx-auto"
                 >
                   Zbiór chwil, które nas ukształtowały i tych, które dopiero nadejdą
                 </motion.p>

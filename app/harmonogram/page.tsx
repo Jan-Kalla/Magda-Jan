@@ -8,6 +8,8 @@ import TimelineSection from "./TimelineSection";
 import Footer from "@/app/components/Footer";
 import PageWrapper from "@/app/components/PageWrapper";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { useGuest } from "@/app/context/GuestContext";
+import { useRouter } from "next/navigation";
 
 type Star = {
   id: number;
@@ -19,8 +21,10 @@ type Star = {
 };
 
 export default function HarmonogramPage() {
-  const timelineRef = useRef<HTMLDivElement>(null);
+  const { guest, loading } = useGuest(); // Pobranie stanu
+  const router = useRouter(); // Router
   
+  const timelineRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: timelineRef,
     offset: ["start start", "end end"]
@@ -57,6 +61,18 @@ export default function HarmonogramPage() {
       }))
     );
   }, []);
+
+  // DODANE: Nasłuchiwanie wylogowania
+  useEffect(() => {
+    if (!loading && !guest) {
+      router.push("/");
+    }
+  }, [guest, loading, router]);
+
+  // DODANE: Blokada ekranu (umieszczone po wszystkich hookach!)
+  if (loading || !guest) {
+    return <div className="min-h-screen bg-[#050510]" />; // Pokazujemy puste nocne niebo na ułamek sekundy
+  }
 
   return (
     <div className="relative min-h-screen bg-[#050510] overflow-x-hidden">

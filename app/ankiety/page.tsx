@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/app/components/Navbar";
 import { useMealSurvey } from "./hooks/useMealSurvey";
 import MainCourseSelector from "@/app/components/MainCourseSelector";
@@ -12,6 +13,9 @@ import RsvpSelector, { RsvpStatus } from "@/app/components/RsvpSelector";
 import PageWrapper from "@/app/components/PageWrapper";
 import { createClient } from "@supabase/supabase-js";
 import OrganicGlassPattern from "@/app/components/OrganicGlassPattern";
+
+// ZMIANA: Importujemy nasz customowy kursor
+import CustomCursor from "@/app/components/CustomCursor";
 
 import { motion, Variants, easeOut, easeInOut, AnimatePresence } from "framer-motion";
 import { Send, Music, ShieldCheck } from "lucide-react";
@@ -77,6 +81,8 @@ export default function MealSurveyPage() {
     results,
   } = useMealSurvey();
 
+  const router = useRouter();
+
   const [rsvpStatus, setRsvpStatus] = useState<RsvpStatus>(null);
 
   const [gameQuestion, setGameQuestion] = useState("");
@@ -99,6 +105,20 @@ export default function MealSurveyPage() {
       fetchQuestions();
     }
   }, [isWodzirej, isBrideOrGroom]);
+
+  useEffect(() => {
+    if (!loading && !guest) {
+      router.push("/");
+    }
+  }, [guest, loading, router]);
+
+  if (loading || !guest) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-[#FDF9EC] via-[#A46C6E] to-[#4E0113] text-[#FDF9EC]">
+        <p className="font-serif italic text-xl tracking-widest uppercase">Ładowanie...</p>
+      </div>
+    );
+  }
 
   const handleGameQuestionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,15 +148,15 @@ export default function MealSurveyPage() {
 
   return (
     <>
+      {/* ZMIANA: Dodany customowy kursor */}
+      <CustomCursor />
+      
       <Navbar />
       
-      {/* Główny kontener strony. Tło to gradient przechodzący z góry na dół na całej długości.
-         ZMIANA: Orientacja 'bg-gradient-to-b' oraz nowe kolory (Cream-Oliwkowy -> Bordo)
-      */}
       <div className="relative min-h-screen bg-gradient-to-b from-[#FDF9EC] via-[#A46C6E] to-[#4E0113] pt-24 md:pt-32 pb-32 z-0 overflow-hidden text-[#4c4a1e]">
         
-        {/* Szklany wzór, przypięty absolutnie do przewijającego się kontenera */}
-        <div className="absolute inset-0 z-0 pointer-events-none">
+        {/* ZMIANA: Klasa 'hidden md:block' sprawia, że szkło znika na urządzeniach mobilnych, a sam gradient pozostaje gładki. */}
+        <div className="absolute inset-0 z-0 pointer-events-none hidden md:block">
           <OrganicGlassPattern part="top" />
         </div>
 
@@ -167,7 +187,6 @@ export default function MealSurveyPage() {
                       parentGuestId={guest?.id}
                     />
 
-                    {/* Formularz jedzenia w eleganckiej "szklanej" karcie */}
                     <motion.form
                       onSubmit={handleSubmit}
                       className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] p-8 md:p-14 max-w-4xl mx-auto mt-16 relative z-10"
@@ -219,7 +238,6 @@ export default function MealSurveyPage() {
                       )}
                     </motion.form>
 
-                    {/* Wyniki ankiety */}
                     <motion.div
                       initial="hidden"
                       animate="visible"
@@ -239,7 +257,6 @@ export default function MealSurveyPage() {
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.8, delay: 0.2 }}
-                      // ZMIANA: Tło zmienione na przyciemnione szkło, tekst na #F6f4e5
                       className="max-w-4xl mx-auto mt-24 bg-black/20 backdrop-blur-xl rounded-2xl p-8 md:p-14 border border-white/20 shadow-2xl text-center relative z-10 text-[#F6f4e5]"
                     >
                       <div className="flex justify-center mb-6">
@@ -260,13 +277,11 @@ export default function MealSurveyPage() {
                             value={gameQuestion}
                             onChange={(e) => setGameQuestion(e.target.value)}
                             placeholder="Treść pytania..."
-                            // ZMIANA: Ciemniejszy input, dopasowany do białego tekstu
                             className="w-full p-5 rounded-xl bg-white/10 border border-white/30 text-[#F6f4e5] placeholder-[#F6f4e5]/50 focus:outline-none focus:ring-2 focus:ring-[#F6f4e5]/40 transition-all font-sans text-center shadow-inner"
                           />
                           <button 
                             type="submit"
                             disabled={isSubmittingGame || !gameQuestion.trim()}
-                            // ZMIANA: Przycisk jasny (#F6f4e5) z bordowym tekstem, żeby mocno kontrastował
                             className="flex items-center justify-center gap-3 bg-[#F6f4e5] text-[#4E0113] py-4 px-8 rounded-xl font-serif uppercase tracking-widest hover:bg-white hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg font-bold"
                           >
                             {isSubmittingGame ? "Wysyłanie..." : "Wyślij pytanie"}

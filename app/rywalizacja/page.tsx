@@ -13,62 +13,67 @@ import {
   BeakerIcon,
   MagnifyingGlassIcon,
   GiftIcon
-} from "@heroicons/react/24/outline"; // Zmieniono na wariant outline dla elegancji
+} from "@heroicons/react/24/outline"; 
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import PageWrapper from "@/app/components/PageWrapper";
-import OrganicGlassPattern from "@/app/components/OrganicGlassPattern"; // Dodano import szkła
+import OrganicGlassPattern from "@/app/components/OrganicGlassPattern"; 
+import CustomCursor from "@/app/components/CustomCursor";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// --- 1. KONTENER (Zarządza kolejnością) ---
-const listContainer: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.2,
-    },
-  },
-};
-
-// --- 2. ELEMENT ZWYKŁY (Nagłówek - wjeżdża z dołu) ---
 const headerVariant: Variants = {
   hidden: { opacity: 0, y: -20 },
   visible: { 
     opacity: 1, 
     y: 0,
-    transition: { duration: 0.6, ease: "easeOut" }
+    transition: { duration: 0.8, ease: "easeOut" }
   }
 };
 
-// --- 3. ELEMENT BOCZNY (Karty - wjeżdżają z boków) ---
+// ZMIANA: Zmodyfikowany wariant kart - dodano możliwość sterowania opóźnieniem (delay) oraz wydłużono czas trwania (duration: 1.6) i dystans (200px)
 const cardVariant: Variants = {
-  hidden: (direction: number) => ({ 
+  hidden: (custom: { dir: number; delay: number }) => ({ 
     opacity: 0, 
-    x: direction === -1 ? -150 : 150 
+    x: custom.dir === -1 ? -200 : 200 
   }),
-  visible: { 
+  visible: (custom: { dir: number; delay: number }) => ({ 
     opacity: 1, 
     x: 0,
     transition: { 
-      duration: 0.9, 
-      ease: [0.25, 1, 0.5, 1] 
+      delay: custom.delay,
+      duration: 1.6, 
+      ease: [0.22, 1, 0.36, 1] 
     }
-  },
+  }),
 };
 
 export default function CompetitionPage() {
-  const { guest } = useGuest();
+  const { guest, loading } = useGuest(); 
   const router = useRouter();
   
   const [showLockedMessage, setShowLockedMessage] = useState(false);
   const [showTournamentMessage, setShowTournamentMessage] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  
+  // ZMIANA: Stan wykrywający mobilki po to, by idealnie dostroić moment wyzwalania animacji
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (!loading && !guest) {
+      router.push("/");
+    }
+  }, [guest, loading, router]);
 
   const isAdmin = guest?.code === "FC3818";
   const isTester = guest?.code === "8DD06D";
@@ -111,36 +116,47 @@ export default function CompetitionPage() {
   };
 
   const isQuizUnlocked = isAdmin || isTester || isOpen;
+  
+  if (loading || !guest) {
+    return <div className="min-h-screen bg-gradient-to-b from-[#FDF9EC] via-[#A46C6E] to-[#4E0113]" />;
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
+      <CustomCursor />
+
       <Navbar />
 
-      {/* GŁÓWNY KONTENER Z PŁYNNYM GRADIENTEM I SZKŁEM */}
       <section className="relative flex-grow bg-gradient-to-b from-[#FDF9EC] via-[#A46C6E] to-[#4E0113] pt-24 md:pt-32 pb-32 overflow-hidden">
         
-        <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 z-0 pointer-events-none hidden md:block">
           <OrganicGlassPattern part="top" />
         </div>
 
         <div className="relative z-10 px-4 md:px-8">
           <PageWrapper className="max-w-2xl mx-auto">
             
-            <motion.div 
-              className="flex flex-col items-center gap-6 md:gap-8"
-              variants={listContainer} 
-              initial="hidden"
-              animate="visible"
-            >
+            {/* ZMIANA: Usunięto z głównego kontenera "variants" i "animate", teraz każdy element decyduje za siebie */}
+            <div className="flex flex-col items-center gap-6 md:gap-8">
             
               {/* NAGŁÓWEK */}
-              <motion.h1 variants={headerVariant} className="font-script text-6xl md:text-7xl text-[#4c4a1e] mb-4 text-center drop-shadow-sm">
+              <motion.h1 
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={headerVariant} 
+                className="font-serif font-light text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-[#4c4a1e] mb-4 text-center drop-shadow-sm uppercase tracking-widest"
+              >
                 Strefa Rywalizacji
               </motion.h1>
 
               {/* === KOMUNIKAT WSTĘPNY (Z LEWEJ) === */}
+              {/* ZMIANA: Dodano whileInView, initial oraz custom konfiguracyjny (kierunek i opóźnienie) */}
               <motion.div
-                custom={-1}
+                custom={{ dir: -1, delay: isMobile ? 0 : 0.15 }}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: isMobile ? 0.3 : 0.1 }}
                 variants={cardVariant}
                 className="bg-white/40 backdrop-blur-xl p-8 md:p-10 rounded-2xl border border-white/60 text-center shadow-[0_8px_30px_rgba(0,0,0,0.06)] w-full"
               >
@@ -157,7 +173,10 @@ export default function CompetitionPage() {
 
               {/* === 1. QUIZ (Z PRAWEJ) === */}
               <motion.div
-                custom={1}
+                custom={{ dir: 1, delay: isMobile ? 0 : 0.3 }}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: isMobile ? 0.4 : 0.1 }}
                 variants={cardVariant}
                 whileHover={isQuizUnlocked ? { scale: 1.02 } : {}}
                 whileTap={isQuizUnlocked ? { scale: 0.98 } : {}}
@@ -214,9 +233,11 @@ export default function CompetitionPage() {
               </motion.div>
 
               {/* === 2. TETRIS (Z LEWEJ) === */}
-              {/* Tutaj zaczyna się ściemniać, zmieniamy styl na ciemne szkło i jasny tekst */}
               <motion.div 
-                  custom={-1}
+                  custom={{ dir: -1, delay: isMobile ? 0 : 0.45 }}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: isMobile ? 0.4 : 0.1 }}
                   variants={cardVariant} 
                   className="w-full"
               >
@@ -241,7 +262,10 @@ export default function CompetitionPage() {
 
               {/* === 3. ZAGADKA (Z PRAWEJ) === */}
               <motion.div 
-                  custom={1}
+                  custom={{ dir: 1, delay: isMobile ? 0 : 0.6 }}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: isMobile ? 0.4 : 0.1 }}
                   variants={cardVariant} 
                   className="w-full"
               >
@@ -265,9 +289,11 @@ export default function CompetitionPage() {
               </motion.div>
 
                {/* === 4. Gra melodyjna (Z LEWEJ) === */}
-               {/* Na samym dole jest głębokie bordo - stosujemy mocniejsze szkło */}
               <motion.div
-                 custom={-1}
+                 custom={{ dir: -1, delay: isMobile ? 0 : 0.75 }}
+                 initial="hidden"
+                 whileInView="visible"
+                 viewport={{ once: true, amount: isMobile ? 0.4 : 0.1 }}
                  variants={cardVariant}
                  whileHover={{ scale: 1.02 }}
                  whileTap={{ scale: 0.98 }}
@@ -288,7 +314,10 @@ export default function CompetitionPage() {
 
               {/* === 5. TURNIEJ II (Z PRAWEJ) === */}
               <motion.div
-                 custom={1}
+                 custom={{ dir: 1, delay: isMobile ? 0 : 0.9 }}
+                 initial="hidden"
+                 whileInView="visible"
+                 viewport={{ once: true, amount: isMobile ? 0.4 : 0.1 }}
                  variants={cardVariant}
                  whileHover={{ scale: 1.02 }}
                  whileTap={{ scale: 0.98 }}
@@ -323,7 +352,7 @@ export default function CompetitionPage() {
                  </AnimatePresence>
               </motion.div>
 
-            </motion.div>
+            </div>
           </PageWrapper>
         </div>
       </section>
