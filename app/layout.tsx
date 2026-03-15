@@ -23,8 +23,8 @@ export const metadata: Metadata = {
   description: "19 lipca 2026. Dołącz do nas w tym wyjątkowym dniu! Zależy nam na Twojej obecności!",
 
   openGraph: {
-    title: "Magdalena & Jan | Pobieramy się! 💍",
-    description: "To będzie piękny dzień! Zależy nam na Twojej obecności. Kliknij, aby zobaczyć szczegóły i potwierdzić przybycie.",
+    title: "Magdalena & Jan | Pobieramy się! 👰‍♀️🤵‍♂️",
+    description: "To będzie piękny dzień! Zależy nam na Twojej obecności. Kliknij, aby zobaczyć szczegóły.",
     url: "https://magda-jan.vercel.app",
     siteName: "Ślub Magdaleny i Jana",
     locale: "pl_PL",
