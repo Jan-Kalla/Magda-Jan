@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     images: [
       {
         // ZMIANA: Pełny, absolutny adres URL do pięknego zdjęcia z górami
-        url: "https://magda-jan.vercel.app/fotki/do__linku.jpg", 
+        url: "https://magda-jan.vercel.app/fotki/do___linku.jpg", 
         width: 1200,
         height: 630,
         alt: "Magdalena i Jan w górach - Zaproszenie na ślub",
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     title: "Magdalena & Jan | Wielki Dzień",
     description: "Zapraszamy na nasz ślub. Kliknij i zobacz szczegóły.",
     // ZMIANA: Tutaj również absolutny URL do zdjęcia
-    images: ["https://magda-jan.vercel.app/fotki/do__linku.jpg"],
+    images: ["https://magda-jan.vercel.app/fotki/do___linku.jpg"],
   },
 };
 
