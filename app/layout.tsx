@@ -18,16 +18,10 @@ const lato = Lato({
 
 // --- MAGIA OPEN GRAPH ---
 export const metadata: Metadata = {
-  // 1. Podstawowy adres strony
   metadataBase: new URL("https://magda-jan.vercel.app"), 
-
-  // 2. Tytuł widoczny w zakładce przeglądarki
   title: "Magdalena & Jan | Pobieramy się!",
-  
-  // 3. Opis pod linkiem w Google
   description: "19 lipca 2026. Dołącz do nas w tym wyjątkowym dniu! Zależy nam na Twojej obecności!",
 
-  // 4. Konfiguracja dla Facebooka / Messengera / WhatsAppa
   openGraph: {
     title: "Magdalena & Jan | Pobieramy się! 💍",
     description: "To będzie piękny dzień! Zależy nam na Twojej obecności. Kliknij, aby zobaczyć szczegóły i potwierdzić przybycie.",
@@ -35,24 +29,14 @@ export const metadata: Metadata = {
     siteName: "Ślub Magdaleny i Jana",
     locale: "pl_PL",
     type: "website",
-    images: [
-      {
-        // ZMIANA: Pełny, absolutny adres URL do pięknego zdjęcia z górami
-        url: "https://magda-jan.vercel.app/fotki/do___linku.jpg", 
-        width: 1200,
-        height: 630,
-        alt: "Magdalena i Jan w górach - Zaproszenie na ślub",
-      },
-    ],
+    // USUNIĘTO RĘCZNE 'images' - Next.js sam je doda z pliku opengraph-image.jpg
   },
 
-  // 5. Konfiguracja dla Twittera / X / iMessage (opcjonalnie, ale bardzo przydatne)
   twitter: {
     card: "summary_large_image",
     title: "Magdalena & Jan | Wielki Dzień",
     description: "Zapraszamy na nasz ślub. Kliknij i zobacz szczegóły.",
-    // ZMIANA: Tutaj również absolutny URL do zdjęcia
-    images: ["https://magda-jan.vercel.app/fotki/do___linku.jpg"],
+    // USUNIĘTO RĘCZNE 'images'
   },
 };
 
