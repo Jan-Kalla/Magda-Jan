@@ -112,7 +112,9 @@ const TimelineItem = ({ item, index }: { item: TimelineEvent; index: number }) =
 
 export default function TimelineSection() {
   return (
-    <section className="max-w-5xl mx-auto my-24 px-4 relative z-10">
+    // ZMIANA: Zamiast "my-24" daliśmy "mt-48 md:mt-64 mb-24". 
+    // To stworzy potężną przerwę (ponad 250px!) NAD napisem "Scenariusz Wydarzenia", odsłaniając niebo!
+    <section className="max-w-5xl mx-auto mt-64 md:mt-96 mb-36 px-4 relative z-10">
       <motion.div 
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}

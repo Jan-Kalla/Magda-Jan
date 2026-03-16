@@ -1,61 +1,45 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { motion } from "framer-motion";
 import AnimatedText from "@/app/components/AnimatedText";
 
 const images = [
   "/fotki/Szwajcaria1.jpg",
   "/fotki/Szwajcaria2.jpg",
+  "/fotki/Szwajcaria3.jpg",
+  "/fotki/Szwajcaria4.jpg",
+  "/fotki/Szwajcaria5.jpg",
+  "/fotki/Szwajcaria6.jpg",
+  "/fotki/Szwajcaria7.jpg",
 ];
 
+// Przy 5 zdjęciach wystarczy powielić tablicę tylko raz, 
+// by animacja x: ["0%", "-50%"] zrobiła idealną pętlę.
+const duplicatedImages = [...images, ...images];
+
 export default function VenueHeroSection() {
-  const [current, setCurrent] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      nextSlide();
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [current]);
-
-  const prevSlide = () => {
-    setCurrent((prev) => (prev - 1 + images.length) % images.length);
-  };
-
-  const nextSlide = () => {
-    setCurrent((prev) => (prev + 1) % images.length);
-  };
-
   return (
-    <section className="flex flex-col md:flex-row w-full pt-20 md:pt-28 pb-12 overflow-hidden items-center">
-      {/* Lewa kolumna – slider */}
-      <div className="w-full md:w-1/2 relative h-[300px] md:h-[500px] shadow-2xl md:ml-12 rounded-2xl md:rounded-r-3xl md:rounded-l-none overflow-hidden border border-white/30 mx-4 md:mx-0">
-        <AnimatePresence mode="wait">
-          <motion.img
-            key={current}
-            src={images[current]}
-            alt="Sala weselna Stara Szwajcaria"
-            className="w-full h-full object-cover"
-            initial={{ opacity: 0, scale: 1.1 }}
-            animate={{ opacity: 1, scale: 1, transition: { duration: 0.5 } }}
-            exit={{ opacity: 0, transition: { duration: 0.3 } }}
-          />
-        </AnimatePresence>
-
-        <button
-          onClick={prevSlide}
-          className="absolute bottom-4 left-4 bg-black/20 backdrop-blur-md border border-white/20 text-white p-3 rounded-full hover:bg-white/20 transition-all"
+    // ZMIANA 1: Usunięto 'overflow-hidden', aby cień mógł swobodnie opadać, oraz zwiększono lekko dolny padding na pb-16
+    <section className="flex flex-col md:flex-row w-full pt-20 md:pt-28 pb-16 items-center">
+      
+      {/* Lewa kolumna – slider (taśma zdjęć) */}
+      {/* ZMIANA 2: Poprawiono marginesy i szerokość dla mobile, dodano pełne zaokrąglenie rogów (md:rounded-3xl) */}
+      <div className="w-[calc(100%-2rem)] md:w-1/2 relative h-[300px] md:h-[500px] shadow-2xl rounded-2xl md:rounded-3xl overflow-hidden border border-white/30 mx-auto md:ml-12 md:mr-0 bg-black/10 backdrop-blur-sm">
+        <motion.div
+          className="flex h-full w-max"
+          animate={{ x: ["0%", "-50%"] }} 
+          transition={{ ease: "linear", duration: 60, repeat: Infinity }}
         >
-          <ChevronLeft size={24} />
-        </button>
-        <button
-          onClick={nextSlide}
-          className="absolute bottom-4 right-4 bg-black/20 backdrop-blur-md border border-white/20 text-white p-3 rounded-full hover:bg-white/20 transition-all"
-        >
-          <ChevronRight size={24} />
-        </button>
+          {duplicatedImages.map((src, i) => (
+            <div key={i} className="relative h-full w-auto flex-shrink-0">
+              <img
+                src={src}
+                alt="Sala weselna Stara Szwajcaria"
+                className="h-full w-auto object-cover"
+              />
+            </div>
+          ))}
+        </motion.div>
       </div>
 
       {/* Prawa kolumna – opis */}

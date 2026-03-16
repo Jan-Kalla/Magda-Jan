@@ -10,6 +10,8 @@ import PageWrapper from "@/app/components/PageWrapper";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useGuest } from "@/app/context/GuestContext";
 import { useRouter } from "next/navigation";
+// ZMIANA 1: Importujemy nasz CustomCursor
+import CustomCursor from "@/app/components/CustomCursor";
 
 type Star = {
   id: number;
@@ -20,11 +22,34 @@ type Star = {
   pulseDelay: number;
 };
 
+// 1. GŁÓWNY KOMPONENT
 export default function HarmonogramPage() {
-  const { guest, loading } = useGuest(); // Pobranie stanu
-  const router = useRouter(); // Router
+  const { guest, loading } = useGuest();
+  const router = useRouter();
   
+  useEffect(() => {
+    if (!loading && !guest) {
+      router.push("/");
+    }
+  }, [guest, loading, router]);
+
+  if (loading || !guest) {
+    return <div className="min-h-screen bg-[#050510]" />;
+  }
+
+  // ZMIANA 2: Dodajemy <CustomCursor /> tuż przed główną zawartością w tzw. pustym fragmencie <> </>
+  return (
+    <>
+      <CustomCursor />
+      <HarmonogramContent />
+    </>
+  );
+}
+
+// 2. KOMPONENT Z ZAWARTOŚCIĄ
+function HarmonogramContent() {
   const timelineRef = useRef<HTMLDivElement>(null);
+  
   const { scrollYProgress } = useScroll({
     target: timelineRef,
     offset: ["start start", "end end"]
@@ -61,18 +86,6 @@ export default function HarmonogramPage() {
       }))
     );
   }, []);
-
-  // DODANE: Nasłuchiwanie wylogowania
-  useEffect(() => {
-    if (!loading && !guest) {
-      router.push("/");
-    }
-  }, [guest, loading, router]);
-
-  // DODANE: Blokada ekranu (umieszczone po wszystkich hookach!)
-  if (loading || !guest) {
-    return <div className="min-h-screen bg-[#050510]" />; // Pokazujemy puste nocne niebo na ułamek sekundy
-  }
 
   return (
     <div className="relative min-h-screen bg-[#050510] overflow-x-hidden">
@@ -145,7 +158,7 @@ export default function HarmonogramPage() {
       {/* 4. STOPKA ZE SŁOŃCEM */}
       <div className="relative z-30 overflow-visible">
         
-        {/* WSCHODZĄCE SŁOŃCE - Zmniejszone rozmiary i lekko przesunięte w dół */}
+        {/* WSCHODZĄCE SŁOŃCE */}
         <motion.div 
           style={{ 
             opacity: dawnOpacity,

@@ -80,8 +80,8 @@ export default function CustomCursor() {
   };
 
   const isFemale = guest?.first_name?.trim().endsWith("a");
-  const frame1 = isFemale ? "/cursors/madzi.jpg" : "/cursors/swinia1.png";
-  const frame2 = isFemale ? "/cursors/madzi.jpg" : "/cursors/swinia2.png"; 
+  const frame1 = isFemale ? "/cursors/swinia1.jpg" : "/cursors/swinia1.png";
+  const frame2 = isFemale ? "/cursors/swinia2.jpg" : "/cursors/swinia2.png"; 
 
   const cursorImage = (isClicking || (isHovering && isPulseLarge)) ? frame2 : frame1;
 

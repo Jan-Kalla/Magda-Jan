@@ -1,13 +1,8 @@
 "use client";
 
-import { useState } from "react";
-
-const GOOGLE_MAPS_EMBED_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY;
-
 export default function MapTrackSection() {
-  const [iframeSrc, setIframeSrc] = useState(
-    "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2559.872844639911!2d18.62930407670107!3d50.30766837149274!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4711319f8c6849b3%3A0xc58b39055c51c5d!2sStara%20Szwajcaria!5e0!3m2!1spl!2spl!4v1739386000000!5m2!1spl!2spl"
-  );
+  const destinationForEmbed = encodeURIComponent("Stara Szwajcaria, Łabędzka 6, Gliwice");
+  const iframeSrc = `https://maps.google.com/maps?q=${destinationForEmbed}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
 
   const origin = encodeURIComponent(
     "Kościół Rzymskokatolicki pw. św. Piotra i Pawła, Mikołów"
@@ -19,17 +14,10 @@ export default function MapTrackSection() {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  const embedDirectionsWithApiKey = () => {
-    if (!GOOGLE_MAPS_EMBED_KEY) {
-      openDirectionsInNewTab();
-      return;
-    }
-    const url = `https://www.google.com/maps/embed/v1/directions?key=${GOOGLE_MAPS_EMBED_KEY}&origin=${origin}&destination=${destination}&mode=driving`;
-    setIframeSrc(url);
-  };
-
   return (
-    <div className="flex flex-col items-center my-16 px-4">
+    // ZMIANA: Marginesy wróciły do normy (mt-16 mb-16), żeby jasna sekcja niepotrzebnie się nie rozciągała
+    <div className="flex flex-col items-center mt-16 mb-16 px-4">
+      
       <div className="w-full md:w-[1080px] h-[500px] md:h-[720px] rounded-3xl overflow-hidden shadow-2xl border border-white/40 bg-white/20 backdrop-blur-md p-2">
         <iframe
           src={iframeSrc}
