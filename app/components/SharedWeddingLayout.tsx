@@ -200,31 +200,35 @@ export default function SharedWeddingLayout({
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
                       transition={{ duration: 0.5 }}
-                      className="pointer-events-auto px-4 w-full max-w-[320px] md:max-w-[400px]"
+                      className="pointer-events-auto px-4 w-full max-w-[460px] md:max-w-[580px]"
                     >
-                      <div className="relative overflow-hidden bg-white/20 backdrop-blur-md border border-white/30 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.15)] p-6 md:p-8 flex flex-col items-center justify-center min-h-[120px] md:min-h-[140px] w-full">
+                      <div className="relative overflow-hidden bg-white/20 backdrop-blur-md border border-white/30 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.15)] w-full aspect-[3.87/1] min-h-[120px] md:min-h-[140px]">
                         
                         <div className="absolute inset-0 w-full h-full pointer-events-none opacity-90 z-0">
                           <Image 
-                            src="/fotki/kawiatki__3.png" 
+                            src="/fotki/kawiatki4.png" 
                             alt="Kwiaty" 
                             fill 
                             className="object-cover object-center" 
                           />
                         </div>
 
-                        {/* ZMIANA: Wyśrodkowana całość, przesunięta w górę. Powitanie wyrównane precyzyjnie w lewo za pomocą translate */}
-                        <div className="relative z-10 w-full flex flex-col items-center -mt-6 md:-mt-8">
+                        <div className="absolute inset-0 z-10 w-full h-full pointer-events-none">
                           
-                          <span className="text-lg md:text-xl font-serif text-[#FDF9EC] drop-shadow-md -translate-x-8 md:-translate-x-12">
-                            {greeting},
-                          </span>
+                          {/* Powitanie: większe (text-2xl/3xl), zakotwiczone w 45% szerokości (odrobinę w lewo od centrum) i 27% wysokości */}
+                          <div className="absolute left-[45%] top-[27%] -translate-x-1/2 -translate-y-1/2">
+                            <span className="text-2xl md:text-3xl font-serif text-[#FDF9EC] drop-shadow-md whitespace-nowrap">
+                              {greeting},
+                            </span>
+                          </div>
                           
-                          {/* ZMIANA: Imię i nazwisko na środku, podciągnięte do góry */}
-                          <span className="text-xl md:text-2xl font-bold font-sans text-[#FDF9EC] drop-shadow-md text-center -mt-1 md:-mt-2 tracking-wide">
-                            {guest.first_name} {guest.last_name}!
-                          </span>
-                          
+                          {/* ZMIANA: Usunięto max-w, dodano whitespace-nowrap. Imię i nazwisko absolutnie zawsze w jednej linii! */}
+                          <div className="absolute left-[60%] top-[65%] -translate-x-1/2 -translate-y-1/2 text-center">
+                            <span className="text-2xl md:text-3xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide whitespace-nowrap">
+                              {guest.first_name} {guest.last_name}! 
+                            </span>
+                          </div>
+
                         </div>
 
                       </div>

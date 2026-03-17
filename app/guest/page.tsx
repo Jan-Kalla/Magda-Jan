@@ -78,9 +78,9 @@ export default function GuestPage() {
             exit={{
               opacity: 0,
               height: 0,
-              transition: { duration: 0.5, ease: "easeInOut" },
+              transition: { duration: 0.9, ease: "easeInOut" },
             }}
-            transition={{ duration: 0.6, ease: "easeInOut" }}
+            transition={{ duration: 1.6, ease: "easeInOut" }}
             className="w-full flex items-center justify-center overflow-hidden"
           >
             <div className="w-full flex justify-center pb-2 relative z-10"> 
@@ -88,7 +88,7 @@ export default function GuestPage() {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.4, delay: 0.1 }}
+                transition={{ duration: 1.9, delay: 0.1 }}
                 className="relative bg-white/20 backdrop-blur-md rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] p-10 md:p-14 max-w-lg w-[95%] border border-white/30 overflow-hidden flex flex-col items-center"
               >
                 
@@ -115,10 +115,10 @@ export default function GuestPage() {
                 {/* ======================================================= */}
 
                 <div className="relative z-10 w-full text-center mt-6 mb-2">
-                  <h1 className="text-3xl md:text-4xl font-serif font-bold mb-3 text-[#4E0113] drop-shadow-sm">
+                  <h1 className="text-3xl md:text-4xl font-serif font-bold mb-3 text-[#FDF9EC] drop-shadow-sm">
                     {greeting},<br className="md:hidden"/> gościu weselny!
                   </h1>
-                  <p className="mb-8 text-[#4E0113]/90 font-medium px-2 text-sm md:text-base">
+                  <p className="mb-8 text-[#FDF9EC]/90 font-medium px-2 text-sm md:text-base">
                     Wpisz kod z zaproszenia, aby zobaczyć szczegóły naszego wielkiego dnia.
                   </p>
 

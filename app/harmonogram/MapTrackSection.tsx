@@ -15,8 +15,9 @@ export default function MapTrackSection() {
   };
 
   return (
-    // ZMIANA: Marginesy wróciły do normy (mt-16 mb-16), żeby jasna sekcja niepotrzebnie się nie rozciągała
-    <div className="flex flex-col items-center mt-16 mb-16 px-4">
+    // ZMIANA: Klasa "mb-40 md:mb-64" dodaje ogromną przestrzeń pod przyciskiem, 
+    // zmuszając jasne tło do ciągnięcia się daleko w dół.
+    <div className="flex flex-col items-center mt-32 mb-80 md:mb-128 px-4">
       
       <div className="w-full md:w-[1080px] h-[500px] md:h-[720px] rounded-3xl overflow-hidden shadow-2xl border border-white/40 bg-white/20 backdrop-blur-md p-2">
         <iframe
