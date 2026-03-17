@@ -114,9 +114,10 @@ export default function GuestPage() {
 
                 {/* ======================================================= */}
 
-                <div className="relative z-10 w-full text-center mt-6 mb-2">
+                <div className="relative z-10 w-full flex flex-col items-center text-center -mt-3 md:-mt-4">
+                  
                   <h1 className="text-3xl md:text-4xl font-serif font-bold mb-3 text-[#FDF9EC] drop-shadow-sm">
-                    {greeting},<br className="md:hidden"/> gościu weselny!
+                    {greeting},<br /> gościu weselny!
                   </h1>
                   <p className="mb-8 text-[#FDF9EC]/90 font-medium px-2 text-sm md:text-base">
                     Wpisz kod z zaproszenia, aby zobaczyć szczegóły naszego wielkiego dnia.

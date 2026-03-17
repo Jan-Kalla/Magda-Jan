@@ -202,7 +202,7 @@ export default function SharedWeddingLayout({
                       transition={{ duration: 0.5 }}
                       className="pointer-events-auto px-4 w-full max-w-[460px] md:max-w-[580px]"
                     >
-                      <div className="relative overflow-hidden bg-white/20 backdrop-blur-md border border-white/30 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.15)] w-full aspect-[3.87/1] min-h-[120px] md:min-h-[140px]">
+                      <div className="relative overflow-hidden bg-white/20 backdrop-blur-md border border-white/30 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.15)] flex flex-col justify-center w-full aspect-[3.87/1] min-h-[120px] md:min-h-[140px]">
                         
                         <div className="absolute inset-0 w-full h-full pointer-events-none opacity-90 z-0">
                           <Image 
@@ -215,14 +215,12 @@ export default function SharedWeddingLayout({
 
                         <div className="absolute inset-0 z-10 w-full h-full pointer-events-none">
                           
-                          {/* Powitanie: większe (text-2xl/3xl), zakotwiczone w 45% szerokości (odrobinę w lewo od centrum) i 27% wysokości */}
                           <div className="absolute left-[45%] top-[27%] -translate-x-1/2 -translate-y-1/2">
                             <span className="text-2xl md:text-3xl font-serif text-[#FDF9EC] drop-shadow-md whitespace-nowrap">
                               {greeting},
                             </span>
                           </div>
                           
-                          {/* ZMIANA: Usunięto max-w, dodano whitespace-nowrap. Imię i nazwisko absolutnie zawsze w jednej linii! */}
                           <div className="absolute left-[60%] top-[65%] -translate-x-1/2 -translate-y-1/2 text-center">
                             <span className="text-2xl md:text-3xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide whitespace-nowrap">
                               {guest.first_name} {guest.last_name}! 
@@ -254,9 +252,10 @@ export default function SharedWeddingLayout({
                 ) : (
                   <motion.div
                     key="title"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
+                    initial={{ opacity: 0, y: guest ? 0 : 280 }}
+                    animate={{ opacity: 1, y: guest ? 0 : 280 }}
                     exit={{ opacity: 0 }}
+                    transition={{ duration: 3.2, ease: [0.22, 1, 0.36, 1] }}
                     className="relative z-10 text-center text-[#FDF9EC] drop-shadow-2xl px-4 -mt-16 md:-mt-24 lg:-mt-32"
                   >
                     <div className="relative inline-block">
