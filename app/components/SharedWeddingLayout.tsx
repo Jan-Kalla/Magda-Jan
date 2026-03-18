@@ -250,12 +250,13 @@ export default function SharedWeddingLayout({
                     </p>
                   </motion.div>
                 ) : (
+                  //* ZMIANA: Tytuł odsuwa się na dół (y: 280) TYLKO na stronie logowania dla niezalogowanego gościa */}
                   <motion.div
                     key="title"
-                    initial={{ opacity: 0, y: guest ? 0 : 280 }}
-                    animate={{ opacity: 1, y: guest ? 0 : 280 }}
+                    initial={{ opacity: 0, y: (pathname.includes("guest") && !guest) ? 280 : 0 }}
+                    animate={{ opacity: 1, y: (pathname.includes("guest") && !guest) ? 280 : 0 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 3.2, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 2.2, ease: [0.22, 1, 0.36, 1] }}
                     className="relative z-10 text-center text-[#FDF9EC] drop-shadow-2xl px-4 -mt-16 md:-mt-24 lg:-mt-32"
                   >
                     <div className="relative inline-block">
