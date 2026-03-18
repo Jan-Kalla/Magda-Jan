@@ -229,32 +229,51 @@ export default function SharedWeddingLayout({
 
                         {/* ======================================================= */}
 
-                        <div className="absolute inset-0 z-10 w-full h-full pointer-events-none">
-                          
-                          <div className="absolute left-[40%] top-[25%] -translate-x-1/2 -translate-y-1/2">
+                       <div className="absolute left-[40%] top-[25%] -translate-x-1/2 -translate-y-1/2">
                             <span className="text-2xl md:text-3xl font-serif text-[#FDF9EC] drop-shadow-md whitespace-nowrap">
                               {greeting},
                             </span>
                           </div>
                           
-                          <div className="absolute left-[63%] top-[75%] -translate-x-1/2 -translate-y-1/2 w-[240px] md:w-[320px]">
-                            {/* LOGIKA: Jeśli imię i nazwisko mają łącznie ponad 17 znaków, rozbijamy na kaskadowe 2 linie */}
-                            {guest.first_name.length + guest.last_name.length > 15 ? (
-                              <div className="flex flex-col w-full">
-                                <span className="text-2xl md:text-3xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide leading-tight self-start text-left">
-                                  {guest.first_name}
-                                </span>
-                                <span className="text-2xl md:text-3xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide leading-tight self-end text-right mt-1">
-                                  {guest.last_name}!
-                                </span>
-                              </div>
-                            ) : (
-                              /* LOGIKA: Krótkie imiona i nazwiska zostają w 1 linii */
-                              <div className="text-center w-full">
-                                <span className="text-2xl md:text-3xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide whitespace-nowrap">
-                                  {guest.first_name} {guest.last_name}! 
-                                </span>
-                              </div>
+                          <div className="absolute left-[58%] top-[65%] -translate-x-1/2 -translate-y-1/2 w-[240px] md:w-[320px]">
+                            
+                            {/* WERSJA MOBILNA (podział przy > 12 znakach) */}
+                            <div className="md:hidden w-full">
+                              {guest.first_name.length + guest.last_name.length > 11 ? (
+                                <div className="flex flex-col w-full text-center items-center">
+                                  <span className="text-2xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide leading-tight -translate-x-4">
+                                    {guest.first_name}
+                                  </span>
+                                  <span className="text-2xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide leading-tight mt-2 translate-x-4">
+                                    {guest.last_name}!
+                                  </span>
+                                </div>
+                              ) : (
+                                <div className="text-center w-full">
+                                  <span className="text-2xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide whitespace-nowrap">
+                                    {guest.first_name} {guest.last_name}! 
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* WERSJA DESKTOPOWA (podział przy > 18 znakach) */}
+                            <div className="hidden md:block w-full">
+                              {guest.first_name.length + guest.last_name.length > 15 ? (
+                                <div className="flex flex-col w-full text-center items-center ">
+                                  <span className="text-3xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide leading-tight -translate-x-6">
+                                    {guest.first_name}
+                                  </span>
+                                  <span className="text-3xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide leading-tight mt-1 translate-x-6">
+                                    {guest.last_name}!
+                                  </span>
+                                </div>
+                              ) : (
+                                <div className="text-center w-full">
+                                  <span className="text-3xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide whitespace-nowrap">
+                                    {guest.first_name} {guest.last_name}! 
+                                  </span>
+                                </div>
                             )}
                           </div>
 
