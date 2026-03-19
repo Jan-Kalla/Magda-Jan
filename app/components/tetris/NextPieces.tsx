@@ -8,7 +8,6 @@ const PREVIEW_SIZE = 5; // 5x5 mini-grid na każdy klocek
 
 export default function NextPieces() {
   const [pieces, setPieces] = useState(getNextPieces());
-  // ZMIANA: Obsługa 3 canvasów
   const canvasRefs = [
     useRef<HTMLCanvasElement | null>(null), 
     useRef<HTMLCanvasElement | null>(null),
@@ -26,7 +25,6 @@ export default function NextPieces() {
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        // ZMIANA: Odsłania CSS'owe tło tetris-canvas
         ctx.clearRect(0, 0, PREVIEW_SIZE * BLOCK_SIZE, PREVIEW_SIZE * BLOCK_SIZE);
 
         const piece = next[idx];
@@ -60,17 +58,23 @@ export default function NextPieces() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center">
-      {/* ZMIANA: Wymuszenie poziomego układu (flex-row) niezależnie od urządzenia */}
-      <div className="flex flex-row gap-2 sm:gap-4 justify-center items-center">
+    <div className="flex flex-col items-center mt-2">
+      <div className="flex flex-row gap-3 sm:gap-4 justify-center items-center">
         {canvasRefs.map((ref, idx) => (
-          <canvas
-            key={idx}
-            ref={ref}
-            width={PREVIEW_SIZE * BLOCK_SIZE}
-            height={PREVIEW_SIZE * BLOCK_SIZE}
-            className="tetris-canvas rounded shadow-md"
-          />
+          <div key={idx} className="relative mt-3">
+            
+            {/* ETYKIETA KOLEJNOŚCI - "Pigułka" nad klockiem */}
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#4E0113] border border-[#FDF9EC]/30 text-[#FDF9EC] text-[14px] font-bold px-2 py-0.5 rounded-full shadow-md z-10 whitespace-nowrap tracking-wider">
+              {idx === 0 ? "1. NEXT" : `${idx + 1}.`}
+            </div>
+
+            <canvas
+              ref={ref}
+              width={PREVIEW_SIZE * BLOCK_SIZE}
+              height={PREVIEW_SIZE * BLOCK_SIZE}
+              className="tetris-canvas rounded shadow-md"
+            />
+          </div>
         ))}
       </div>
     </div>
