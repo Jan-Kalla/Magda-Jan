@@ -265,7 +265,7 @@ export default function WyprawaPage() {
                               Etap Zablokowany
                           </h2>
                           <p className="text-gray-500 max-w-xs mx-auto mb-6">
-                              Dalsza część wyprawy zostanie ujawniona na weselu. Wypatrujcie sygnału od Wodzireja lub Pary Młodej! 🤵👰
+                              Gratulacje za przejście do kolejnego etapu! Dalsza część wyprawy zostanie ujawniona na weselu.
                           </p>
                           {isAdmin && (
                               <p className="text-xs text-green-600 font-bold uppercase tracking-widest mt-4">

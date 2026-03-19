@@ -5,13 +5,12 @@ import Footer from "@/app/components/Footer";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { ChevronDown, HelpCircle, Send, ShieldCheck } from "lucide-react";
+import { ChevronDown, Send, ShieldCheck, MessageSquare } from "lucide-react";
 import { useGuest } from "@/app/context/GuestContext";
 import { useSound } from "@/app/context/SoundContext";
 import PageWrapper from "@/app/components/PageWrapper";
 import { createClient } from "@supabase/supabase-js";
 import OrganicGlassPattern from "@/app/components/OrganicGlassPattern";
-// ZMIANA: Import customowego kursora
 import CustomCursor from "@/app/components/CustomCursor";
 
 const supabase = createClient(
@@ -66,17 +65,25 @@ export default function FaqPage() {
   const isBrideOrGroom = guest?.code === "FC3818" || guest?.code === "8DD06D";
 
   useEffect(() => {
-    if (isBrideOrGroom) {
-      const fetchQuestions = async () => {
-        const { data } = await supabase
-          .from("faq_suggestions")
-          .select("*")
-          .order("created_at", { ascending: false });
-        if (data) setSuggestedQuestions(data);
-      };
-      fetchQuestions();
-    }
-  }, [isBrideOrGroom]);
+    if (!guest) return;
+
+    const fetchQuestions = async () => {
+      let query = supabase
+        .from("faq_suggestions")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (!isBrideOrGroom) {
+        const guestName = `${guest.first_name} ${guest.last_name}`;
+        query = query.eq("guest_name", guestName);
+      }
+
+      const { data } = await query;
+      if (data) setSuggestedQuestions(data);
+    };
+
+    fetchQuestions();
+  }, [guest, isBrideOrGroom]);
 
   useEffect(() => {
     if (!loading && !guest) {
@@ -84,8 +91,8 @@ export default function FaqPage() {
     }
   }, [guest, loading, router]);
 
+  // ZMIANA: Usunięto playSound("click"), bo globalny SoundContext robi to automatycznie!
   const toggleItem = (id: number) => {
-    playSound("click");
     setOpenId(openId === id ? null : id);
   };
 
@@ -95,7 +102,8 @@ export default function FaqPage() {
     
     setIsSubmitting(true);
     setSubmitStatus("idle");
-    playSound("click");
+    // Tutaj playSound("click") też nie jest w 100% konieczne, jeśli button ma type="submit", 
+    // ale zostawiamy z uwagi na zapobieganie defaultowi przez React w niektórych przypadkach
 
     const guestName = guest ? `${guest.first_name} ${guest.last_name}` : "Anonim";
 
@@ -106,8 +114,6 @@ export default function FaqPage() {
       },
     ]);
 
-    
-
     setIsSubmitting(false);
 
     if (error) {
@@ -117,10 +123,12 @@ export default function FaqPage() {
       setCustomQuestion("");
       playSound("success"); 
       
-      if (isBrideOrGroom) {
-        const { data } = await supabase.from("faq_suggestions").select("*").order("created_at", { ascending: false });
-        if (data) setSuggestedQuestions(data);
+      let query = supabase.from("faq_suggestions").select("*").order("created_at", { ascending: false });
+      if (!isBrideOrGroom) {
+        query = query.eq("guest_name", guestName);
       }
+      const { data } = await query;
+      if (data) setSuggestedQuestions(data);
     }
   };
 
@@ -134,14 +142,12 @@ export default function FaqPage() {
 
   return (
     <div className="flex flex-col min-h-screen relative">
-      {/* ZMIANA: Dodany kursor */}
       <CustomCursor />
 
       <Navbar />
 
       <section className="relative flex-grow bg-gradient-to-b from-[#FDF9EC] via-[#A46C6E] to-[#4E0113] pt-24 md:pt-32 pb-32 overflow-hidden text-[#4c4a1e]">
         
-        {/* ZMIANA: Ukrycie wzoru tafli szkła na mobile */}
         <div className="absolute inset-0 z-0 pointer-events-none hidden md:block">
           <OrganicGlassPattern part="top" />
         </div>
@@ -156,11 +162,9 @@ export default function FaqPage() {
               transition={{ duration: 0.8 }}
               className="text-center mb-16"
             >
-              {/* ZMIANA: Font IvyOra, uppercase, tracking-widest */}
               <h1 className="font-serif font-light text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-6 flex items-center justify-center gap-4 text-[#4c4a1e] drop-shadow-sm uppercase tracking-widest">
                 Częste Pytania 
               </h1>
-              {/* ZMIANA: Usunięto uppercase i nienaturalny rozstaw liter */}
               <p className="font-sans font-light text-[#4c4a1e]/90 text-base md:text-lg max-w-2xl mx-auto">
                 Wszystko, co chcielibyście wiedzieć, a o co boicie się zapytać
               </p>
@@ -253,6 +257,33 @@ export default function FaqPage() {
                   )}
                </form>
             </motion.div>
+
+            {/* PANEL DLA GOŚCIA - JEGO WŁASNE PYTANIA */}
+            {!isBrideOrGroom && suggestedQuestions.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-12 bg-black/10 backdrop-blur-md rounded-2xl p-6 md:p-8 border border-white/10"
+              >
+                 <div className="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
+                    <MessageSquare className="text-white/70" size={24} />
+                    <h3 className="font-serif text-xl md:text-2xl font-light text-[#FDF9EC] uppercase tracking-widest">
+                      Twoje zadane pytania
+                    </h3>
+                 </div>
+                 
+                 <div className="space-y-4 max-w-2xl mx-auto">
+                   {suggestedQuestions.map((q) => (
+                     <div key={q.id} className="bg-black/20 rounded-xl p-5 border border-white/5 text-left shadow-inner">
+                        <p className="text-xs text-[#FDF9EC]/50 mb-2 font-sans uppercase tracking-wider">
+                          Wysłano: {new Date(q.created_at).toLocaleDateString('pl-PL', { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                        <p className="text-white text-lg font-serif italic leading-relaxed">"{q.question}"</p>
+                     </div>
+                   ))}
+                 </div>
+              </motion.div>
+            )}
 
             {/* SEKRETNY PANEL PARY MŁODEJ */}
             {isBrideOrGroom && (

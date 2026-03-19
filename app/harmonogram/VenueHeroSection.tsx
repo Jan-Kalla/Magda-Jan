@@ -9,8 +9,9 @@ const images = [
   "/fotki/Szwajcaria3.jpg",
   "/fotki/Szwajcaria4.jpg",
   "/fotki/Szwajcaria5.jpg",
-  "/fotki/Szwajcaria6.jpg",
+  "/fotki/Szwajcaria_6.jpg",
   "/fotki/Szwajcaria7.jpg",
+  "/fotki/Szwajcaria8.jpg",
 ];
 
 // Przy 5 zdjęciach wystarczy powielić tablicę tylko raz, 
@@ -63,7 +64,7 @@ export default function VenueHeroSection() {
           className="bg-white/30 backdrop-blur-xl p-8 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-white/50 relative overflow-hidden"
         >
           <p className="font-sans font-light text-lg leading-relaxed mb-6 text-[#2C2B14]">
-            To tutaj rozegra się akcja naszego filmu. Park, plac zabaw dla najmłodszych, a w środku – przestrzeń, która pomieści zarówno szalone tańce, jak i multimedialne widowisko.
+            To tutaj rozegra się akcja naszego filmu. Właśnie w tych progach miejsce będzie miała ta legendarna i niezapomniana zabawa! Do naszej dyspozycji mamy łącznie około 750 m2 na salach i o wiele więcej w parku Szwajcaria tuż obok.
           </p>
           <p className="font-serif italic text-xl text-[#2C2B14] tracking-wide">
             Przygotujcie się na 4 Akty pełne emocji.

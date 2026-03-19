@@ -83,26 +83,51 @@ const TimelineItem = ({ item, index }: { item: TimelineEvent; index: number }) =
           <div className="absolute left-0 md:static md:flex-none z-10 w-4 h-4 md:w-5 md:h-5 rounded-full bg-white/20 backdrop-blur-md border border-white/50 shadow-[0_0_15px_rgba(255,255,255,0.3)]" />
 
           <div className="flex-1 w-full md:w-auto">
-            <div className="bg-black/20 backdrop-blur-xl border border-white/10 hover:border-white/30 transition-all duration-300 p-6 md:p-8 rounded-2xl shadow-xl hover:-translate-y-1">
+            {/* ZMIANA: Kontener to teraz motion.div z obsługą onClick i logiką rozwijania */}
+            <motion.div 
+              layout
+              onClick={() => item.details && setIsOpen(!isOpen)}
+              className={`bg-black/20 backdrop-blur-xl border border-white/10 transition-all duration-300 p-6 md:p-8 rounded-2xl shadow-xl overflow-hidden group ${
+                item.details ? "cursor-pointer hover:border-white/30 hover:-translate-y-1" : ""
+              }`}
+            >
               <span className="md:hidden text-sm font-bold text-white/50 font-serif italic mb-3 block">{item.time}</span>
               
               <div className="flex items-start gap-4">
-                 <div className="mt-1 p-3 bg-white/10 rounded-xl text-[#FDF9EC] border border-white/10">
+                 <div className="mt-1 p-3 bg-white/10 rounded-xl text-[#FDF9EC] border border-white/10 shrink-0">
                     {item.icon}
                  </div>
-                 <div>
-                    <h3 className="font-serif text-2xl font-light text-[#FDF9EC] tracking-wide mb-1">{item.title}</h3>
+                 <div className="flex-1 min-w-0">
+                    <h3 className="font-serif text-2xl font-light text-[#FDF9EC] tracking-wide mb-1 truncate">{item.title}</h3>
                     <p className="font-sans font-light text-[#FDF9EC]/70 text-sm leading-relaxed">{item.description}</p>
                     
-                    {item.details && (
-                       <div className="mt-4 text-xs font-sans uppercase tracking-widest text-[#FDF9EC]/50 flex gap-2 items-start bg-white/5 p-3 rounded-lg">
-                         <Info className="w-4 h-4 shrink-0" />
-                         <span className="leading-snug">{item.details}</span>
+                    {/* ZMIANA: Animowane rozwijanie szczegółów */}
+                    <AnimatePresence>
+                      {isOpen && item.details && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="mt-5 pt-5 border-t border-white/10">
+                            <p className="font-serif italic text-[#FDF9EC]/90 text-base leading-relaxed">
+                              {item.details}
+                            </p>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    {/* ZMIANA: Skaczący Chevron widoczny tylko, gdy karta jest zwinięta (sygnalizuje, że można kliknąć) */}
+                    {!isOpen && item.details && (
+                       <div className="mt-4 flex justify-start">
+                          <ChevronLeft className="-rotate-90 w-5 h-5 text-white/40 group-hover:text-white/80 transition-colors animate-bounce" />
                        </div>
                     )}
                  </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       )}
@@ -124,7 +149,7 @@ export default function TimelineSection() {
           Scenariusz Wydarzenia
         </h2>
         <p className="font-sans font-light uppercase tracking-widest text-[#FDF9EC]/80 text-sm md:text-base max-w-2xl mx-auto">
-          Kliknij na główne punkty programu (Akty), aby odkryć szczegóły
+          Kliknij na wybrane punkty programu, aby odkryć szczegóły
         </p>
       </motion.div>
 

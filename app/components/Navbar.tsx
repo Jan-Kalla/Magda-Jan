@@ -6,7 +6,6 @@ import { useGuest } from "@/app/context/GuestContext";
 import { usePathname } from "next/navigation";
 import { SpeakerWaveIcon, SpeakerXMarkIcon } from "@heroicons/react/24/solid";
 import { motion, AnimatePresence } from "framer-motion";
-import { togglePause } from "@/app/components/tetris/gameLogic";
 import { useSound } from "@/app/context/SoundContext";
 
 function useIsMobile() {
@@ -27,9 +26,18 @@ export default function Navbar() {
   const isMobile = useIsMobile();
   const { isMuted, toggleMute } = useSound();
 
+  // ZMIANA: Dodano "subItems" dla "Wybory dla gościa" ze ścieżkami (hash) do poszczególnych sekcji
   const navItems = [
     { label: "Strona główna", href: "/" },
-    { label: "Wybory dla gościa", href: "/ankiety", protected: true },
+    { 
+      label: "Wybory dla gościa", 
+      href: "/ankiety", 
+      protected: true,
+      subItems: [
+        { label: "Wybór posiłku", hash: "#posilek" },
+        { label: "Test zgodności", hash: "#test-zgodnosci" },
+      ]
+    },
     { label: "Harmonogram wesela", href: "/harmonogram", protected: true },
     { label: "Galeria", href: "/galeria", protected: true },
     { label: "Rywalizacja", href: "/rywalizacja", protected: true },
@@ -41,15 +49,10 @@ export default function Navbar() {
 
   const handleMenuClick = () => {
     setIsOpen((prev) => !prev);
-    if (isMobile) {
-      try {
-        togglePause();
-      } catch {}
-    }
   };
 
   return (
-  <nav className="sticky top-0 left-0 w-full bg-[#FDF9EC] text-[#4E0113] shadow-md z-50 md:fixed transition-colors duration-300">
+  <nav className="sticky top-0 left-0 w-full bg-[#FDF9EC] text-[#4E0113] shadow-md z-[100] md:fixed transition-colors duration-300">
     <div className="w-full px-6 lg:px-16 py-3 flex justify-between items-center relative z-20 bg-[#FDF9EC]">
       
       {/* Logo M&J */}
@@ -108,14 +111,13 @@ export default function Navbar() {
           {visibleItems.map((item) => {
             const isActive = pathname === item.href;
             return (
-              <li key={item.href}>
+              <li key={item.href} className="relative group">
                 <Link
                   href={item.href}
-                  className={`relative group transition-colors font-serif font-bold uppercase tracking-[0.15em] text-xs lg:text-sm ${
+                  className={`relative transition-colors font-serif font-bold uppercase tracking-[0.15em] text-xs lg:text-sm ${
                     isActive ? "text-[#C97B78]" : "text-[#4E0113]/70 hover:text-[#C97B78]"
                   }`}
                 >
-                  {/* ZMIANA: Niewidzialny bufor znacznie powiększający przestrzeń klikalną wokół tekstu */}
                   <span className="absolute -inset-y-4 -inset-x-3 z-10 cursor-pointer" />
                   
                   {item.label}
@@ -125,6 +127,23 @@ export default function Navbar() {
                     }`}
                   />
                 </Link>
+
+                {/* ZMIANA: ROZWIJANE MENU (DROPDOWN) DLA DESKTOPU */}
+                {item.subItems && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 pt-6 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                    <div className="bg-[#FDF9EC] shadow-2xl border border-[#4E0113]/10 rounded-2xl py-3 w-56 flex flex-col gap-1 relative before:content-[''] before:absolute before:-top-2 before:left-1/2 before:-translate-x-1/2 before:border-8 before:border-transparent before:border-b-[#FDF9EC]">
+                      {item.subItems.map((sub) => (
+                        <Link
+                          key={sub.hash}
+                          href={`${item.href}${sub.hash}`}
+                          className="px-4 py-3 mx-2 hover:bg-[#C05454]/10 rounded-xl text-[#4E0113] text-xs font-serif font-bold uppercase tracking-widest text-center transition-colors"
+                        >
+                          {sub.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </li>
             );
           })}
@@ -149,7 +168,6 @@ export default function Navbar() {
             <li>
               <button
                 onClick={logout}
-                // ZMIANA: Hover buttonu wylogowania w wersji Desktop na #4E0113
                 className="ml-2 bg-[#C05454] hover:bg-[#4E0113] transition px-4 py-2 rounded-lg text-[#FDF9EC] text-xs font-serif font-medium uppercase tracking-widest shadow"
               >
                 Wyloguj się
@@ -175,7 +193,7 @@ export default function Navbar() {
               {visibleItems.map((item) => {
                 const isActive = pathname === item.href;
                 return (
-                  <li key={item.href}>
+                  <li key={item.href} className="w-full">
                     <Link
                       href={item.href}
                       className={`block py-3 transition-colors font-serif font-medium uppercase tracking-widest text-sm ${
@@ -187,6 +205,22 @@ export default function Navbar() {
                     >
                       {item.label}
                     </Link>
+
+                    {/* ZMIANA: PODSEKCJE W MENU MOBILNYM */}
+                    {item.subItems && (
+                      <div className="flex flex-col space-y-1 bg-[#4E0113]/5 rounded-xl p-2 mb-2 mt-1">
+                        {item.subItems.map((sub) => (
+                          <Link
+                            key={sub.hash}
+                            href={`${item.href}${sub.hash}`}
+                            onClick={() => setIsOpen(false)}
+                            className="block py-3 px-4 text-xs font-serif font-bold uppercase tracking-widest text-[#4E0113]/70 hover:text-[#4E0113] transition-colors"
+                          >
+                            ↳ {sub.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
                   </li>
                 );
               })}

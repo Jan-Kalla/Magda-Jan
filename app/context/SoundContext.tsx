@@ -24,7 +24,7 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
   
   // Refs do śledzenia stanu urządzeń wejściowych
   const lastHoveredRef = useRef<Element | null>(null);
-  const lastPointerType = useRef<string>("mouse"); // ZMIANA: Śledzi, czy to myszka, czy dotyk
+  const lastPointerType = useRef<string>("mouse"); 
 
   // 1. WCZYTYWANIE USTAWIEŃ Z LOCALSTORAGE
   useEffect(() => {
@@ -161,24 +161,27 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
   // 5. GLOBALNE NASŁUCHIWANIE
   useEffect(() => {
     
-    // ZMIANA: Obsługa dotknięcia ekranu (tylko rejestruje typ, ewentualnie odtwarza dla myszki)
     const handlePointerDown = (e: PointerEvent) => {
-      lastPointerType.current = e.pointerType || "mouse"; // Zapamiętujemy czy to dotyk, rysik czy myszka
+      lastPointerType.current = e.pointerType || "mouse"; 
       if (audioCtxRef.current?.state === "suspended") audioCtxRef.current.resume();
 
-      // Jeśli to myszka (Desktop), puszczamy dźwięk od razu dla idealnego czasu reakcji (zero lagów)
+      // ZMIANA: Ignoruj kliknięcia (chrumknięcia) na elementach z klasą .no-global-click
+      const target = e.target as Element;
+      if (target?.closest(".no-global-click")) return;
+
       if (lastPointerType.current === "mouse") {
         playSound("click");
       }
     };
 
-    // ZMIANA: Obsługa pełnego kliknięcia (wyzwala się TYLKO gdy nie było scrollowania)
     const handleGlobalClick = (e: MouseEvent) => {
       if (audioCtxRef.current?.state === "suspended") audioCtxRef.current.resume();
 
-      // Jeśli to był dotyk (Mobile), dźwięk puszczamy dopiero tutaj, bo jeśli był scroll, ten kod się nie wywoła
+      // ZMIANA: Ignoruj kliknięcia (chrumknięcia) na elementach z klasą .no-global-click
+      const target = e.target as Element;
+      if (target?.closest(".no-global-click")) return;
+
       if (lastPointerType.current === "touch" || lastPointerType.current === "pen") {
-        const target = e.target as Element;
         const interactiveElement = target.closest("button, a, input, [role='button'], .cursor-pointer");
 
         if (interactiveElement) {
@@ -188,7 +191,6 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const handleGlobalHover = (e: MouseEvent) => {
-      // ZMIANA: Ignorujemy "ghost hovery" na urządzeniach dotykowych, aby niepotrzebnie nie odtwarzać dźwięku
       if (lastPointerType.current === "touch" || lastPointerType.current === "pen") return;
 
       const target = e.target as Element;

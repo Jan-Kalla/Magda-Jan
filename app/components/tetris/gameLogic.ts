@@ -192,8 +192,24 @@ export function restartGame() {
 
 // --- Renderowanie ---
 export function render(ctx: CanvasRenderingContext2D) {
-  // ZMIANA: Zamiast "zalać" na biało, "czyścimy" pole, dzięki czemu widać CSS z tła (piksele)
   ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+  // ZMIANA: Rysowanie idealnej siatki pomocniczej (kratki) bezpośrednio na Canvasie
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+  ctx.lineWidth = 1;
+  
+  for (let x = 0; x <= WIDTH; x += BLOCK_SIZE) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, HEIGHT);
+    ctx.stroke();
+  }
+  for (let y = 0; y <= HEIGHT; y += BLOCK_SIZE) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(WIDTH, y);
+    ctx.stroke();
+  }
 
   // pole gry
   for (let y = 0; y < NO_ROWS; y++) {
@@ -223,7 +239,7 @@ export function render(ctx: CanvasRenderingContext2D) {
 
     ctx.globalAlpha = 1;
     ctx.font = "20px Arial";
-    ctx.fillStyle = "white"; // Zmiana na biały dla kontrastu
+    ctx.fillStyle = "white";
     ctx.fillText("Press Enter to restart", WIDTH / 2, HEIGHT / 2 + 40);
   }
 

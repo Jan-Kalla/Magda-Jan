@@ -14,7 +14,6 @@ import {
   getIsGameOver,
   setPieceLockCallback,
   setLineClearCallback,
-  // DODANE:
   getLevel,
   setLevelCallback,
   setScoreCallback,
@@ -31,8 +30,8 @@ const supabase = createClient(
 
 const WIDTH = 300;
 const HEIGHT = 600;
-const BASE_DROP_INTERVAL = 1000; // 1s na levelu 1
-const SPEED_FACTOR = 0.85;       // -15% czasu ⇒ +15% prędkości na level
+const BASE_DROP_INTERVAL = 1000; 
+const SPEED_FACTOR = 0.85;       
 const DAS = 150;
 const ARR = 40;
 
@@ -46,7 +45,21 @@ export default function TetrisGame({ mobileLayout }: { mobileLayout?: React.Reac
   const animationIdRef = useRef<number | null>(null);
   const lastDropRef = useRef<number>(performance.now());
 
-  // Odblokowanie audio po pierwszej interakcji
+  const playControlSound = (key: string) => {
+    const sound = new Audio('/sounds/tetris/hover.mp3');
+    (sound as any).preservesPitch = false;
+    (sound as any).webkitPreservesPitch = false;
+
+    if (key === "ArrowUp") {
+      sound.playbackRate = 0.75;
+    } else if (key === "ArrowDown") {
+      sound.playbackRate = 1.5;
+    } else {
+      sound.playbackRate = 1.0;
+    }
+    sound.play().catch(() => {});
+  };
+
   useEffect(() => {
     const unlockAudio = () => {
       try {
@@ -70,16 +83,13 @@ export default function TetrisGame({ mobileLayout }: { mobileLayout?: React.Reac
   }, []);
 
   useEffect(() => {
-    // Callbacki zdarzeń z logiki gry
     setPieceLockCallback(() => playHitAlternating());
     setLineClearCallback(() => sounds.line.play());
 
-    // Reset timera opadania po każdym awansie levelu
     setLevelCallback(() => {
       lastDropRef.current = performance.now();
     });
 
-    // Opcjonalnie: możesz tu reagować na score (np. dla HUD), ale nie musimy nic robić
     setScoreCallback(() => {});
 
     setGameOverCallback(async (score) => {
@@ -111,7 +121,6 @@ export default function TetrisGame({ mobileLayout }: { mobileLayout?: React.Reac
         }
       }
 
-      // 🔔 powiadom leaderboard o zmianie
       window.dispatchEvent(new Event("scoresUpdated"));
     });
 
@@ -124,6 +133,9 @@ export default function TetrisGame({ mobileLayout }: { mobileLayout?: React.Reac
       if (["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", " "].includes(e.key) || e.code === "Space") {
         e.preventDefault();
       }
+
+      let actionTaken = false;
+
       if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
         if (!keysDown.current[e.key]) {
           keysDown.current[e.key] = true;
@@ -131,15 +143,39 @@ export default function TetrisGame({ mobileLayout }: { mobileLayout?: React.Reac
           if (e.key === "ArrowRight") moveRight();
           lastMoveTime.current = performance.now();
           dasTriggered.current = false;
+          actionTaken = true;
         }
       }
-      if (e.key === "ArrowDown") softDrop();
-      if (e.key === "ArrowUp") rotate();
-      if (e.code === "Space") hardDrop();
-      if (e.key === "Escape") togglePause();
+      
+      if (e.key === "ArrowDown") {
+        softDrop();
+        actionTaken = true;
+      }
+      if (e.key === "ArrowUp") {
+        rotate();
+        actionTaken = true;
+      }
+      if (e.code === "Space") {
+        hardDrop();
+        actionTaken = true;
+      }
+      
+      // ZMIANA: Zabezpieczenie przed navbarami i innymi przyciskami UI!
+      // Escape zadziała TYLKO jeśli kliknięto go fizycznie (isTrusted) i focus jest poza elementami interfejsu (na BODY lub CANVAS)
+      if (e.key === "Escape") {
+        const target = e.target as HTMLElement;
+        if (e.isTrusted && (target.tagName === "BODY" || target.tagName === "CANVAS")) {
+          togglePause();
+        }
+      }
+
       if (e.key === "Enter" && getIsGameOver()) {
         restartGame();
         lastDropRef.current = performance.now();
+      }
+
+      if (actionTaken && e.isTrusted) {
+        playControlSound(e.key);
       }
     };
 
@@ -153,17 +189,14 @@ export default function TetrisGame({ mobileLayout }: { mobileLayout?: React.Reac
     window.addEventListener("keyup", handleKeyUp);
 
     const loop = (time: number) => {
-      // Interwał opadania zależny od aktualnego levelu
       const currentLevel = getLevel();
       const interval = Math.max(100, BASE_DROP_INTERVAL * Math.pow(SPEED_FACTOR, currentLevel - 1));
 
-      // Opadanie klocka (może wykonać kilka ticków jeśli rama trwała długo)
       while (time - lastDropRef.current >= interval) {
         tick();
         lastDropRef.current += interval;
       }
 
-      // DAS/ARR dla przesuwania w bok
       if (keysDown.current["ArrowLeft"] || keysDown.current["ArrowRight"]) {
         const key = keysDown.current["ArrowLeft"] ? "ArrowLeft" : "ArrowRight";
         if (!dasTriggered.current) {

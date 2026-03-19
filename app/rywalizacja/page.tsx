@@ -225,7 +225,7 @@ export default function CompetitionPage() {
                     <div className="text-left">
                       <h2 className="font-serif text-2xl md:text-3xl tracking-wide mb-1">Quiz</h2>
                       <p className="font-sans font-light uppercase tracking-widest text-xs md:text-sm opacity-80">
-                        {isAdmin ? "Panel Wodzireja" : "Sprawdź wiedzę o Parze Młodej"}
+                        {isAdmin ? "Panel Wodzireja" : "Konicznie weź se sobą na wesele naładowany telefon!"}
                       </p>
                     </div>
                   </div>
@@ -246,7 +246,7 @@ export default function CompetitionPage() {
                     <div className="text-left">
                       <h2 className="font-serif text-2xl md:text-3xl tracking-wide mb-1">Tetris</h2>
                       <p className="font-sans font-light uppercase tracking-widest text-xs md:text-sm opacity-80">
-                        Klasyczna rozgrywka, zacięta rywalizacja
+                        Klasyczny tetris, jaki jest, każdy widzi, bij rekordy w wolnej chwili
                       </p>
                     </div>
                   </motion.div>
@@ -320,7 +320,7 @@ export default function CompetitionPage() {
                       exit={{ opacity: 0 }}
                       className="absolute -bottom-14 left-0 right-0 text-center z-30"
                     >
-                      <span className="bg-[#4c4a1e] text-[#FDF9EC] text-sm md:text-base font-serif italic px-6 py-3 rounded-xl shadow-xl border border-white/10 inline-block">
+                      <span className="bg-[#4c4a1e] text-[#FDF9EC] text-sm md:text-base font-light italic px-6 py-3 rounded-xl shadow-xl border border-white/10 inline-block">
                         Wyniki pojawią się tutaj po zakończeniu wesela.
                       </span>
                     </motion.div>

@@ -27,6 +27,22 @@ export default function NextPieces() {
 
         ctx.clearRect(0, 0, PREVIEW_SIZE * BLOCK_SIZE, PREVIEW_SIZE * BLOCK_SIZE);
 
+        // ZMIANA: Mini-siatka pomocnicza dopasowana do okienka zapowiedzi
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+        ctx.lineWidth = 1;
+        for (let x = 0; x <= PREVIEW_SIZE * BLOCK_SIZE; x += BLOCK_SIZE) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, PREVIEW_SIZE * BLOCK_SIZE);
+          ctx.stroke();
+        }
+        for (let y = 0; y <= PREVIEW_SIZE * BLOCK_SIZE; y += BLOCK_SIZE) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(PREVIEW_SIZE * BLOCK_SIZE, y);
+          ctx.stroke();
+        }
+
         const piece = next[idx];
         if (piece) {
           const minX = Math.min(...piece.positions.map(p => p.x));
@@ -63,7 +79,6 @@ export default function NextPieces() {
         {canvasRefs.map((ref, idx) => (
           <div key={idx} className="relative mt-3">
             
-            {/* ETYKIETA KOLEJNOŚCI - "Pigułka" nad klockiem */}
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#4E0113] border border-[#FDF9EC]/30 text-[#FDF9EC] text-[14px] font-bold px-2 py-0.5 rounded-full shadow-md z-10 whitespace-nowrap tracking-wider">
               {idx === 0 ? "1. NEXT" : `${idx + 1}.`}
             </div>

@@ -11,7 +11,7 @@
   100% { background-position: 0% 50%; }
 }
 
-/* === Subtelna faktura (pikselowa siatka) === */
+/* === Subtelna faktura do ogólnego użytku === */
 .bg-texture {
   background-color: #111;
   background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
@@ -33,7 +33,6 @@
 .tetris-canvas {
   border: 4px solid #4E0113;
   background-color: #111;
-  background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
-  background-size: 20px 20px;
+  /* ZMIANA: Usunięto background-image, siatkę rysujemy teraz bezpośrednio w logice gry! */
   box-shadow: 0 0 15px rgba(0,0,0,0.8);
 }

@@ -13,8 +13,6 @@ import RsvpSelector, { RsvpStatus } from "@/app/components/RsvpSelector";
 import PageWrapper from "@/app/components/PageWrapper";
 import { createClient } from "@supabase/supabase-js";
 import OrganicGlassPattern from "@/app/components/OrganicGlassPattern";
-
-// ZMIANA: Importujemy nasz customowy kursor
 import CustomCursor from "@/app/components/CustomCursor";
 
 import { motion, Variants, easeOut, easeInOut, AnimatePresence } from "framer-motion";
@@ -148,14 +146,12 @@ export default function MealSurveyPage() {
 
   return (
     <>
-      {/* ZMIANA: Dodany customowy kursor */}
       <CustomCursor />
       
       <Navbar />
       
       <div className="relative min-h-screen bg-gradient-to-b from-[#FDF9EC] via-[#A46C6E] to-[#4E0113] pt-24 md:pt-32 pb-32 z-0 overflow-hidden text-[#4c4a1e]">
         
-        {/* ZMIANA: Klasa 'hidden md:block' sprawia, że szkło znika na urządzeniach mobilnych, a sam gradient pozostaje gładki. */}
         <div className="absolute inset-0 z-0 pointer-events-none hidden md:block">
           <OrganicGlassPattern part="top" />
         </div>
@@ -187,9 +183,11 @@ export default function MealSurveyPage() {
                       parentGuestId={guest?.id}
                     />
 
+                    {/* ZMIANA: Dodano id="posilek" oraz klasy wyrównujące offset scrollowania (scroll-mt-28 md:scroll-mt-36) */}
                     <motion.form
+                      id="posilek"
                       onSubmit={handleSubmit}
-                      className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] p-8 md:p-14 max-w-4xl mx-auto mt-16 relative z-10"
+                      className="scroll-mt-28 md:scroll-mt-36 bg-white/40 backdrop-blur-xl border border-white/60 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] p-8 md:p-14 max-w-4xl mx-auto mt-16 relative z-10"
                       initial="hidden"
                       animate="visible"
                       variants={fadeUp}
@@ -252,12 +250,14 @@ export default function MealSurveyPage() {
                     </motion.div>
 
                     {/* === SEKCJA GRY (TEST ZGODNOŚCI) === */}
+                    {/* ZMIANA: Dodano id="test-zgodnosci" oraz klasy wyrównujące offset scrollowania (scroll-mt-28 md:scroll-mt-36) */}
                     <motion.div
+                      id="test-zgodnosci"
                       initial={{ opacity: 0, y: 40 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.8, delay: 0.2 }}
-                      className="max-w-4xl mx-auto mt-24 bg-black/20 backdrop-blur-xl rounded-2xl p-8 md:p-14 border border-white/20 shadow-2xl text-center relative z-10 text-[#F6f4e5]"
+                      className="scroll-mt-28 md:scroll-mt-36 max-w-4xl mx-auto mt-24 bg-black/20 backdrop-blur-xl rounded-2xl p-8 md:p-14 border border-white/20 shadow-2xl text-center relative z-10 text-[#F6f4e5]"
                     >
                       <div className="flex justify-center mb-6">
                           <Music className="text-[#F6f4e5]/80" size={32} />
