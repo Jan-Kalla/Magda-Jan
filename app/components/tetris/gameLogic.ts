@@ -22,7 +22,8 @@ let scoreCallback: ((score: number) => void) | null = null;
 
 let isGameOver = false;
 let gameOverFrame = 0;
-let nextPieces: Piece[] = [randomPiece(), randomPiece()];
+// ZMIANA: Zwiększono zapowiedzi z 2 na 3
+let nextPieces: Piece[] = [randomPiece(), randomPiece(), randomPiece()]; 
 let isPaused = false;
 
 let level = 1;
@@ -53,15 +54,12 @@ function freezePiece(piece: Piece) {
     }
   });
 
-  console.log("freezePiece called"); // 👈 sprawdź w konsoli
   if (pieceLockCb) {
-    console.log("pieceLockCb fired");
     pieceLockCb();
   }
 
   clearLines();
 }
-
 
 function spawnPiece() {
   activePiece = nextPieces.shift()!; // weź pierwszy z kolejki
@@ -74,51 +72,20 @@ function spawnPiece() {
 }
 
 // --- API stanu ---
-export function getLevel() {
-  return level;
-}
+export function getLevel() { return level; }
+export function getScore() { return score; }
+export function togglePause() { isPaused = !isPaused; }
+export function getIsPaused() { return isPaused; }
+export function getIsGameOver() { return isGameOver; }
+export function getNextPieces() { return nextPieces; }
 
-export function getScore() {
-  return score;
-}
+export function setLevelCallback(cb: (level: number) => void) { levelCallback = cb; }
+export function setGameOverCallback(cb: (score: number) => void) { gameOverCallback = cb; }
+export function setScoreCallback(cb: (score: number) => void) { scoreCallback = cb; }
+export function setPieceLockCallback(cb: () => void) { pieceLockCb = cb; }
+export function setLineClearCallback(cb: (count: number) => void) { lineClearCb = cb; }
 
-export function togglePause() {
-  isPaused = !isPaused;
-}
-
-export function getIsPaused() {
-  return isPaused;
-}
-
-export function getIsGameOver() {
-  return isGameOver;
-}
-
-export function getNextPieces() {
-  return nextPieces;
-}
-
-export function setLevelCallback(cb: (level: number) => void) {
-  levelCallback = cb;
-}
-
-export function setGameOverCallback(cb: (score: number) => void) {
-  gameOverCallback = cb;
-}
-
-export function setScoreCallback(cb: (score: number) => void) {
-  scoreCallback = cb;
-}
-
-export function setPieceLockCallback(cb: () => void) {
-  pieceLockCb = cb;
-}
-
-export function setLineClearCallback(cb: (count: number) => void) {
-  lineClearCb = cb;
-}
-
-// --- Czyszczenie linii i punktacja / awans poziomu ---
+// --- Czyszczenie linii i punktacja ---
 function clearLines() {
   let linesCleared = 0;
 
@@ -127,20 +94,17 @@ function clearLines() {
       field.splice(y, 1);
       field.unshift(Array(NO_COLS).fill(null));
       linesCleared++;
-      y++; // sprawdź ponownie po "opadnięciu" wierszy
+      y++; 
     }
   }
 
   if (linesCleared > 0) {
     if (lineClearCb) lineClearCb(linesCleared);
 
-    // klasyczne punkty × level
     const basePoints = [0, 40, 100, 300, 1200];
     score += (basePoints[linesCleared] ?? 0) * level;
     if (scoreCallback) scoreCallback(score);
 
-    // awans co 1 linię dla testów
-    //////////////////////////////////////// TEST /////////////////////////////////
     linesClearedTotal += linesCleared;
     while (linesClearedTotal >= level * 5) {
       level++;
@@ -148,7 +112,6 @@ function clearLines() {
     }
   }
 }
-
 
 // --- Sterowanie ---
 export function moveLeft() {
@@ -204,7 +167,7 @@ export function hardDrop() {
 // --- Aktualizacja gry ---
 export function tick() {
   if (isGameOver || isPaused) {
-    gameOverFrame++; // używane do animacji overlayów
+    gameOverFrame++;
     return;
   }
   softDrop();
@@ -216,12 +179,11 @@ export function restartGame() {
   isGameOver = false;
   gameOverFrame = 0;
 
-  // reset kolejki i aktywnego klocka
-  nextPieces = [randomPiece(), randomPiece()];
+  // ZMIANA: Resetuje z uwzględnieniem 3 zapowiedzi
+  nextPieces = [randomPiece(), randomPiece(), randomPiece()];
   activePiece = nextPieces.shift()!;
   nextPieces.push(randomPiece());
 
-  // reset poziomu i liczników
   level = 1;
   linesClearedTotal = 0;
   if (levelCallback) levelCallback(level);
@@ -230,8 +192,8 @@ export function restartGame() {
 
 // --- Renderowanie ---
 export function render(ctx: CanvasRenderingContext2D) {
-  ctx.fillStyle = "white";
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  // ZMIANA: Zamiast "zalać" na biało, "czyścimy" pole, dzięki czemu widać CSS z tła (piksele)
+  ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
   // pole gry
   for (let y = 0; y < NO_ROWS; y++) {
@@ -251,17 +213,17 @@ export function render(ctx: CanvasRenderingContext2D) {
 
   // komunikat Game Over
   if (isGameOver) {
-    const alpha = Math.min(1, gameOverFrame / 60); // fade-in przez 1s
+    const alpha = Math.min(1, gameOverFrame / 60); 
     ctx.globalAlpha = alpha;
 
     ctx.fillStyle = "red";
-    ctx.font = `bold ${40 + Math.sin(gameOverFrame / 10) * 5}px Arial`; // lekkie pulsowanie
+    ctx.font = `bold ${40 + Math.sin(gameOverFrame / 10) * 5}px Arial`; 
     ctx.textAlign = "center";
     ctx.fillText("GAME OVER", WIDTH / 2, HEIGHT / 2);
 
     ctx.globalAlpha = 1;
     ctx.font = "20px Arial";
-    ctx.fillStyle = "black";
+    ctx.fillStyle = "white"; // Zmiana na biały dla kontrastu
     ctx.fillText("Press Enter to restart", WIDTH / 2, HEIGHT / 2 + 40);
   }
 

@@ -106,7 +106,7 @@ export default function RsvpSelector({ guestId, onDecisionChange }: RsvpSelector
         <motion.div variants={fadeUp} className="max-w-2xl text-[#4c4a1e]/90 font-sans font-light text-lg">
           <p className="mb-6 leading-relaxed">
             Daj nam znać, czy zaszczycisz nas swoją obecnością w tym wyjątkowym dniu.{"\n\n"}
-            Prosimy o odpowiedź najlepiej do miesiąca przed uroczystością.
+            Prosimy o odpowiedź najlepiej do 15 maja.
           </p>
         </motion.div>
       )}
@@ -116,7 +116,7 @@ export default function RsvpSelector({ guestId, onDecisionChange }: RsvpSelector
           {rsvpStatus === 'confirmed' && (
             <div>
               <p className="font-serif text-2xl text-[#4c4a1e] mb-2 tracking-wide">
-                Z przyjemnością gościć Cię będziemy na ślubie i weselu.
+                Już nie możemy się doczekać twojej obecności, ale będzie zabawa!
               </p>
               <p className="font-sans font-light text-[#4c4a1e]/80 mt-2">Poniżej prosimy o wybór preferowanego posiłku.</p>
             </div>
@@ -124,7 +124,7 @@ export default function RsvpSelector({ guestId, onDecisionChange }: RsvpSelector
           {rsvpStatus === 'ceremony_only' && (
             <div>
               <p className="font-serif text-2xl text-[#4c4a1e] mb-2 tracking-wide">
-                Cieszymy się, że będziesz z nami podczas ceremonii zaślubin.
+                Cieszymy się, że będziesz z nami na naszym ślubie.
               </p>
               <p className="font-sans font-light text-[#4c4a1e]/80 mt-2">Dziękujemy za przekazaną informację.</p>
             </div>
@@ -132,7 +132,7 @@ export default function RsvpSelector({ guestId, onDecisionChange }: RsvpSelector
           {rsvpStatus === 'declined' && (
             <div>
               <p className="font-serif text-2xl text-[#4c4a1e]/80 mb-2 tracking-wide">
-                Z żalem przyjmujemy informację o Twojej nieobecności.
+                Szkodaaaaaaa 😢.
               </p>
               <p className="font-sans font-light text-[#4c4a1e]/80 mt-2">Dziękujemy za odpowiedź.</p>
             </div>
@@ -160,7 +160,7 @@ export default function RsvpSelector({ guestId, onDecisionChange }: RsvpSelector
             disabled={loading}
             className="flex-1 px-8 py-5 rounded-xl font-serif uppercase tracking-widest text-[#4c4a1e] bg-white/60 backdrop-blur-sm border border-white/80 hover:bg-white shadow-lg transition-all hover:-translate-y-0.5"
           >
-            Tylko ceremonia
+            Będę tylko na ślubie
           </button>
           
           <button
@@ -168,7 +168,7 @@ export default function RsvpSelector({ guestId, onDecisionChange }: RsvpSelector
             disabled={loading}
             className="flex-1 px-8 py-5 rounded-xl font-serif uppercase tracking-widest text-[#4c4a1e]/80 bg-white/30 backdrop-blur-sm hover:bg-white/50 border border-white/50 shadow-lg transition-all hover:-translate-y-0.5"
           >
-            Niestety, nie będę
+            Niestety, nie będzie mnie
           </button>
         </motion.div>
       )}

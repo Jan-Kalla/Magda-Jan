@@ -8,7 +8,12 @@ const PREVIEW_SIZE = 5; // 5x5 mini-grid na każdy klocek
 
 export default function NextPieces() {
   const [pieces, setPieces] = useState(getNextPieces());
-  const canvasRefs = [useRef<HTMLCanvasElement | null>(null), useRef<HTMLCanvasElement | null>(null)];
+  // ZMIANA: Obsługa 3 canvasów
+  const canvasRefs = [
+    useRef<HTMLCanvasElement | null>(null), 
+    useRef<HTMLCanvasElement | null>(null),
+    useRef<HTMLCanvasElement | null>(null)
+  ];
 
   useEffect(() => {
     const renderPreviews = () => {
@@ -21,8 +26,8 @@ export default function NextPieces() {
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, PREVIEW_SIZE * BLOCK_SIZE, PREVIEW_SIZE * BLOCK_SIZE);
+        // ZMIANA: Odsłania CSS'owe tło tetris-canvas
+        ctx.clearRect(0, 0, PREVIEW_SIZE * BLOCK_SIZE, PREVIEW_SIZE * BLOCK_SIZE);
 
         const piece = next[idx];
         if (piece) {
@@ -51,11 +56,13 @@ export default function NextPieces() {
     };
 
     renderPreviews();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <div className="flex flex-col items-center">
-      <div className="flex flex-row sm:flex-row md:flex-col gap-4 justify-center md:items-center">
+      {/* ZMIANA: Wymuszenie poziomego układu (flex-row) niezależnie od urządzenia */}
+      <div className="flex flex-row gap-2 sm:gap-4 justify-center items-center">
         {canvasRefs.map((ref, idx) => (
           <canvas
             key={idx}

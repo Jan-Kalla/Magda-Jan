@@ -192,7 +192,7 @@ export default function CompetitionPage() {
                 </div>
                 <p className="text-[#4c4a1e] text-sm md:text-base leading-relaxed font-sans font-light">
                   Włączcie ducha walki! Przygotowaliśmy dla Was kilka angażujących konkurencji. 
-                  TOP 3 graczy zgarnia wyjątkowe nagrody.
+                  <span className="font-bold tracking-wide">TOP 3</span> graczy zgarnia wyjątkowe <span className="font-bold tracking-wide">nagrody</span>.
                 </p>
               </motion.div>
 

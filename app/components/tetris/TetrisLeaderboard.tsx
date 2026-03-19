@@ -36,7 +36,7 @@ export default function TetrisLeaderboard() {
   }, []);
 
   return (
-    <div className="panel-card w-full max-w-none mx-auto mt-6 px-10 py-6">
+    <div className="panel-card w-full max-w-none mx-auto mt-2 px-10 py-6">
       <h2 className="text-xl font-extrabold mb-6 text-white text-center tracking-wide">
         Ranking Tetris
       </h2>
@@ -57,13 +57,17 @@ export default function TetrisLeaderboard() {
             <div className="text-2xl font-bold text-white w-10 text-center shrink-0">
               {medalIcons[i] || `${i + 1}.`}
             </div>
+            
             <div className="font-semibold text-white flex-1 px-2 break-words">
-              {row.guest.first_name} {row.guest.last_name}
+              {row.guest?.first_name} {row.guest?.last_name}
             </div>
-            <div className="flex gap-4 text-white text-sm font-medium shrink-0">
+            
+            {/* ZMIANA: Dodano flex-col na telefonach (spycha level pod score) oraz flex-row na większych ekranach */}
+            <div className="flex flex-col sm:flex-row items-end sm:items-center sm:gap-4 text-white text-sm shrink-0">
               <span>Score: {row.score}</span>
               <span>Level: {row.level}</span>
             </div>
+            
           </div>
         ))}
       </div>

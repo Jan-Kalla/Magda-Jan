@@ -15,17 +15,15 @@ export default function ResponsiveTetrisLayout() {
         </div>
 
         {/* Prawa kolumna */}
-      <div className="flex flex-col items-center gap-8 w-full md:w-auto">
-        <div className="flex flex-row gap-16 w-full justify-center">
+        <div className="flex flex-col items-center gap-6 w-full md:w-auto">
           <NextPieces />
-            <div className="w-64 mt-16">
+          <div className="w-full flex justify-center mt-2">
             <ScorePanel />
-            </div>
+          </div>
+          <div className="hidden md:block w-full mt-4">
+            <TetrisLeaderboard />
+          </div>
         </div>
-        <div className="hidden md:block w-full">
-          <TetrisLeaderboard />
-        </div>
-      </div>
       </div>
 
       {/* Leaderboard na mobile na dole */}
