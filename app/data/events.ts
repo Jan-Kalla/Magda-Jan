@@ -9,7 +9,7 @@ export const events = [
 { durationDays: 112, name: "trwa ciąża wielkiej białej polskiej (Rasa polskiej świni domowej o jednym z najszybszych temp wzrostu)",url:"" },
 { durationDays: 102, name: "Okres od powrotu Napoleona z Elby do klęski pod Waterloo",url:"" },
 { durationDays: 90, name: "Pełen cykl Erytropoezy u człowieka()",url:"" },
-{ durationDays: 80, name: "Podróż Phileasa Fogga",url:"" },
+{ durationDays: 79, name: "Podróż Phileasa Fogga",url:"" },
 { durationDays: 65, name: "Okres inkubacji jaj pingwina cesarskiego",url:"" },
 { durationDays: 52, name: "ten potrzebny na dojrzewanie półtwardego sera gouda (Jong belegen)",url:"" },
 { durationDays: 40, name: "ten, jaki Jezus spędził na pustyni, kuszony przez diabła",url:"" },
@@ -21,7 +21,7 @@ export const events = [
 { durationDays: 15, name: "trwają letnie Igrzyska Olimpijskie",url:"" },
 { durationDays: 12, name: "trwa kwitnięcie sakury (wiśni japońskiej)",url:"" },
 
-{ durationDays: 8, name: "trwałą misji Apollo 11",url:"" },
+{ durationDays: 8, name: "trwała misja Apollo 11",url:"" },
 { durationDays: 6, name: "trwały wiatowe Dni Młodzieży w Lizbonie w 2023",url:"" },
 { durationDays: 5, name: "trwa kwitnięcie lotosu", url:"" },
 { durationDays: 4, name: "trwał rejs Titanica", url:"" },

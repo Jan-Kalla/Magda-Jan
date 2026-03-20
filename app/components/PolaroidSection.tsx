@@ -101,7 +101,7 @@ const PhotoCard = ({ photo, globalIndex, direction }: { photo: any; globalIndex:
                 exit="exit"
                 className="flex md:hidden absolute bottom-2 left-1/2 -translate-x-1/2 pointer-events-none"
               >
-                <p className="font-serif tracking-widest uppercase text-white bg-black/50 border border-white/60 px-2.5 py-1 rounded-full backdrop-blur-md text-[9px] shadow-lg animate-pulse whitespace-nowrap">
+                <p className="font-serif tracking-widest uppercase text-white bg-black/50 border border-white/60 px-2.5 py-1 rounded-full backdrop-blur-md text-[14px] shadow-lg animate-pulse whitespace-nowrap">
                   Obróć
                 </p>
               </motion.div>

@@ -7,6 +7,13 @@ import { usePathname } from "next/navigation";
 import { SpeakerWaveIcon, SpeakerXMarkIcon } from "@heroicons/react/24/solid";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSound } from "@/app/context/SoundContext";
+import { createClient } from "@supabase/supabase-js";
+
+// Inicjalizacja klienta Supabase dla Navbara
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
@@ -26,17 +33,46 @@ export default function Navbar() {
   const isMobile = useIsMobile();
   const { isMuted, toggleMute } = useSound();
 
-  // ZMIANA: Dodano "subItems" dla "Wybory dla gościa" ze ścieżkami (hash) do poszczególnych sekcji
+  // ZMIANA: Nowy stan przechowujący informację, czy gość potwierdził przybycie
+  const [isConfirmed, setIsConfirmed] = useState(false);
+
+  useEffect(() => {
+    // 1. Pobranie początkowego statusu z bazy podczas ładowania Navbara
+    const fetchRsvp = async () => {
+      if (!guest) return;
+      const { data } = await supabase
+        .from("guests")
+        .select("rsvp_status")
+        .eq("id", guest.id)
+        .maybeSingle();
+        
+      if (data) {
+        setIsConfirmed(data.rsvp_status === "confirmed");
+      }
+    };
+    fetchRsvp();
+
+    // 2. Nasłuchiwanie na bieżące zmiany statusu (np. gdy gość właśnie klika "Będę" na podstronie)
+    const handleRsvpChange = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      setIsConfirmed(customEvent.detail === "confirmed");
+    };
+
+    window.addEventListener("rsvpChanged", handleRsvpChange);
+    return () => window.removeEventListener("rsvpChanged", handleRsvpChange);
+  }, [guest]);
+
   const navItems = [
     { label: "Strona główna", href: "/" },
     { 
       label: "Wybory dla gościa", 
       href: "/ankiety", 
       protected: true,
-      subItems: [
+      // ZMIANA: Sub-elementy pojawią się TYLKO, jeśli isConfirmed === true
+      subItems: isConfirmed ? [
         { label: "Wybór posiłku", hash: "#posilek" },
         { label: "Test zgodności", hash: "#test-zgodnosci" },
-      ]
+      ] : undefined
     },
     { label: "Harmonogram wesela", href: "/harmonogram", protected: true },
     { label: "Galeria", href: "/galeria", protected: true },
@@ -64,7 +100,6 @@ export default function Navbar() {
       {isMobile ? (
         <div className="flex items-center gap-2 sm:gap-4">
           
-          {/* PRZYCISK DŹWIĘKU - MOBILE */}
           <button 
             onClick={(e) => {
               e.stopPropagation();
@@ -80,7 +115,6 @@ export default function Navbar() {
             )}
           </button>
 
-          {/* PRZYCISK MENU (HAMBURGER) */}
           <button
             className="focus:outline-none p-2 rounded-lg bg-[#C05454] hover:bg-[#c99a93] transition shadow-sm flex items-center justify-center w-11 h-11"
             onClick={handleMenuClick}
@@ -128,7 +162,6 @@ export default function Navbar() {
                   />
                 </Link>
 
-                {/* ZMIANA: ROZWIJANE MENU (DROPDOWN) DLA DESKTOPU */}
                 {item.subItems && (
                   <div className="absolute top-full left-1/2 -translate-x-1/2 pt-6 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                     <div className="bg-[#FDF9EC] shadow-2xl border border-[#4E0113]/10 rounded-2xl py-3 w-56 flex flex-col gap-1 relative before:content-[''] before:absolute before:-top-2 before:left-1/2 before:-translate-x-1/2 before:border-8 before:border-transparent before:border-b-[#FDF9EC]">
@@ -148,7 +181,6 @@ export default function Navbar() {
             );
           })}
           
-          {/* PRZYCISK DŹWIĘKU - DESKTOP */}
          <button 
            onClick={(e) => {
              e.stopPropagation();
@@ -206,7 +238,6 @@ export default function Navbar() {
                       {item.label}
                     </Link>
 
-                    {/* ZMIANA: PODSEKCJE W MENU MOBILNYM */}
                     {item.subItems && (
                       <div className="flex flex-col space-y-1 bg-[#4E0113]/5 rounded-xl p-2 mb-2 mt-1">
                         {item.subItems.map((sub) => (

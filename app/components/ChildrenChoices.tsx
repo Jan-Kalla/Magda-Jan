@@ -1,5 +1,6 @@
 "use client";
-import React from "react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function ChildrenChoices({
   children,
@@ -58,12 +59,51 @@ export default function ChildrenChoices({
     );
   };
 
+  const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
+
   return (
     <div className="mt-16">
-      <h2 className="font-serif text-3xl md:text-4xl font-light text-[#4c4a1e] mb-10 text-center uppercase tracking-[0.1em] border-t border-[#4c4a1e]/20 pt-10">
+      <h2 className="font-serif text-3xl md:text-4xl font-light text-[#4c4a1e] mb-4 text-center uppercase tracking-[0.1em] border-t border-[#4c4a1e]/20 pt-10">
         Menu dla najmłodszych
       </h2>
       
+      <p className="font-serif italic text-lg md:text-xl text-[#4c4a1e]/80 text-center tracking-wide mb-4 px-4">
+        Do każdego dania ze specjalnego menu dziecięcego zostanie również przypisany delikatny rosół drobiowy z makaronem, jako pierwsze danie
+      </p>
+
+      {/* NOWY PRZYCISK OPISU */}
+      <div className="flex justify-center mb-8">
+        <button
+          type="button"
+          onClick={() => setIsDescriptionOpen(!isDescriptionOpen)}
+          className="text-xs md:text-sm font-sans uppercase tracking-widest text-[#4c4a1e] border border-[#4c4a1e]/30 px-6 py-2 rounded-full hover:bg-white/30 transition-all duration-300"
+        >
+          {isDescriptionOpen ? "Zwiń opis" : "Zobacz opis"}
+        </button>
+      </div>
+
+      {/* ROZWIJANA KARTA Z DŁUŻSZYM OPISEM */}
+      <AnimatePresence>
+        {isDescriptionOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className="overflow-hidden mb-12 max-w-3xl mx-auto px-4"
+          >
+            <div className="bg-white/30 p-6 md:p-8 rounded-xl border border-[#4c4a1e]/10 shadow-inner text-center">
+              <p className="font-serif text-[#4c4a1e]/90 leading-relaxed text-sm md:text-base">
+                Dania z menu dziecięcego przygotowywane są z delikatnych składników i podawane w atrakcyjny dla maluchów sposób. 
+                Również rosół drobiowy z oferty dziecięcej, rekomendowany nam przez Starą Szwajcarię, jako skrojony bardziej pod młodsze podniebienie, to nie to samo co domowy rosół na trzech mięsach z oferty standardowej.
+                Natomiast, jeśli Twoje dziecko jest już większe lub po prostu woli zjeść to, co dorośli – nie ma najmniejszego problemu, wystarczy wybrać danie 
+                z sekcji standardowej poniżej.
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {children.map((child: any) => (
         <div key={child.id} className="mb-12 bg-white/20 p-6 md:p-8 rounded-2xl border border-white/40">
           <h3 className="font-serif text-2xl md:text-3xl text-[#4c4a1e] mb-6 pb-2 border-b border-[#4c4a1e]/20 inline-block">

@@ -49,6 +49,11 @@ const faqData = [
     question: "Mam dietę wegetariańską. Co robić?",
     answer: "W zakładce 'Wybory dla gościa' znajdziecie miejsce, gdzie możecie zaznaczyć swoje preferencje żywieniowe. Postaramy się, aby każdy znalazł coś dla siebie."
   },
+  {
+    id: 7,
+    question: "Kiedy i gdzie pojawią się zdjęcia i film ze ślubu i wesela?",
+    answer: "Jest to czas bliżej nieokreślony i przede wszystkim od nas niezależny, dlatego prosimy uzbroić się w cierpliwość. Wszystkie zdjęcia będą dostępne w zakładce 'Galeria' lecz filmu w całości udostępniać nie będziemy (kiedy już się pojawi, to zaprosimy na prywatne seanse😉)"
+  },
 ];
 
 export default function FaqPage() {

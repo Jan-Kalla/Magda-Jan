@@ -3,6 +3,7 @@ import Navbar from "@/app/components/Navbar";
 import ResponsiveTetrisLayout from "@/app/components/tetris/ResponsiveTetrisLayout";
 import MobileTetrisLayout from "@/app/components/tetris/MobileControls";
 import { useEffect, useState } from "react";
+import RequireGuest from "@/app/components/RequireGuest";
 
 export default function TetrisPage() {
   const [isMobile, setIsMobile] = useState(false);
@@ -14,6 +15,7 @@ export default function TetrisPage() {
   }, []);
 
   return (
+    <RequireGuest>
     <>
       <Navbar />
       <div
@@ -24,5 +26,6 @@ export default function TetrisPage() {
         {isMobile ? <MobileTetrisLayout /> : <ResponsiveTetrisLayout />}
       </div>
     </>
+    </RequireGuest>
   );
 }

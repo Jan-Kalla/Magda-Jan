@@ -14,6 +14,7 @@ import PageWrapper from "@/app/components/PageWrapper";
 import { createClient } from "@supabase/supabase-js";
 import OrganicGlassPattern from "@/app/components/OrganicGlassPattern";
 import CustomCursor from "@/app/components/CustomCursor";
+import ConfirmedGuestsList from "./ConfirmedGuestsList";
 
 import { motion, Variants, easeOut, easeInOut, AnimatePresence } from "framer-motion";
 import { Send, Music, ShieldCheck } from "lucide-react";
@@ -90,6 +91,13 @@ export default function MealSurveyPage() {
 
   const isWodzirej = guest?.code === "C83841";
   const isBrideOrGroom = guest?.code === "FC3818" || guest?.code === "8DD06D";
+
+  // ZMIANA: Powiadomienie globalne (dla Navbara) o zmianie statusu RSVP
+  useEffect(() => {
+    if (rsvpStatus !== null) {
+      window.dispatchEvent(new CustomEvent("rsvpChanged", { detail: rsvpStatus }));
+    }
+  }, [rsvpStatus]);
 
   useEffect(() => {
     if (isWodzirej && !isBrideOrGroom) {
@@ -183,7 +191,6 @@ export default function MealSurveyPage() {
                       parentGuestId={guest?.id}
                     />
 
-                    {/* ZMIANA: Dodano id="posilek" oraz klasy wyrównujące offset scrollowania (scroll-mt-28 md:scroll-mt-36) */}
                     <motion.form
                       id="posilek"
                       onSubmit={handleSubmit}
@@ -193,11 +200,18 @@ export default function MealSurveyPage() {
                       variants={fadeUp}
                     >
                       <motion.h1
-                        className="font-serif text-3xl md:text-5xl font-light text-[#4c4a1e] mb-12 text-center uppercase tracking-[0.15em] drop-shadow-md"
+                        className="font-serif text-3xl md:text-5xl font-light text-[#4c4a1e] mb-4 text-center uppercase tracking-[0.15em] drop-shadow-md"
                         variants={fadeUp}
                       >
                         Wybierz swoje danie
                       </motion.h1>
+
+                      <motion.p
+                        className="font-serif italic text-lg md:text-xl text-[#4c4a1e]/80 text-center tracking-wide mb-12"
+                        variants={fadeUp}
+                      >
+                        Prosimy o ostateczny wybór najpóźniej do <strong className="font-bold text-[#4c4a1e]">10 lipca</strong>
+                      </motion.p>
 
                       <motion.div variants={fadeInLeft}>
                         <MainCourseSelector
@@ -217,10 +231,20 @@ export default function MealSurveyPage() {
                         />
                       </motion.div>
 
+                      <motion.div 
+                        variants={fadeUp}
+                        className="mt-12 bg-white/30 border border-[#4c4a1e]/10 p-5 md:p-6 rounded-xl shadow-inner text-center"
+                      >
+                        <p className="font-sans font-light text-[#4c4a1e]/90 text-sm md:text-base leading-relaxed">
+                          <span className="font-serif italic font-bold text-lg block mb-1 text-[#4c4a1e]">Drogi Gościu,</span>
+                          w zależności od Twojego wyboru, przypisane zostanie Ci również pierwsze danie. Każde danie mięsne poprzedzone będzie domowym rosołem na trzech mięsach ze swojskim makaronem, a danie wegetariańskie poprzedzone będzie kremem z pieczonej papryki z pomidorami.
+                        </p>
+                      </motion.div>
+
                       <motion.button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-[#4c4a1e] text-[#FDF9EC] py-5 rounded-xl hover:bg-[#383716] transition-all duration-300 font-serif uppercase tracking-widest mt-12 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed font-bold"
+                        className="w-full bg-[#4c4a1e] text-[#FDF9EC] py-5 rounded-xl hover:bg-[#383716] transition-all duration-300 font-serif uppercase tracking-widest mt-8 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed font-bold"
                         variants={fadeUp}
                       >
                         {loading ? "Zapisywanie..." : "Zatwierdź wybór posiłku"}
@@ -236,6 +260,18 @@ export default function MealSurveyPage() {
                       )}
                     </motion.form>
 
+                    {/* === SPIS POTWIERDZONYCH GOŚCI (TYLKO DLA PARY MŁODEJ) === */}
+                    {isBrideOrGroom && (
+                      <motion.div
+                        initial="hidden"
+                        animate="visible"
+                        variants={fadeInRight}
+                        className="mt-16 max-w-4xl mx-auto relative z-10"
+                      >
+                        <ConfirmedGuestsList />
+                      </motion.div>
+                    )}
+
                     <motion.div
                       initial="hidden"
                       animate="visible"
@@ -250,7 +286,6 @@ export default function MealSurveyPage() {
                     </motion.div>
 
                     {/* === SEKCJA GRY (TEST ZGODNOŚCI) === */}
-                    {/* ZMIANA: Dodano id="test-zgodnosci" oraz klasy wyrównujące offset scrollowania (scroll-mt-28 md:scroll-mt-36) */}
                     <motion.div
                       id="test-zgodnosci"
                       initial={{ opacity: 0, y: 40 }}
@@ -266,9 +301,9 @@ export default function MealSurveyPage() {
                         Test Zgodności
                       </h2>
                       <p className="font-sans font-light text-[#F6f4e5]/90 mb-10 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-                          Przed oczepinami zmierzymy się w klasycznym teście na zgodność. Jednak aby było to mniej sztampowe, chcemy, aby pytania zadawali goście! <br/><br/>
+                          Przed oczepinami zmierzymy się w klasycznym teście na zgodność. Jednak aby było to mniej sztampowe, chcemy, aby pytania podsunęli sami goście! <br/><br/>
                           Masz pomysł na zabawne pytanie, które sprawdzi, jak dobrze znamy się jako para? A może chcesz zadać podchwytliwe pytanie, które nas zaskoczy? <br/><br/>
-                          Śmiało – nie krępuj się. Im bardziej kreatywne pytanie, tym lepiej. Pamiętaj tylko o tym, aby było ono tak skonstruowane, żeby odpowiedź na nie mogła brzmieć: "Panna młoda" albo "Pan młody", ewentualnie "Oboje". <br/><br/>
+                          Śmiało – nie krępuj się. Im bardziej kreatywne pytanie, tym lepiej. Pamiętaj tylko o tym, aby było ono tak skonstruowane, żeby odpowiedź mogła brzmieć: "Panna młoda" albo "Pan młody", ewentualnie "Oboje". <br/><br/>
                           Spokojnie, Para Młoda nie zobaczy tych pytań przed weselem, trafią one prosto do wodzireja.
                       </p>
                       

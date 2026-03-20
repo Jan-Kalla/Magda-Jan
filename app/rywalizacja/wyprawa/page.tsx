@@ -13,6 +13,7 @@ import {
   FingerPrintIcon
 } from "@heroicons/react/24/solid";
 import confetti from "canvas-confetti";
+import RequireGuest from "@/app/components/RequireGuest";
 
 // IMPORTY KOMPONENTÓW
 import StageOnePuzzle from "./components/StageOnePuzzle";
@@ -47,6 +48,7 @@ export default function WyprawaPage() {
   // === 1. INICJALIZACJA DANYCH ===
   useEffect(() => {
     const fetchData = async () => {
+      // Zabezpieczenie: jeśli gość jest niezalogowany, nie próbuj pobierać jego danych
       if (!guest) return;
 
       const { data: progressData } = await supabase.rpc('get_or_create_hunt_progress', {
@@ -103,7 +105,27 @@ export default function WyprawaPage() {
     await supabase.from('quiz_state').update({ [colName]: !currentVal }).eq('id', 1);
   };
 
-  if (loading || isLoadingData || !guest) return null;
+  // === ZMIANA: Zastąpiono dawny "return null" poprawkami przekazującymi kontrolę strażnikowi ===
+  if (loading || !guest) {
+    return (
+      <RequireGuest>
+        {/* Ten fragment kodu wykona się dopiero, gdy wpiszesz kod w wyświetlonym przez RequireGuest okienku */}
+        <div />
+      </RequireGuest>
+    );
+  }
+
+  // W sytuacji, gdy użytkownik wpisał kod poprawnie, ale pobieramy jego stan gry z bazy:
+  if (isLoadingData) {
+    return (
+      <RequireGuest>
+        <Navbar />
+        <div className="min-h-screen bg-[#fff0e6] pt-[112px] flex items-center justify-center text-[#4E0113]">
+           <p className="animate-pulse font-serif tracking-widest text-lg">Ładowanie gry...</p>
+        </div>
+      </RequireGuest>
+    );
+  }
 
   let currentStage = 1;
   if (progress.stage_1_solved) currentStage = 2;
@@ -114,6 +136,7 @@ export default function WyprawaPage() {
   const isStage3Locked = !isAdmin && !gameState.stage_3_active && currentStage === 3;
 
   return (
+    <RequireGuest>
     <>
       {/* === NAVBAR WYJĘTY NA ZEWNĄTRZ === */}
       <Navbar />
@@ -301,5 +324,6 @@ export default function WyprawaPage() {
         </div>
       </div>
     </>
+    </RequireGuest>
   );
 }

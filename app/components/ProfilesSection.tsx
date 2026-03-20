@@ -172,7 +172,7 @@ export default function ProfilesSection() {
                         exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.9 } }}
                         className="flex md:hidden absolute bottom-3 left-1/2 -translate-x-1/2"
                       >
-                        <p className="font-serif tracking-widest uppercase text-white bg-black/40 border border-white/60 px-3 py-1 rounded-full backdrop-blur-md text-[10px] shadow-lg animate-pulse">
+                        <p className="font-serif tracking-widest uppercase text-white bg-black/40 border border-white/60 px-3 py-1 rounded-full backdrop-blur-md text-[16px] shadow-lg animate-pulse">
                           Obróć
                         </p>
                       </motion.div>
@@ -274,7 +274,7 @@ export default function ProfilesSection() {
                         exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.9 } }}
                         className="flex md:hidden absolute bottom-3 left-1/2 -translate-x-1/2"
                       >
-                        <p className="font-serif tracking-widest uppercase text-white bg-black/40 border border-white/60 px-3 py-1 rounded-full backdrop-blur-md text-[10px] shadow-lg animate-pulse">
+                        <p className="font-serif tracking-widest uppercase text-white bg-black/40 border border-white/60 px-3 py-1 rounded-full backdrop-blur-md text-[16px] shadow-lg animate-pulse">
                           Obróć
                         </p>
                       </motion.div>
