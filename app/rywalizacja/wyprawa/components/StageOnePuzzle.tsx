@@ -9,7 +9,8 @@ import {
   LightBulbIcon,
   ExclamationCircleIcon,
   InformationCircleIcon,
-  SparklesIcon
+  SparklesIcon,
+  CheckIcon // <--- ZMIANA: Dodano CheckIcon do wyświetlania ptaszka
 } from "@heroicons/react/24/solid";
 
 const supabase = createClient(
@@ -73,20 +74,19 @@ const BAWDY = [
 ];
 
 // === KONFIGURACJA PYTAŃ I POSZLAK ===
-// Pamiętaj, aby uzupełnić pola "valid" (odpowiedzi) małymi literami!
 const QUESTIONS_DATA = [
-  { id: 1,  question: "Ulica w Katowicach na której Magda z Johnym swego czasu często bywali?", valid: ["mariacka", "na mariackiej", "mariackiej"], clue: "🧭" }, // Kompas
-  { id: 2,  question: "Największe jezioro, na jakim wspólnie byli Magda z Janem?", valid: ["sniardwy", "śniardwy"], clue: "🌬️" }, // Wiatr
-  { id: 3,  question: "Najwyższy szczyt, na jaki razem weszli Magda z Janem?", valid: ["świnica", "swinica", "2303", "2304", "2303m.n.p.m.", "2304m.n.p.m.", "2303 m.n.p.m.", "2304 m.n.p.m."], clue: "🪢" }, // Lina
-  { id: 4,  question: "Państwo, do którego odbył się pierwszy wspólny zagraniczny wyjazd Magdy i Johnego?", valid: ["austria"], clue: "🗺️" }, // Mapa
-  { id: 5,  question: "W jaką grę video Magda najbardziej lubi grać u Jana?", valid: ["granturismo", "gran turismo", "gr7","granturismo7", "gran turismo7","granturismo 7", "gran turismo 7", "gr 7"], clue: "⚙️❌" }, // Brak silnika
-  { id: 6,  question: "Pierwsze miasto, w którym Magda z Johnym zamieszkają po ślubie?", valid: ["zabrze"], clue: "⛺" }, // Namiot
-  { id: 7,  question: "Co Magda z Janem częściej wybierają, gdy się ich o to spyta: kawa czy herbata?", valid: ["kawa", "kawę"], clue: "🌊" }, // Fale
-  { id: 8,  question: "Wymień chociaż jeden z trzech zespołów, na których występie na żywo byli wspólnie Magda z Janem?", valid: ["myslovitz", "myslowic", "strachy na lachy", "strachynalachy","tlove","t-love"], clue: "🔕" }, // Cisza
-  { id: 9,  question: "Danie, które Magda i Jan oboje lubią jeść?", valid: ["jajecznica","owsianka","bar gil","sushi","vifon","zupka chińska","kebab", "pizza","pizze","pizzę", "burger", "burgery", "hamburger", "hamburgery", "wszystko","spaghetti"], clue: "🐟" }, // NOWE: Ryba (zamiast Kotwicy)
-  { id: 10, question: "Wspólne hobby Magdy i Jana?", valid: ["film", "kino", "chodzenie do kina", "oglądanie filmów", "oglądanie filmow", "kinematografia", "sauna", "sauny", "chodzenie na saune", "saunowanie", "taniec", "tanczenie", "tańczenie", "gory", "góry", "chodzenie po górach", "chodzenie po gorach", "gorskie wedrowki", "górskie wędrówki", "wedrowki gorskie", "trekking", "hiking", "spacery", "spacer", "chodzenie na spacery", "jedzenie", "chodzenie na jedzenie", "jedzenie na miescie", "food", "foodie", "muzyka", "sluchanie muzyki", "słuchanie muzyki", "koncerty", "zeglowanie", "żeglowanie", "plywanie zaglowka", "pływanie żaglówką", "zaglowka", "żaglówka", "standup", "stand-up", "oglądanie standupów", "oglądanie stand-upów", "standupy", "narty", "narciarstwo", "jazda na nartach", "gotowanie", "gotowanie razem", "gotuja razem", "gotują razem", "kuchnia", "biblia", "czytanie biblii", "pismo święte" , "czytanie pisma świętego"], clue: "🌲" }, // Drzewo
-  { id: 11, question: "Marka samochodu, która często pojawiała się zarówno w rodzinie Magdy, jak i w rodzinie Jana?", valid: ["skoda", "škoda"], clue: "🕶️" }, // NOWE: Okulary (zamiast Koła)
-  { id: 12, question: "Ulubiona księga Nowego Testamentu Johnego i Magdy?", valid: ["dzieje apostolskie"], clue: "🌅" }, // Zachód słońca
+  { id: 1,  question: "Ulica w Katowicach na której Magda z Johnym swego czasu często bywali?", valid: ["mariacka", "na mariackiej", "mariackiej"], clue: "🌬️" },
+  { id: 2,  question: "Największe jezioro, na jakim wspólnie byli Magda z Janem?", valid: ["sniardwy", "śniardwy"], clue: "🧭" },
+  { id: 3,  question: "Najwyższy szczyt, na jaki razem weszli Magda z Janem?", valid: ["świnica", "swinica", "2303", "2304", "2303m.n.p.m.", "2304m.n.p.m.", "2303 m.n.p.m.", "2304 m.n.p.m."], clue: "🪢" },
+  { id: 4,  question: "Państwo, do którego odbył się pierwszy wspólny zagraniczny wyjazd Magdy i Johnego?", valid: ["austria"], clue: "🗺️" },
+  { id: 5,  question: "W jaką grę video Magda najbardziej lubi grać u Jana?", valid: ["granturismo", "gran turismo", "gr7","granturismo7", "gran turismo7","granturismo 7", "gran turismo 7", "gr 7"], clue: "⚙️❌" },
+  { id: 6,  question: "Pierwsze miasto, w którym Magda z Johnym zamieszkają po ślubie?", valid: ["zabrze"], clue: "⛺" },
+  { id: 7,  question: "Co Magda z Janem częściej wybierają, gdy się ich o to spyta: kawa czy herbata?", valid: ["kawa", "kawę"], clue: "🌅" },
+  { id: 8,  question: "Wymień chociaż jeden z trzech zespołów, na których występie na żywo byli wspólnie Magda z Janem?", valid: ["myslovitz", "myslowic", "strachy na lachy", "strachynalachy","tlove","t-love"], clue: "🔕" },
+  { id: 9,  question: "Danie, które Magda i Jan oboje lubią jeść?", valid: ["jajecznica","owsianka","bar gil","sushi","vifon","zupka chińska","kebab", "pizza","pizze","pizzę", "burger", "burgery", "hamburger", "hamburgery", "wszystko","spaghetti"], clue: "🐟" },
+  { id: 10, question: "Wspólne hobby Magdy i Jana?", valid: ["film", "kino", "chodzenie do kina", "oglądanie filmów", "oglądanie filmow", "kinematografia", "sauna", "sauny", "chodzenie na saune", "saunowanie", "taniec", "tanczenie", "tańczenie", "gory", "góry", "chodzenie po górach", "chodzenie po gorach", "gorskie wedrowki", "górskie wędrówki", "wedrowki gorskie", "trekking", "hiking", "spacery", "spacer", "chodzenie na spacery", "jedzenie", "chodzenie na jedzenie", "jedzenie na miescie", "food", "foodie", "muzyka", "sluchanie muzyki", "słuchanie muzyki", "koncerty", "zeglowanie", "żeglowanie", "plywanie zaglowka", "pływanie żaglówką", "zaglowka", "żaglówka", "standup", "stand-up", "oglądanie standupów", "oglądanie stand-upów", "standupy", "narty", "narciarstwo", "jazda na nartach", "gotowanie", "gotowanie razem", "gotuja razem", "gotują razem", "kuchnia", "biblia", "czytanie biblii", "pismo święte" , "czytanie pisma świętego"], clue: "🌲" },
+  { id: 11, question: "Marka samochodu, która często pojawiała się zarówno w rodzinie Magdy, jak i w rodzinie Jana?", valid: ["skoda", "škoda"], clue: "🕶️" },
+  { id: 12, question: "Ulubiona księga Nowego Testamentu Johnego i Magdy?", valid: ["dzieje apostolskie"], clue: "🌊" },
 ];
 
 export default function StageOnePuzzle({ guestId, onSuccess, onMistake }: Props) {
@@ -95,6 +95,8 @@ export default function StageOnePuzzle({ guestId, onSuccess, onMistake }: Props)
 
   const [finalGuess, setFinalGuess] = useState("");
   const [shakeFinal, setShakeFinal] = useState(false);
+  const [shakeInputId, setShakeInputId] = useState<number | null>(null); // Stan dla potrząsania poszczególnych pytań
+  
   const [almostCount, setAlmostCount] = useState(0);
   const [finalMsg, setFinalMsg] = useState<{ text: string; type: 'error' | 'warning' | 'info' } | null>(null);
 
@@ -108,7 +110,6 @@ export default function StageOnePuzzle({ guestId, onSuccess, onMistake }: Props)
         .single();
 
       if (data && data.stage_1_clues) {
-        // Rzutowanie na tablicę liczb (jsonb w bazie -> number[] w JS)
         const savedIds = data.stage_1_clues as number[];
         setSolvedIds(savedIds);
       }
@@ -118,7 +119,6 @@ export default function StageOnePuzzle({ guestId, onSuccess, onMistake }: Props)
 
   // === 2. FUNKCJA ZAPISUJĄCA STAN ===
   const saveSolvedToDb = async (newSolvedIds: number[]) => {
-    // Aktualizujemy tylko kolumnę stage_1_clues
     await supabase
       .from('honey_hunt_progress')
       .update({ stage_1_clues: newSolvedIds })
@@ -130,17 +130,20 @@ export default function StageOnePuzzle({ guestId, onSuccess, onMistake }: Props)
     if (!q) return;
     const userVal = (inputs[id] || "").trim().toLowerCase();
     
+    // ZMIANA: Zabezpieczenie przed pustym wejściem
+    if (!userVal) {
+      setShakeInputId(id);
+      setTimeout(() => setShakeInputId(null), 400);
+      return;
+    }
+
     if (q.valid.some(v => userVal.includes(v))) {
-      // SUKCES:
-      // 1. Aktualizujemy lokalnie
+      // SUKCES
       const newSolved = [...solvedIds, id];
       setSolvedIds(newSolved);
-      
-      // 2. Zapisujemy w bazie (żeby po odświeżeniu pamiętało)
       await saveSolvedToDb(newSolved);
-
     } else {
-      // BŁĄD:
+      // BŁĄD
       onMistake();
       setInputs(prev => ({ ...prev, [id]: "❌" }));
       setTimeout(() => setInputs(prev => ({ ...prev, [id]: "" })), 500);
@@ -151,6 +154,13 @@ export default function StageOnePuzzle({ guestId, onSuccess, onMistake }: Props)
     const val = finalGuess.trim().toLowerCase();
     setFinalMsg(null);
 
+    // ZMIANA: Zabezpieczenie przed pustym hasłem finałowym
+    if (!val) {
+      setShakeFinal(true);
+      setTimeout(() => setShakeFinal(false), 400);
+      return;
+    }
+
     // 1. SUKCES
     if (VALID_FINALS.some(v => val.includes(v))) {
       onSuccess();
@@ -158,7 +168,7 @@ export default function StageOnePuzzle({ guestId, onSuccess, onMistake }: Props)
     }
 
     setShakeFinal(true);
-    setTimeout(() => setShakeFinal(false), 500);
+    setTimeout(() => setShakeFinal(false), 400);
     onMistake();
 
     // 2. GORĄCO
@@ -180,7 +190,7 @@ export default function StageOnePuzzle({ guestId, onSuccess, onMistake }: Props)
       return;
     }
 
-    // 4.
+    // 4. MOCNO NIETAKTOWNIE
     if (BAWDY.some(v => val.includes(v))) {
       setFinalMsg({
         text: "Seriooo?! Ile Ty masz lat? No tak, to generalnie też część planu, ale nie o to chodziło w głównym haśle... 😅"
@@ -188,6 +198,7 @@ export default function StageOnePuzzle({ guestId, onSuccess, onMistake }: Props)
       });
       return;
     }
+    
     // 5. ZIMNO
     setFinalMsg({ text: "Pudło! To nie to. ❄️", type: 'error' });
   };
@@ -211,7 +222,12 @@ export default function StageOnePuzzle({ guestId, onSuccess, onMistake }: Props)
       </motion.div>
 
       {/* === GŁÓWNE HASŁO === */}
-      <div className={`mb-8 p-4 bg-[#4E0113] rounded-2xl shadow-xl text-[#FAD6C8] transition-transform ${shakeFinal ? "translate-x-2" : ""}`}>
+      {/* ZMIANA: Użyto motion.div do ładnego efektu trzęsienia */}
+      <motion.div 
+         className="mb-8 p-4 bg-[#4E0113] rounded-2xl shadow-xl text-[#FAD6C8]"
+         animate={shakeFinal ? { x: [-8, 8, -8, 8, 0] } : {}}
+         transition={{ duration: 0.4 }}
+      >
          <div className="flex items-center gap-2 mb-2 justify-center">
             <KeyIcon className="w-5 h-5" />
             <span className="font-bold uppercase tracking-widest text-sm">Hasło Główne</span>
@@ -221,7 +237,6 @@ export default function StageOnePuzzle({ guestId, onSuccess, onMistake }: Props)
             <input 
               type="text" 
               placeholder="Wpisz rozwiązanie..." 
-              // --- ZMIANY W STYLACH INPUTA ---
               className="
                 flex-1 
                 p-3 
@@ -235,7 +250,6 @@ export default function StageOnePuzzle({ guestId, onSuccess, onMistake }: Props)
                 placeholder:transition-opacity 
                 focus:placeholder:opacity-0
               "
-              // ------------------------------
               value={finalGuess}
               onChange={(e) => setFinalGuess(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && checkFinal()}
@@ -283,9 +297,9 @@ export default function StageOnePuzzle({ guestId, onSuccess, onMistake }: Props)
                 </div>
             )}
          </AnimatePresence>
-      </div>
+      </motion.div>
 
-      {/* === SIATKA POSZLAK (BEZ PODPISÓW) === */}
+      {/* === SIATKA POSZLAK === */}
       <h3 className="font-bold text-[#4E0113] mb-4 flex items-center gap-2">
         <LightBulbIcon className="w-5 h-5" />
         Twoje Poszlaki ({solvedIds.length}/{QUESTIONS_DATA.length})
@@ -316,32 +330,54 @@ export default function StageOnePuzzle({ guestId, onSuccess, onMistake }: Props)
       <div className="space-y-3">
         {QUESTIONS_DATA.map((item) => {
           const isSolved = solvedIds.includes(item.id);
-          if (isSolved) return null; // Ukrywamy rozwiązane
+          // ZMIANA: Usunięto linijkę ukrywającą kafelek: if (isSolved) return null;
 
           return (
             <motion.div 
               key={item.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white p-4 rounded-xl border border-[#4E0113]/10 shadow-sm"
+              // ZMIANA: Stonowana, lekko zielona ramka nawiązująca do głównego koloru
+              className={`p-4 rounded-xl border shadow-sm transition-colors duration-300 ${
+                isSolved ? "bg-[#2E7D32]/5 border-[#2E7D32]/20" : "bg-white border-[#4E0113]/10"
+              }`}
             >
-              <p className="font-bold text-[#4E0113] text-sm mb-2">{item.question}</p>
-              <div className="flex gap-2">
+              <p className={`font-bold text-sm mb-2 transition-colors duration-300 ${
+                isSolved ? "text-[#2E7D32]" : "text-[#4E0113]"
+              }`}>
+                {item.question}
+              </p>
+              
+              <motion.div 
+                className="flex gap-2"
+                animate={shakeInputId === item.id ? { x: [-8, 8, -8, 8, 0] } : {}}
+                transition={{ duration: 0.4 }}
+              >
                 <input 
                   type="text" 
-                  className="flex-1 p-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-[#4E0113] focus:outline-none"
-                  placeholder="Odpowiedź..."
-                  value={inputs[item.id] || ""}
+                  disabled={isSolved}
+                  className={`flex-1 p-2 border rounded-lg text-sm focus:outline-none transition-colors duration-300 ${
+                    isSolved 
+                      ? "bg-[#2E7D32]/10 border-[#2E7D32]/30 text-[#2E7D32] font-semibold cursor-default" 
+                      : "bg-gray-50 border-gray-200 focus:border-[#4E0113] text-[#4E0113]"
+                  }`}
+                  placeholder={isSolved ? "Rozwiązane!" : "Odpowiedź..."}
+                  value={isSolved ? "Rozwiązane!" : (inputs[item.id] || "")}
                   onChange={(e) => setInputs(prev => ({ ...prev, [item.id]: e.target.value }))}
-                  onKeyDown={(e) => e.key === 'Enter' && checkQuestion(item.id)}
+                  onKeyDown={(e) => !isSolved && e.key === 'Enter' && checkQuestion(item.id)}
                 />
                 <button 
-                  onClick={() => checkQuestion(item.id)}
-                  className="bg-[#4E0113] text-white px-3 rounded-lg text-sm font-bold"
+                  disabled={isSolved}
+                  onClick={() => !isSolved && checkQuestion(item.id)}
+                  className={`px-3 rounded-lg text-sm font-bold flex items-center justify-center transition-colors duration-300 ${
+                    isSolved 
+                      ? "bg-[#2E7D32] text-white cursor-default shadow-inner" 
+                      : "bg-[#4E0113] text-white hover:bg-[#6b1326] shadow-md"
+                  }`}
                 >
-                  ?
+                  {isSolved ? <CheckIcon className="w-5 h-5" /> : "?"}
                 </button>
-              </div>
+              </motion.div>
             </motion.div>
           );
         })}

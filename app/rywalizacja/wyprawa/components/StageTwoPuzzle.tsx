@@ -12,9 +12,18 @@ type Props = {
 export function StageTwoPuzzle({ onSuccess, onMistake }: Props) {
   const [inputVal, setInputVal] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [shake, setShake] = useState(false);
 
   const checkAnswer = () => {
     const answer = inputVal.trim().toLowerCase();
+
+    // ZMIANA: Zabezpieczenie przed pustym zatwierdzeniem
+    if (!answer) {
+      setShake(true);
+      setTimeout(() => setShake(false), 400);
+      return;
+    }
+
     const validAnswers = ["finlandia", "finlandii", "suomi", "helsinki", "laponia"];
 
     if (validAnswers.some(v => answer.includes(v))) {
@@ -34,7 +43,11 @@ export function StageTwoPuzzle({ onSuccess, onMistake }: Props) {
       <GlobeEuropeAfricaIcon className="w-16 h-16 mx-auto text-blue-800 mb-4 opacity-80" />
       <h2 className="text-2xl font-bold mb-2 text-[#4E0113]">Etap 2: Gdzie jedziemy?</h2>
 
-      <div className="mt-4">
+      <motion.div 
+         className="mt-4"
+         animate={shake ? { x: [-8, 8, -8, 8, 0] } : {}}
+         transition={{ duration: 0.4 }}
+      >
         <input
           type="text"
           value={inputVal}
@@ -54,7 +67,7 @@ export function StageTwoPuzzle({ onSuccess, onMistake }: Props) {
         >
           Sprawdź!
         </button>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }

@@ -9,13 +9,21 @@ type Props = {
   onMistake: () => void;
 };
 
-// WAŻNE: Musi być 'export default'
 export function StageThreePuzzle({ onSuccess, onMistake }: Props) {
   const [inputVal, setInputVal] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [shake, setShake] = useState(false);
 
   const checkAnswer = () => {
     const answer = inputVal.trim().toLowerCase();
+
+    // ZMIANA: Zabezpieczenie przed pustym zatwierdzeniem
+    if (!answer) {
+      setShake(true);
+      setTimeout(() => setShake(false), 400);
+      return;
+    }
+
     const validAnswers = ["14", "czternaście", "czternascie"];
 
     if (validAnswers.some(v => answer.includes(v))) {
@@ -43,7 +51,11 @@ export function StageThreePuzzle({ onSuccess, onMistake }: Props) {
         📅 Zgadnijcie (lub poszukajcie wskazówki na sali), na ile dni znikamy po weselu!
       </div>
 
-      <div className="mt-4">
+      <motion.div 
+         className="mt-4"
+         animate={shake ? { x: [-8, 8, -8, 8, 0] } : {}}
+         transition={{ duration: 0.4 }}
+      >
         <input
           type="text"
           value={inputVal}
@@ -63,7 +75,7 @@ export function StageThreePuzzle({ onSuccess, onMistake }: Props) {
         >
           Sprawdź!
         </button>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }
