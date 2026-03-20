@@ -98,26 +98,49 @@ export default function TetrisGame({ mobileLayout }: { mobileLayout?: React.Reac
 
       const currentLevel = getLevel();
 
-      const { data: existing } = await supabase
+      const { data: existing, error: fetchError } = await supabase
         .from("tetris_scores")
         .select("id, score, level")
         .eq("guest_id", guest.id)
-        .single();
+        .maybeSingle();
+
+      if (fetchError) {
+        console.error("❌ BŁĄD POBIERANIA WYNIKÓW Z SUPABASE:", fetchError);
+      }
 
       if (!existing) {
-        await supabase.from("tetris_scores").insert({ guest_id: guest.id, score, level: currentLevel });
+        const { error: insertError } = await supabase
+          .from("tetris_scores")
+          .insert({ guest_id: guest.id, score, level: currentLevel });
+          
+        if (insertError) {
+          console.error("❌ BŁĄD TWORZENIA NOWEGO REKORDU:", insertError);
+        } else {
+          console.log("✅ Dodano nowy wynik do bazy!");
+        }
       } else {
         const improvedScore = score > (existing.score ?? 0);
         const improvedLevel = currentLevel > (existing.level ?? 0);
 
         if (improvedScore || improvedLevel) {
-          await supabase
+          console.log(`Pobito rekord! Próba nadpisania w bazie: ${existing.score} -> ${score}`);
+          
+          const { error: updateError } = await supabase
             .from("tetris_scores")
             .update({
               score: improvedScore ? score : existing.score,
               level: improvedLevel ? currentLevel : existing.level,
             })
-            .eq("id", existing.id);
+            // W KOŃCU! OTO PRAWDZIWA POPRAWKA NA GUEST_ID:
+            .eq("guest_id", guest.id);
+
+          if (updateError) {
+             console.error("❌ SUPABASE ODRZUCIŁ AKTUALIZACJĘ:", updateError);
+          } else {
+             console.log("✅ Wynik pomyślnie nadpisany w bazie!");
+          }
+        } else {
+          console.log(`Słaby wynik (${score}). Stary rekord to ${existing.score}. Nie zapisuję.`);
         }
       }
 
@@ -130,7 +153,7 @@ export default function TetrisGame({ mobileLayout }: { mobileLayout?: React.Reac
     if (!ctx) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", " "].includes(e.key) || e.code === "Space") {
+      if (["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", " ", "p", "P"].includes(e.key) || e.code === "Space") {
         e.preventDefault();
       }
 
@@ -160,13 +183,15 @@ export default function TetrisGame({ mobileLayout }: { mobileLayout?: React.Reac
         actionTaken = true;
       }
       
-      // ZMIANA: Zabezpieczenie przed navbarami i innymi przyciskami UI!
-      // Escape zadziała TYLKO jeśli kliknięto go fizycznie (isTrusted) i focus jest poza elementami interfejsu (na BODY lub CANVAS)
       if (e.key === "Escape") {
         const target = e.target as HTMLElement;
         if (e.isTrusted && (target.tagName === "BODY" || target.tagName === "CANVAS")) {
           togglePause();
         }
+      }
+
+      if (e.key === "p" || e.key === "P" || e.code === "KeyP") {
+        togglePause();
       }
 
       if (e.key === "Enter" && getIsGameOver()) {
