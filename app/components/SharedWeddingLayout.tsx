@@ -303,7 +303,7 @@ export default function SharedWeddingLayout({
                         transition={{ duration: 2.2, ease: [0.22, 1, 0.36, 1] }}
                         className="text-center text-[#FDF9EC] drop-shadow-2xl relative w-full flex justify-center"
                       >
-                        <div className="relative inline-block mt-8 md:mt-0">
+                        <div className="relative inline-block -mt-40 -md:mt-0 ">
                           <motion.h1 
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -318,7 +318,7 @@ export default function SharedWeddingLayout({
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 1.0, ease: "easeOut", delay: 1.6 }}
                             // ZMIANA: Skorygowano pozycję napisu "Pobieramy się" dla lepszej elastyczności
-                            className="absolute -bottom-10 sm:-bottom-12 md:-bottom-16 right-[10%] sm:right-16 md:right-24 text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] font-script text-[#FDF9EC] drop-shadow-md z-20 whitespace-nowrap"
+                            className="absolute sm:-bottom-6 md:-bottom-8 right-[10%] sm:right-16 md:right-24 text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] font-script text-[#FDF9EC] drop-shadow-md z-20 whitespace-nowrap"
                           >
                             Pobieramy się!
                           </motion.p>
