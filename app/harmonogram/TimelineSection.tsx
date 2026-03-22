@@ -5,6 +5,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, Info } from "lucide-react";
 import { scheduleData, TimelineEvent } from "@/app/harmonogram/data";
 
+// ZMIANA: Funkcja zapobiegająca zostawianiu pojedynczych liter na końcu linii (tzw. sierot)
+const formatText = (text: string) => {
+  if (!text) return "";
+  // Zamienia pojedyncze litery (a, i, o, u, w, z) ze spacją po nich na literę z twardą spacją
+  return text.replace(/(^|\s)([aAiIoOuUwWzZ])\s+/g, "$1$2\u00A0");
+};
+
 const TimelineItem = ({ item, index }: { item: TimelineEvent; index: number }) => {
   const [isOpen, setIsOpen] = useState(false);
   const isAct = item.type === "act";
@@ -42,10 +49,10 @@ const TimelineItem = ({ item, index }: { item: TimelineEvent; index: number }) =
                 {item.time}
              </div>
 
-             <h3 className="font-serif text-3xl md:text-4xl font-light text-[#FDF9EC] uppercase tracking-[0.15em] mb-4 group-hover:text-white transition-colors">
-               {item.title}
+             <h3 className="font-serif text-3xl md:text-4xl font-light text-[#FDF9EC] uppercase tracking-[0.15em] mb-4 group-hover:text-white transition-colors leading-snug">
+               {formatText(item.title)}
              </h3>
-             <p className="font-sans font-light text-[#FDF9EC]/80 text-lg leading-relaxed">{item.description}</p>
+             <p className="font-sans font-light text-[#FDF9EC]/80 text-lg leading-relaxed">{formatText(item.description)}</p>
 
              <AnimatePresence>
               {isOpen && item.details && (
@@ -57,7 +64,7 @@ const TimelineItem = ({ item, index }: { item: TimelineEvent; index: number }) =
                 >
                   <div className="mt-8 pt-8 border-t border-white/10">
                      <p className="font-serif italic text-[#FDF9EC]/90 text-lg leading-relaxed max-w-lg mx-auto">
-                       {item.details}
+                       {formatText(item.details)}
                      </p>
                   </div>
                 </motion.div>
@@ -83,7 +90,6 @@ const TimelineItem = ({ item, index }: { item: TimelineEvent; index: number }) =
           <div className="absolute left-0 md:static md:flex-none z-10 w-4 h-4 md:w-5 md:h-5 rounded-full bg-white/20 backdrop-blur-md border border-white/50 shadow-[0_0_15px_rgba(255,255,255,0.3)]" />
 
           <div className="flex-1 w-full md:w-auto">
-            {/* ZMIANA: Kontener to teraz motion.div z obsługą onClick i logiką rozwijania */}
             <motion.div 
               layout
               onClick={() => item.details && setIsOpen(!isOpen)}
@@ -98,10 +104,14 @@ const TimelineItem = ({ item, index }: { item: TimelineEvent; index: number }) =
                     {item.icon}
                  </div>
                  <div className="flex-1 min-w-0">
-                    <h3 className="font-serif text-2xl font-light text-[#FDF9EC] tracking-wide mb-1 truncate">{item.title}</h3>
-                    <p className="font-sans font-light text-[#FDF9EC]/70 text-sm leading-relaxed">{item.description}</p>
+                    {/* ZMIANA: Usunięto 'truncate', dodano 'break-words' i 'leading-snug' aby wieloliniowy tekst wyglądał zgrabnie */}
+                    <h3 className="font-serif text-2xl font-light text-[#FDF9EC] tracking-wide mb-2 break-words leading-snug">
+                      {formatText(item.title)}
+                    </h3>
+                    <p className="font-sans font-light text-[#FDF9EC]/70 text-sm leading-relaxed">
+                      {formatText(item.description)}
+                    </p>
                     
-                    {/* ZMIANA: Animowane rozwijanie szczegółów */}
                     <AnimatePresence>
                       {isOpen && item.details && (
                         <motion.div
@@ -112,14 +122,13 @@ const TimelineItem = ({ item, index }: { item: TimelineEvent; index: number }) =
                         >
                           <div className="mt-5 pt-5 border-t border-white/10">
                             <p className="font-serif italic text-[#FDF9EC]/90 text-base leading-relaxed">
-                              {item.details}
+                              {formatText(item.details)}
                             </p>
                           </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
 
-                    {/* ZMIANA: Skaczący Chevron widoczny tylko, gdy karta jest zwinięta (sygnalizuje, że można kliknąć) */}
                     {!isOpen && item.details && (
                        <div className="mt-4 flex justify-start">
                           <ChevronLeft className="-rotate-90 w-5 h-5 text-white/40 group-hover:text-white/80 transition-colors animate-bounce" />

@@ -35,7 +35,7 @@ export const scheduleData: TimelineEvent[] = [
     time: "15:00",
     title: "Uroczysty Obiad",
     description: "Dwudaniowy posiłek, który szef kuchni przygotuje zgodnie z Waszymi wyborami w ankiecie.",
-    details: "Opcjonalnie można się zapoznać z treścią modlitywy przed posiłkiem: 'Pobłogosław Panie nas i te dary, które z dobroci twojej spożywać będziemy, przez Chrystusa, Pana naszego. Amen.' ",
+    details: "Opcjonalnie można się zapoznać z treścią modlitwy przed posiłkiem: 'Pobłogosław Panie nas i te dary, które z dobroci twojej spożywać będziemy, przez Chrystusa, Pana naszego. Amen.' ",
     icon: <Utensils className="w-5 h-5 text-white" />,
     type: "event",
   },

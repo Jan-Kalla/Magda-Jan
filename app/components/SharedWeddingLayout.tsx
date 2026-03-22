@@ -174,162 +174,163 @@ export default function SharedWeddingLayout({
               
               <div className="absolute inset-0 bg-black/20 transition-opacity duration-1000 z-1" />
 
-              <div className="absolute top-24 md:top-32 left-0 w-full z-50 flex flex-col items-center pointer-events-none gap-4">
+              {/* ZMIANA: Zamiast "absolute top-24" użyto elastycznego flex-boxa zajmującego całą wysokość, co pozwala na naturalne pozycjonowanie w pionie */}
+              <div className="absolute inset-0 pt-24 pb-12 flex flex-col justify-between items-center pointer-events-none z-50 px-4">
                 
-                <AnimatePresence>
-                  {isUnlocked && children && (
-                    <motion.div 
-                      key="guest-login-form"
-                      initial={{ opacity: 0, y: -20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.6 }}
-                      className="pointer-events-auto w-full" 
-                      onClick={(e) => e.stopPropagation()} 
-                    >
-                      {children}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {/* GÓRNA CZĘŚĆ (Pigułka / Formularz) */}
+                <div className="w-full flex flex-col items-center mt-2 lg:mt-8 shrink-0">
+                  <AnimatePresence>
+                    {isUnlocked && children && (
+                      <motion.div 
+                        key="guest-login-form"
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.6 }}
+                        className="pointer-events-auto w-full" 
+                        onClick={(e) => e.stopPropagation()} 
+                      >
+                        {children}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
-                <AnimatePresence>
-                  {isUnlocked && guest && (
-                    <motion.div 
-                      key="guest-greeting-pill"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.5 }}
-                      className="pointer-events-auto px-4 w-full max-w-[460px] md:max-w-[580px] flex justify-center"
-                    >
-                      {/* ZMIANA: Usunięto sztywne aspect ratio. Pigułka jest elastyczna dzięki paddingowi py-8 px-6 */}
-                      <div className="relative overflow-hidden bg-white/20 backdrop-blur-md border border-white/30 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.15)] flex flex-col items-center justify-center w-full min-h-[140px] px-6 py-8 md:px-12 md:py-10">
-                        
-                        {/* ======================================================= */}
-                        {/* ZDJĘCIA PRZYKLEJONE IDEALNIE DO KRAWĘDZI */}
-                        {/* ======================================================= */}
-                        
-                        {/* Prawy Górny Róg - kwiatki1.png (odbicie góra-dół). H-auto utrzymuje proporcje! */}
-                        <Image 
-                          src="/fotki/kwiatki1.png" 
-                          alt="" 
-                          width={400}
-                          height={400}
-                          className="absolute top-0 right-0 w-32 md:w-44 h-auto pointer-events-none z-0 -scale-y-100" 
-                        />
-
-                        {/* Lewy Dolny Róg - kwiatki3.png (odbicie góra-dół i lewo-prawo). */}
-                        <Image 
-                          src="/fotki/kwiatki3.png" 
-                          alt="" 
-                          width={400}
-                          height={400}
-                          className="absolute bottom-0 left-0 w-36 md:w-48 h-auto pointer-events-none z-0 -scale-x-100 -scale-y-100" 
-                        />
-
-                        {/* ======================================================= */}
-
-                       <div className="absolute left-[40%] top-[25%] -translate-x-1/2 -translate-y-1/2">
-                            <span className="text-2xl md:text-3xl font-serif text-[#FDF9EC] drop-shadow-md whitespace-nowrap">
-                              {greeting},
-                            </span>
-                          </div>
+                  <AnimatePresence>
+                    {isUnlocked && guest && (
+                      <motion.div 
+                        key="guest-greeting-pill"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.5 }}
+                        className="pointer-events-auto w-full max-w-[460px] md:max-w-[580px] flex justify-center"
+                      >
+                        <div className="relative overflow-hidden bg-white/20 backdrop-blur-md border border-white/30 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.15)] flex flex-col items-center justify-center w-full min-h-[140px] px-6 py-8 md:px-12 md:py-10">
                           
-                          <div className="absolute left-[58%] top-[65%] -translate-x-1/2 -translate-y-1/2 w-[240px] md:w-[320px]">
+                          <Image 
+                            src="/fotki/kwiatki1.png" 
+                            alt="" 
+                            width={400}
+                            height={400}
+                            className="absolute top-0 right-0 w-32 md:w-44 h-auto pointer-events-none z-0 -scale-y-100" 
+                          />
+
+                          <Image 
+                            src="/fotki/kwiatki3.png" 
+                            alt="" 
+                            width={400}
+                            height={400}
+                            className="absolute bottom-0 left-0 w-36 md:w-48 h-auto pointer-events-none z-0 -scale-x-100 -scale-y-100" 
+                          />
+
+                         <div className="absolute left-[40%] top-[25%] -translate-x-1/2 -translate-y-1/2">
+                              <span className="text-2xl md:text-3xl font-serif text-[#FDF9EC] drop-shadow-md whitespace-nowrap">
+                                {greeting},
+                              </span>
+                            </div>
                             
-                            {/* WERSJA MOBILNA (podział przy > 12 znakach) */}
-                            <div className="md:hidden w-full">
-                              {guest.first_name.length + guest.last_name.length > 11 ? (
-                                <div className="flex flex-col w-full text-center items-center">
-                                  <span className="text-2xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide leading-tight -translate-x-4">
-                                    {guest.first_name}
-                                  </span>
-                                  <span className="text-2xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide leading-tight mt-2 translate-x-4">
-                                    {guest.last_name}!
-                                  </span>
-                                </div>
-                              ) : (
-                                <div className="text-center w-full">
-                                  <span className="text-2xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide whitespace-nowrap">
-                                    {guest.first_name} {guest.last_name}! 
-                                  </span>
-                                </div>
+                            <div className="absolute left-[58%] top-[65%] -translate-x-1/2 -translate-y-1/2 w-[240px] md:w-[320px]">
+                              
+                              <div className="md:hidden w-full">
+                                {guest.first_name.length + guest.last_name.length > 11 ? (
+                                  <div className="flex flex-col w-full text-center items-center">
+                                    <span className="text-2xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide leading-tight -translate-x-4">
+                                      {guest.first_name}
+                                    </span>
+                                    <span className="text-2xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide leading-tight mt-2 translate-x-4">
+                                      {guest.last_name}!
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <div className="text-center w-full">
+                                    <span className="text-2xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide whitespace-nowrap">
+                                      {guest.first_name} {guest.last_name}! 
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="hidden md:block w-full">
+                                {guest.first_name.length + guest.last_name.length > 15 ? (
+                                  <div className="flex flex-col w-full text-center items-center ">
+                                    <span className="text-3xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide leading-tight -translate-x-6">
+                                      {guest.first_name}
+                                    </span>
+                                    <span className="text-3xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide leading-tight mt-1 translate-x-6">
+                                      {guest.last_name}!
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <div className="text-center w-full">
+                                    <span className="text-3xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide whitespace-nowrap">
+                                      {guest.first_name} {guest.last_name}! 
+                                    </span>
+                                  </div>
                               )}
                             </div>
 
-                            {/* WERSJA DESKTOPOWA (podział przy > 18 znakach) */}
-                            <div className="hidden md:block w-full">
-                              {guest.first_name.length + guest.last_name.length > 15 ? (
-                                <div className="flex flex-col w-full text-center items-center ">
-                                  <span className="text-3xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide leading-tight -translate-x-6">
-                                    {guest.first_name}
-                                  </span>
-                                  <span className="text-3xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide leading-tight mt-1 translate-x-6">
-                                    {guest.last_name}!
-                                  </span>
-                                </div>
-                              ) : (
-                                <div className="text-center w-full">
-                                  <span className="text-3xl font-bold font-sans text-[#FDF9EC] drop-shadow-md tracking-wide whitespace-nowrap">
-                                    {guest.first_name} {guest.last_name}! 
-                                  </span>
-                                </div>
-                            )}
                           </div>
 
                         </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
 
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {/* ŚRODKOWA CZĘŚĆ (Główny Napis) */}
+                <div className="flex-1 flex flex-col justify-center shrink min-h-0 w-full max-w-7xl mx-auto">
+                  <AnimatePresence mode="wait">
+                    {!isUnlocked ? (
+                      <motion.div
+                        key="prompt"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.5 }}
+                        className="text-[#FDF9EC] text-center"
+                      >
+                        <p className="font-script animate-pulse text-5xl md:text-7xl drop-shadow-lg">
+                          Kliknij
+                        </p>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="title"
+                        // ZMIANA: Usunięto sztywne marginesy -mt-XX
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 2.2, ease: [0.22, 1, 0.36, 1] }}
+                        className="text-center text-[#FDF9EC] drop-shadow-2xl relative w-full flex justify-center"
+                      >
+                        <div className="relative inline-block mt-8 md:mt-0">
+                          <motion.h1 
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1.2, ease: "easeOut", delay: 0.6 }}
+                            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.5rem] font-serif font-light tracking-widest uppercase z-10 break-words leading-tight px-2"
+                          >
+                            Magdalena <span className="whitespace-nowrap"><span className="italic pr-1">&amp;</span> Jan</span>
+                          </motion.h1>
+                          
+                          <motion.p 
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1.0, ease: "easeOut", delay: 1.6 }}
+                            // ZMIANA: Skorygowano pozycję napisu "Pobieramy się" dla lepszej elastyczności
+                            className="absolute -bottom-10 sm:-bottom-12 md:-bottom-16 right-[10%] sm:right-16 md:right-24 text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] font-script text-[#FDF9EC] drop-shadow-md z-20 whitespace-nowrap"
+                          >
+                            Pobieramy się!
+                          </motion.p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                
+                {/* DOLNA CZĘŚĆ (pusta, by napisy nie spadały za nisko) */}
+                <div className="h-16 shrink-0" />
               </div>
-
-              <AnimatePresence mode="wait">
-                {!isUnlocked ? (
-                  <motion.div
-                    key="prompt"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.5 }}
-                    className="relative z-10 text-[#FDF9EC] text-center px-4"
-                  >
-                    <p className="font-script animate-pulse text-5xl md:text-7xl drop-shadow-lg">
-                      Kliknij
-                    </p>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="title"
-                    initial={{ opacity: 0, y: (pathname.includes("guest") && !guest) ? 280 : 0 }}
-                    animate={{ opacity: 1, y: (pathname.includes("guest") && !guest) ? 280 : 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 2.2, ease: [0.22, 1, 0.36, 1] }}
-                    className="relative z-10 text-center text-[#FDF9EC] drop-shadow-2xl px-4 -mt-16 md:-mt-24 lg:-mt-32"
-                  >
-                    <div className="relative inline-block">
-                      <motion.h1 
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1.2, ease: "easeOut", delay: 0.6 }}
-                        className="text-4xl md:text-5xl lg:text-7xl font-serif font-light tracking-widest uppercase z-10"
-                      >
-                        Magdalena <span className="whitespace-nowrap"><span className="italic pr-1">&amp;</span> Jan</span>
-                      </motion.h1>
-                      
-                      <motion.p 
-                        initial={{ opacity: 0, y: 15 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1.0, ease: "easeOut", delay: 1.6 }}
-                        className="absolute -bottom-12 md:-bottom-20 right-16 sm:right-20 md:right-24 lg:right-40 text-3xl md:text-4xl lg:text-5xl font-script text-[#FDF9EC] drop-shadow-md z-20 whitespace-nowrap"
-                      >
-                        Pobieramy się!
-                      </motion.p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </section>
 
             {isUnlocked && (
