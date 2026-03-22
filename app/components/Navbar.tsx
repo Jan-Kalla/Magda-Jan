@@ -89,10 +89,12 @@ export default function Navbar() {
 
   return (
   <nav className="sticky top-0 left-0 w-full bg-[#FDF9EC] text-[#4E0113] shadow-md z-[100] md:fixed transition-colors duration-300">
-    <div className="w-full px-6 lg:px-16 py-3 flex justify-between items-center relative z-20 bg-[#FDF9EC]">
+    {/* ZMIANA: Płynniejsze zarządzanie bocznymi paddingami (px-4 -> lg:px-8 -> xl:px-16) */}
+    <div className="w-full px-4 lg:px-8 xl:px-16 py-3 flex justify-between items-center relative z-20 bg-[#FDF9EC]">
       
       {/* Logo M&J */}
-      <Link href="/" className="text-4xl md:text-5xl font-script text-[#4E0113] hover:opacity-80 transition-opacity mt-1 shrink-0 pr-12 md:pr-24">
+      {/* ZMIANA: Zmniejszono marginesy prawego odstępu dla średnich ekranów (pr-6 -> lg:pr-8 -> xl:pr-24) */}
+      <Link href="/" className="text-4xl md:text-5xl font-script text-[#4E0113] hover:opacity-80 transition-opacity mt-1 shrink-0 pr-6 lg:pr-8 xl:pr-24">
         M&J
       </Link>
 
@@ -141,14 +143,16 @@ export default function Navbar() {
         </div>
       ) : (
         /* DESKTOP MENU */
-        <ul className="flex space-x-6 lg:space-x-8 items-center">
+        /* ZMIANA: Zmniejszono luki pomiędzy słowami (space-x-4 -> lg:space-x-5 -> xl:space-x-8) */
+        <ul className="flex space-x-4 lg:space-x-5 xl:space-x-8 items-center">
           {visibleItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <li key={item.href} className="relative group">
                 <Link
                   href={item.href}
-                  className={`relative transition-colors font-serif font-bold uppercase tracking-[0.15em] text-xs lg:text-sm ${
+                  // ZMIANA: Zmniejszono tracking (odstępy między literami) i wielkość tekstu na 1024px-1280px
+                  className={`relative transition-colors font-serif font-bold uppercase tracking-[0.1em] xl:tracking-[0.15em] text-[11px] xl:text-sm ${
                     isActive ? "text-[#C97B78]" : "text-[#4E0113]/70 hover:text-[#C97B78]"
                   }`}
                 >
