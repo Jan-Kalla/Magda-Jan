@@ -292,17 +292,26 @@ export default function SharedWeddingLayout({
                         <p className="font-script animate-pulse text-5xl md:text-7xl drop-shadow-lg">
                           Kliknij
                         </p>
-                      </motion.div>
-                    ) : (
-                      <motion.div
+
+                        </motion.div>
+
+                        ) : (
+
+                        <motion.div
+
                         key="title"
-                        // ZMIANA: Usunięto sztywne marginesy -mt-XX
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
+
+                        initial={{ opacity: 0, y: (pathname.includes("guest") && !guest) ? 280 : 0 }}
+
+                        animate={{ opacity: 1, y: (pathname.includes("guest") && !guest) ? 280 : 0 }}
+
                         exit={{ opacity: 0 }}
+
                         transition={{ duration: 2.2, ease: [0.22, 1, 0.36, 1] }}
-                        className="text-center text-[#FDF9EC] drop-shadow-2xl relative w-full flex justify-center"
-                      >
+
+                        className="relative z-10 text-center text-[#FDF9EC] drop-shadow-2xl px-4 -mt-16 md:-mt-24 lg:-mt-32"
+
+                        >
                         <div className="relative inline-block -mt-40 -md:mt-0 ">
                           <motion.h1 
                             initial={{ opacity: 0, y: 30 }}
@@ -318,7 +327,7 @@ export default function SharedWeddingLayout({
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 1.0, ease: "easeOut", delay: 1.6 }}
                             // ZMIANA: Skorygowano pozycję napisu "Pobieramy się" dla lepszej elastyczności
-                            className="absolute sm:-bottom-6 md:-bottom-8 right-[10%] sm:right-16 md:right-24 text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] font-script text-[#FDF9EC] drop-shadow-md z-20 whitespace-nowrap"
+                            className="absolute sm:-bottom-12 md:-bottom-16 right-[10%] sm:right-16 md:right-24 text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] font-script text-[#FDF9EC] drop-shadow-md z-20 whitespace-nowrap"
                           >
                             Pobieramy się!
                           </motion.p>
