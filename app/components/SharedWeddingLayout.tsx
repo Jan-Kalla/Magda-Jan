@@ -301,9 +301,9 @@ export default function SharedWeddingLayout({
 
                         key="title"
 
-                        initial={{ opacity: 0, y: (pathname.includes("guest") && !guest) ? 280 : 0 }}
+                        initial={{ opacity: 0, y: (pathname.includes("guest") && !guest) ? 160 : 0 }}
 
-                        animate={{ opacity: 1, y: (pathname.includes("guest") && !guest) ? 280 : 0 }}
+                        animate={{ opacity: 1, y: (pathname.includes("guest") && !guest) ? 160 : 0 }}
 
                         exit={{ opacity: 0 }}
 
