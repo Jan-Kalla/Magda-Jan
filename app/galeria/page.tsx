@@ -111,7 +111,13 @@ export default function GalleryPage() {
                     <motion.div key={album.id} variants={itemVariants}>
                       <AlbumCard 
                         album={album} 
-                        onClick={setSelectedAlbum} 
+                        onClick={(clickedAlbum) => {
+                          if (clickedAlbum.id === "us") {
+                            router.push("/galeria/historia");
+                          } else {
+                            setSelectedAlbum(clickedAlbum);
+                          }
+                        }} 
                       />
                     </motion.div>
                   );

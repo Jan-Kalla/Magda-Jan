@@ -47,7 +47,8 @@ export default function VenueHeroSection() {
       <div className="w-full md:w-1/2 px-6 md:px-16 flex flex-col justify-center mt-12 md:mt-0">
         <AnimatedText
           text="Stara Szwajcaria"
-          className="font-serif text-4xl md:text-6xl font-light mb-4 text-[#2C2B14] drop-shadow-md tracking-wide"
+         // ZMIANA: Kolor zmieniony na text-[#4c4a1e]
+          className="font-serif text-4xl md:text-6xl font-light mb-4 text-[#4c4a1e] drop-shadow-md tracking-wide"
           mode="letters"
         />
         <AnimatedText
@@ -63,10 +64,12 @@ export default function VenueHeroSection() {
           transition={{ delay: 0.5 }}
           className="bg-white/30 backdrop-blur-xl p-8 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-white/50 relative overflow-hidden"
         >
-          <p className="font-sans font-light text-lg leading-relaxed mb-6 text-[#2C2B14]">
+          {/* ZMIANA: Kolor zmieniony na text-[#4c4a1e] */}
+          <p className="font-sans font-light text-lg leading-relaxed mb-6 text-[#4c4a1e]">
             To tutaj rozegra się akcja naszego filmu. Właśnie w tych progach miejsce będzie miała ta legendarna i niezapomniana zabawa! Do naszej dyspozycji mamy łącznie około 750 m2 na salach i o wiele więcej w parku Szwajcaria tuż obok.
           </p>
-          <p className="font-serif italic text-xl text-[#2C2B14] tracking-wide">
+          {/* ZMIANA: Kolor zmieniony na text-[#4c4a1e] */}
+          <p className="font-serif italic text-xl text-[#4c4a1e] tracking-wide">
             Przygotujcie się na 4 Akty pełne emocji.
           </p>
         </motion.div>
