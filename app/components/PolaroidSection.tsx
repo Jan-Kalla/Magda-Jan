@@ -17,7 +17,7 @@ const PhotoCard = ({ photo, globalIndex, direction }: { photo: any; globalIndex:
       opacity: 1, 
       scale: 1, 
       transition: { 
-        delay: 5, 
+        delay: 3, 
         duration: 0.8, 
         ease: "easeOut" 
       } 

@@ -167,7 +167,7 @@ export default function ProfilesSection() {
                       <motion.div 
                         variants={{
                           hidden: { opacity: 0 },
-                          visible: { opacity: 1, transition: { delay: 3.5, duration: 0.8 } }
+                          visible: { opacity: 1, transition: { delay: 2.5, duration: 0.8 } }
                         }}
                         exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.9 } }}
                         className="flex md:hidden absolute bottom-3 left-1/2 -translate-x-1/2"

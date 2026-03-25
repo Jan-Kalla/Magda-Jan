@@ -85,7 +85,7 @@ export default function AboutSection() {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="font-script text-xl md:text-2xl lg:text-3xl drop-shadow-sm mb-2 ml-2 md:ml-8 lg:ml-6"
           >
-            Poznajamy się
+            Poznajmy się
           </motion.p>
           
           <motion.h2 
