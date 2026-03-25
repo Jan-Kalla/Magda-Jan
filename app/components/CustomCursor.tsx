@@ -12,9 +12,7 @@ export default function CustomCursor() {
   const [isClicking, setIsClicking] = useState(false);
   const [isPulseLarge, setIsPulseLarge] = useState(false);
   
-  // ZMIANA: Stan przechowujący informację o tym, czy to urządzenie dotykowe
   const [isTouch, setIsTouch] = useState(false);
-  
   const isLargeRef = useRef(false);
   
   const mouseX = useMotionValue(-100);
@@ -25,12 +23,10 @@ export default function CustomCursor() {
   const y = useSpring(mouseY, springConfig);
 
   useEffect(() => {
-    // Sprawdzamy fizyczną obecność ekranu dotykowego
     const checkTouch = () => "ontouchstart" in window || navigator.maxTouchPoints > 0;
     const isDeviceTouch = checkTouch();
     setIsTouch(isDeviceTouch);
 
-    // ZMIANA: Jeśli to telefon/tablet, natychmiast przerywamy nasłuchiwanie myszki!
     if (isDeviceTouch) return;
 
     const checkHoverState = (clientX: number, clientY: number, targetElement?: HTMLElement) => {
@@ -49,6 +45,7 @@ export default function CustomCursor() {
       checkHoverState(e.clientX, e.clientY, e.target as HTMLElement);
     };
 
+    // Logika samej animacji naciśnięcia
     const handleMouseDown = () => setIsClicking(true);
     
     const handleMouseUp = (e: MouseEvent) => {
@@ -85,13 +82,11 @@ export default function CustomCursor() {
 
   const cursorImage = (isClicking || (isHovering && isPulseLarge)) ? frame2 : frame1;
 
-  // ZMIANA: Zabezpieczenie ostateczne. Jeśli urządzenie ma ekran dotykowy, w ogóle nie renderujemy komponentu kursora (zwracamy null).
   if (isTouch) return null;
 
   return (
     <>
       <style jsx global>{`
-        /* ZMIANA: Chowamy standardowy kursor tylko na urządzeniach potrafiących precyzyjnie "najechać" (mających myszkę) */
         @media (hover: hover) and (pointer: fine) {
           * {
             cursor: none !important;
@@ -100,8 +95,7 @@ export default function CustomCursor() {
       `}</style>
 
       <motion.div
-        // ZMIANA: Usunięto wadliwą klasę 'hidden md:block'. Teraz kursor pojawia się zawsze, chyba że urządzenie jest dotykowe.
-        className="fixed top-0 left-0 pointer-events-none z-[9999]"
+        className="fixed top-0 left-0 pointer-events-none z-[999999]"
         style={{
           x,
           y,

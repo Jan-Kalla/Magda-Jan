@@ -87,12 +87,24 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
     let volume = 1.0;
     let playbackRate = 1.0;
     let loop = false;
-
+    
     // --- KONFIGURACJA DŹWIĘKÓW ---
     if (type === "click") {
+      // Losujemy 1 z 4 dostępnych plików kliknięcia
       const variant = Math.floor(Math.random() * 4) + 1;
       bufferKey = `click-${variant}`;
-      playbackRate = 0.95 + Math.random() * 0.1;
+      
+      // ZMIANA: Losowanie modyfikatora tonu (0 = normalny, 1 = niższy, 2 = wyższy)
+      const pitchModifier = Math.floor(Math.random() * 3);
+      
+      if (pitchModifier === 1) {
+        playbackRate = 0.8; // Zauważalnie niższy ton
+      } else if (pitchModifier === 2) {
+        playbackRate = 1.2; // Zauważalnie wyższy ton
+      } else {
+        playbackRate = 1.0; // Normalny ton
+      }
+
       volume = variant === 3 ? 1.0 : 0.5;
     
     } else if (type === "ticking") {
