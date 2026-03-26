@@ -45,7 +45,7 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
       "hover":   "/sounds/ui/hover.mp3",
       "click-1": "/sounds/ui/click1.mp3",
       "click-2": "/sounds/ui/click2.mp3",
-      "click-3": "/sounds/ui/click3.mp3",
+      "click-3": "/sounds/ui/click.mp3",
       "click-4": "/sounds/ui/click4.mp3",
     };
 
@@ -84,7 +84,7 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
     if (ctx.state === "suspended") ctx.resume();
 
     let bufferKey: string = type;
-    let volume = 1.0;
+    let volume = 0.7;
     let playbackRate = 1.0;
     let loop = false;
     
@@ -95,12 +95,16 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
       bufferKey = `click-${variant}`;
       
       // ZMIANA: Losowanie modyfikatora tonu (0 = normalny, 1 = niższy, 2 = wyższy)
-      const pitchModifier = Math.floor(Math.random() * 3);
+      const pitchModifier = Math.floor(Math.random() * 5);
       
       if (pitchModifier === 1) {
-        playbackRate = 0.8; // Zauważalnie niższy ton
+        playbackRate = 0.75; // Zauważalnie niższy ton
       } else if (pitchModifier === 2) {
-        playbackRate = 1.2; // Zauważalnie wyższy ton
+        playbackRate = 1.25; // Zauważalnie wyższy ton
+      } else if (pitchModifier === 3) {
+        playbackRate = 0.87; // Lżeśnie niższy ton
+      } else if (pitchModifier === 4) {
+        playbackRate = 1.13; // Lżeśnie wyższy ton
       } else {
         playbackRate = 1.0; // Normalny ton
       }

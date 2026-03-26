@@ -112,8 +112,12 @@ export default function GalleryPage() {
                       <AlbumCard 
                         album={album} 
                         onClick={(clickedAlbum) => {
-                          if (clickedAlbum.id === "us") {
+                          // ZMIANA: Sprawdzamy nie tylko ID albumu, ale i kod gościa!
+                          if (clickedAlbum.id === "us" && guest?.code === "FC3818") {
                             router.push("/galeria/historia");
+                             } else if (clickedAlbum.id === "moments" && guest?.code === "FC3818") {
+                            // ZMIANA: Przekierowanie do nowej podstrony momentów
+                            router.push("/galeria/momenty");
                           } else {
                             setSelectedAlbum(clickedAlbum);
                           }
