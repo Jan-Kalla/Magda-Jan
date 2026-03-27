@@ -61,7 +61,7 @@ export const ALBUMS: Album[] = [
   {
     id: "moments",
     title: "Najlepsze Momenty",
-    coverImage: "/fotki/2021.06.jpeg", 
+    coverImage: "/fotki/2024.08.10.jpg", 
     icon: <SparklesIcon className="w-6 h-6" />,
     isLockedFuture: false,
     requiredLevel: "extended",

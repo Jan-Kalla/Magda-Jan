@@ -108,22 +108,24 @@ export default function GalleryPage() {
                   if (!hasAccess(album.requiredLevel)) return null;
 
                   return (
-                    <motion.div key={album.id} variants={itemVariants}>
-                      <AlbumCard 
-                        album={album} 
-                        onClick={(clickedAlbum) => {
-                          // ZMIANA: Sprawdzamy nie tylko ID albumu, ale i kod gościa!
-                          if (clickedAlbum.id === "us" && guest?.code === "FC3818") {
-                            router.push("/galeria/historia");
-                             } else if (clickedAlbum.id === "moments" && guest?.code === "FC3818") {
-                            // ZMIANA: Przekierowanie do nowej podstrony momentów
-                            router.push("/galeria/momenty");
-                          } else {
-                            setSelectedAlbum(clickedAlbum);
-                          }
-                        }} 
-                      />
-                    </motion.div>
+                  <motion.div key={album.id} variants={itemVariants}>
+                    <AlbumCard 
+                      album={album} 
+                      onClick={(clickedAlbum) => {
+                        // Tworzymy listę kodów z uprawnieniami VIP
+                        const allowedCodes = ["FC3818", "8DD06D"];
+                        const isVip = guest?.code && allowedCodes.includes(guest.code);
+
+                        if (clickedAlbum.id === "us" && isVip) {
+                          router.push("/galeria/historia");
+                        } else if (clickedAlbum.id === "moments" && isVip) {
+                          router.push("/galeria/momenty");
+                        } else {
+                          setSelectedAlbum(clickedAlbum);
+                        }
+                      }} 
+                    />
+                  </motion.div>
                   );
                 })}
               </motion.div>

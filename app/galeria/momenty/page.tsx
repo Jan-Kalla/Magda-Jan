@@ -33,11 +33,19 @@ type MediaItem = {
 // SŁOWNIK NAZW FOLDERÓW
 const FOLDER_NAMES_DICTIONARY: Record<string, string> = {
   "licealne_imprezy": "Licealne Imprezy",
-  "wlochy_2022": "Włochy 2022",
-  "paryz_2022": "Paryż 2022",
-  "gory_2024": "Tatry i Zakopane 2024",
   "swieta": "Święta Bożego Narodzenia",
   "wesele_pszczyna": "Wesele w Pszczynie",
+  "czestochowa": "Częstochowa",
+};
+
+// ZMIANA 1: SŁOWNIK OPISÓW FOLDERÓW
+const FOLDER_DESCRIPTIONS_DICTIONARY: Record<string, string> = {
+  "licealne_imprezy": "Tutaj zawiązała się nasza wspólna tożsamość, bardzo często wracamy do tych czasów, bo jest co wspominać.",
+  "czestochowa": "Tak się składa, że Magda pierwszy rok studiowała w Częstochowie, poniżej przedstawia ona swój ówczesny akademik, a ekipa w składzie: Johny, Szczyrbix i Skrzypak, była ją pewnego razu odwiedzić i odebrać.",
+  "swieta": "Magiczny czas spędzony w rodzinnym gronie.",
+  "wesele_pszczyna": "Zabawa do białego rana na weselu znajomych.",
+  "pobliskie_wypady_2022": "Dużo się działo.",
+  "mazury_2022": "Nasze pierwsze wspólne Mazury. Może było zimno, ale za to nie było ciepło. :P"
 };
 
 const formatFolderName = (name: string) => {
@@ -60,10 +68,8 @@ export default function MomentyPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  // ZMIANA: Stan przechowujący aktualną ilość kolumn
   const [columnsCount, setColumnsCount] = useState(3);
 
-  // ZMIANA: Nasłuchiwanie na szerokość ekranu
   useEffect(() => {
     const updateCols = () => {
       if (window.innerWidth >= 1024) setColumnsCount(3);
@@ -90,16 +96,17 @@ export default function MomentyPage() {
     }
   }, [guest, guestLoading, router]);
 
-  useEffect(() => {
+useEffect(() => {
     const fetchMedia = async () => {
+      // ZMIANA: Pobieramy dane bez sortowania po created_at
       const { data, error } = await supabase
         .from("gallery_media")
         .select("*")
-        .eq("album_id", "moments") 
-        .order("created_at", { ascending: false }); 
+        .eq("album_id", "moments");
 
       if (data) {
         const groups: Record<string, MediaItem[]> = {};
+        
         data.forEach((item) => {
           const parts = item.url.split('/');
           let folder = "Różne"; 
@@ -109,6 +116,13 @@ export default function MomentyPage() {
           if (!groups[folder]) groups[folder] = [];
           groups[folder].push(item as MediaItem);
         });
+
+        // ZMIANA: Magiczna pętla, która wchodzi do każdego folderu 
+        // i sortuje wszystkie jego zdjęcia alfabetycznie na podstawie nazwy pliku (URL)
+        Object.keys(groups).forEach(folderName => {
+            groups[folderName].sort((a, b) => a.url.localeCompare(b.url));
+        });
+
         setGroupedMedia(groups);
       }
       setLoading(false);
@@ -118,7 +132,6 @@ export default function MomentyPage() {
         fetchMedia();
     }
   }, [guest]);
-
   const getImageUrl = (pathOrUrl: string) => {
     if (pathOrUrl.startsWith("http") || pathOrUrl.startsWith("/")) return pathOrUrl;
     return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/gallery/${pathOrUrl}`;
@@ -202,8 +215,9 @@ export default function MomentyPage() {
                 transition={{ delay: 0.1 }}
                 className="font-sans font-light text-[#4c4a1e]/80 text-base md:text-lg max-w-2xl mx-auto"
               >
+                {/* ZMIANA 2: Użycie słownika opisów z wbudowanym zabezpieczeniem na wypadek braku wpisu */}
                 {selectedFolder 
-                    ? "Wspomnienia z tego wyjątkowego czasu." 
+                    ? (FOLDER_DESCRIPTIONS_DICTIONARY[selectedFolder] || "Wspomnienia z tego wyjątkowego czasu.") 
                     : "Rozszerzona biblioteka naszych podróży, imprez i chwil wartych zapamiętania. Wybierz katalog, aby zobaczyć więcej."}
               </motion.p>
             </header>

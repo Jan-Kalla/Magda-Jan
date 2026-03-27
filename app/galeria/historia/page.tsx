@@ -48,10 +48,11 @@ export default function HistoriaPage() {
   // ZMIANA: Stan przechowujący aktualną ilość kolumn dla widoku Masonry
   const [columnsCount, setColumnsCount] = useState(3);
 
-  // === STRAŻNIK DOSTĘPU (TYLKO VIP / ADMIN) ===
+  // === STRAŻNIK DOSTĘPU ===
   useEffect(() => {
-    if (!guestLoading && guest && guest.code !== "FC3818") {
-      router.replace("/galeria");
+    const allowedCodes = ["FC3818", "8DD06D"];
+    if (!guestLoading && guest && !allowedCodes.includes(guest.code)) {
+      router.replace("/galeria"); // Wyrzuca, jeśli kodu nie ma na liście
     }
   }, [guest, guestLoading, router]);
 
@@ -67,8 +68,9 @@ export default function HistoriaPage() {
     return () => window.removeEventListener("resize", updateCols);
   }, []);
 
-  useEffect(() => {
-    if (!guest || guest.code !== "FC3818") return;
+useEffect(() => {
+    const allowedCodes = ["FC3818", "8DD06D"];
+    if (!guest || !allowedCodes.includes(guest.code)) return; // <-- TUTAJ ZMIANA
 
     const fetchHistory = async () => {
       const { data, error } = await supabase
@@ -96,7 +98,8 @@ export default function HistoriaPage() {
     return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/gallery/${pathOrUrl}`;
   };
 
-  if (!guestLoading && guest && guest.code !== "FC3818") return null; 
+  const allowedCodes = ["FC3818", "8DD06D"];
+  if (!guestLoading && guest && !allowedCodes.includes(guest.code)) return null;
 
   // Przygotowanie zdjęć do Lightboxa (wszystkie zdjęcia z obu sekcji po kolei)
   const allMedia = [...beforeWeMet, ...sharedHistory];
