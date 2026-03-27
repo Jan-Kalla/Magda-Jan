@@ -45,12 +45,27 @@ export default function HistoriaPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
+  // ZMIANA: Stan przechowujący aktualną ilość kolumn dla widoku Masonry
+  const [columnsCount, setColumnsCount] = useState(3);
+
   // === STRAŻNIK DOSTĘPU (TYLKO VIP / ADMIN) ===
   useEffect(() => {
     if (!guestLoading && guest && guest.code !== "FC3818") {
       router.replace("/galeria");
     }
   }, [guest, guestLoading, router]);
+
+  // ZMIANA: Nasłuchiwanie na szerokość ekranu
+  useEffect(() => {
+    const updateCols = () => {
+      if (window.innerWidth >= 1024) setColumnsCount(3);
+      else if (window.innerWidth >= 640) setColumnsCount(2);
+      else setColumnsCount(1);
+    };
+    updateCols();
+    window.addEventListener("resize", updateCols);
+    return () => window.removeEventListener("resize", updateCols);
+  }, []);
 
   useEffect(() => {
     if (!guest || guest.code !== "FC3818") return;
@@ -95,6 +110,15 @@ export default function HistoriaPage() {
     }
   };
 
+  // ZMIANA: Funkcja rozdzielająca zdjęcia z lewej do prawej
+  const distributeToColumns = (items: HistoryEvent[]) => {
+    const cols: HistoryEvent[][] = Array.from({ length: columnsCount }, () => []);
+    items.forEach((item, index) => {
+      cols[index % columnsCount].push(item);
+    });
+    return cols;
+  };
+
   // Komponent pojedynczego zdjęcia ("Odbitki")
   const GalleryCard = ({ item }: { item: HistoryEvent }) => (
     <motion.div 
@@ -107,14 +131,12 @@ export default function HistoriaPage() {
       onClick={() => openLightbox(item)}
     >
       <div className="relative w-full rounded-sm overflow-hidden bg-gray-100">
-        {/* ZMIANA: width i height z zachowaniem proporcji. Zamiast fill + object-cover używamy naturalnego dopasowania */}
-        <Image 
+        {/* ZMIANA: Zwykły tag img, który zawsze respektuje 100% naturalne proporcje pliku! */}
+        <img 
             src={getImageUrl(item.img_url)} 
             alt={item.title} 
-            width={800} 
-            height={800} 
-            className="w-full h-auto object-contain transition-transform duration-700 group-hover:scale-[1.02]" 
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" 
+            loading="lazy"
+            className="w-full h-auto block transition-transform duration-700 group-hover:scale-[1.02]" 
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500" />
       </div>
@@ -186,11 +208,14 @@ export default function HistoriaPage() {
                             <h2 className="font-script text-5xl md:text-6xl text-[#4c4a1e] mb-4 drop-shadow-sm">Zanim się spotkaliśmy...</h2>
                             <div className="h-[1px] w-24 bg-[#4c4a1e]/30 mx-auto"></div>
                         </div>
-
-                        {/* Prawdziwy, elastyczny układ Masonry oparty na kolumnach CSS */}
-                        <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 md:gap-8">
-                            {beforeWeMet.map((item) => (
-                                <GalleryCard key={item.id} item={item} />
+                        {/* ZMIANA: Układ wierszowy od lewej do prawej */}
+                        <div className="flex gap-6 md:gap-8 items-start w-full">
+                            {distributeToColumns(beforeWeMet).map((column, colIndex) => (
+                                <div key={colIndex} className="flex flex-col flex-1 gap-0">
+                                    {column.map((item) => (
+                                        <GalleryCard key={item.id} item={item} />
+                                    ))}
+                                </div>
                             ))}
                         </div>
                     </div>
@@ -223,10 +248,14 @@ export default function HistoriaPage() {
                             <h2 className="font-script text-5xl md:text-6xl text-[#C97B78] mb-4 drop-shadow-sm">Nasza Wspólna Droga</h2>
                             <div className="h-[1px] w-24 bg-[#C97B78]/30 mx-auto"></div>
                         </div>
-
-                        <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 md:gap-8">
-                            {sharedHistory.map((item) => (
-                                <GalleryCard key={item.id} item={item} />
+                        {/* ZMIANA: Układ wierszowy od lewej do prawej */}
+                        <div className="flex gap-6 md:gap-8 items-start w-full">
+                            {distributeToColumns(sharedHistory).map((column, colIndex) => (
+                                <div key={colIndex} className="flex flex-col flex-1 gap-0">
+                                    {column.map((item) => (
+                                        <GalleryCard key={item.id} item={item} />
+                                    ))}
+                                </div>
                             ))}
                         </div>
                     </div>

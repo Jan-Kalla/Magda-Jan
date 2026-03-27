@@ -225,7 +225,7 @@ export default function CompetitionPage() {
                     <div className="text-left">
                       <h2 className="font-serif text-2xl md:text-3xl tracking-wide mb-1">Quiz</h2>
                       <p className="font-sans font-light uppercase tracking-widest text-xs md:text-sm opacity-80">
-                        {isAdmin ? "Panel Wodzireja" : "Konicznie weź se sobą na wesele naładowany telefon!"}
+                        {isAdmin ? "Panel Wodzireja" : "Koniecznie weź ze sobą na wesele naładowany telefon!"}
                       </p>
                     </div>
                   </div>
