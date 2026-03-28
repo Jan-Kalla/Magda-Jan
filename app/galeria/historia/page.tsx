@@ -4,8 +4,8 @@ import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import PageWrapper from "@/app/components/PageWrapper";
 import RequireGuest from "@/app/components/RequireGuest";
+import CustomCursor from "@/app/components/CustomCursor";
 import { motion } from "framer-motion";
-import Image from "next/image";
 import Link from "next/link";
 import { HeartIcon } from "@heroicons/react/24/solid";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
@@ -13,10 +13,10 @@ import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useGuest } from "@/app/context/GuestContext";
 import { useRouter } from "next/navigation";
-import CustomCursor from "@/app/components/CustomCursor";
 
-// Importy dla pełnoekranowej galerii (Lightbox)
+// IMPORTY PEŁNOEKRANOWEJ GALERII Z ZOOMEM
 import Lightbox from "yet-another-react-lightbox";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/styles.css";
 
 const supabase = createClient(
@@ -41,36 +41,46 @@ export default function HistoriaPage() {
   const [sharedHistory, setSharedHistory] = useState<HistoryEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Stany dla pełnoekranowej galerii
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  // ZMIANA: Stan przechowujący aktualną ilość kolumn dla widoku Masonry
   const [columnsCount, setColumnsCount] = useState(3);
 
-  // === STRAŻNIK DOSTĘPU ===
+  // === OBSŁUGA STRZAŁKI WSTECZ ===
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      const st = e.state;
+      if (st?.level === 'lightbox') {
+          setLightboxOpen(true);
+      } else {
+          setLightboxOpen(false);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   useEffect(() => {
     const allowedCodes = ["FC3818", "8DD06D"];
     if (!guestLoading && guest && !allowedCodes.includes(guest.code)) {
-      router.replace("/galeria"); // Wyrzuca, jeśli kodu nie ma na liście
+      router.replace("/galeria");
     }
   }, [guest, guestLoading, router]);
 
-  // ZMIANA: Nasłuchiwanie na szerokość ekranu
   useEffect(() => {
     const updateCols = () => {
       if (window.innerWidth >= 1024) setColumnsCount(3);
       else if (window.innerWidth >= 640) setColumnsCount(2);
-      else setColumnsCount(1);
+      else setColumnsCount(1); 
     };
     updateCols();
     window.addEventListener("resize", updateCols);
     return () => window.removeEventListener("resize", updateCols);
   }, []);
 
-useEffect(() => {
+  useEffect(() => {
     const allowedCodes = ["FC3818", "8DD06D"];
-    if (!guest || !allowedCodes.includes(guest.code)) return; // <-- TUTAJ ZMIANA
+    if (!guest || !allowedCodes.includes(guest.code)) return;
 
     const fetchHistory = async () => {
       const { data, error } = await supabase
@@ -79,7 +89,6 @@ useEffect(() => {
         .order("year", { ascending: true }); 
 
       if (data) {
-        // Zamiast rozdzielać Magdę i Jana, łączymy ich i sortujemy chronologicznie
         const combinedEarly = data
             .filter(item => item.person === 'magda' || item.person === 'jan')
             .sort((a, b) => parseInt(a.year) - parseInt(b.year));
@@ -99,21 +108,29 @@ useEffect(() => {
   };
 
   const allowedCodes = ["FC3818", "8DD06D"];
-  if (!guestLoading && guest && !allowedCodes.includes(guest.code)) return null;
+  if (!guestLoading && guest && !allowedCodes.includes(guest.code)) return null; 
 
-  // Przygotowanie zdjęć do Lightboxa (wszystkie zdjęcia z obu sekcji po kolei)
   const allMedia = [...beforeWeMet, ...sharedHistory];
   const slides = allMedia.map(m => ({ src: getImageUrl(m.img_url) }));
 
-  const openLightbox = (item: HistoryEvent) => {
+  // NOWE FUNKCJE OTWIERANIA/ZAMYKANIA
+  const handleOpenLightbox = (item: HistoryEvent) => {
     const index = allMedia.findIndex(m => m.id === item.id);
     if (index !== -1) {
         setLightboxIndex(index);
         setLightboxOpen(true);
+        window.history.pushState({ level: 'lightbox' }, '');
     }
   };
 
-  // ZMIANA: Funkcja rozdzielająca zdjęcia z lewej do prawej
+  const handleCloseLightbox = () => {
+    if (window.history.state?.level === 'lightbox') {
+      window.history.back();
+    } else {
+      setLightboxOpen(false);
+    }
+  };
+
   const distributeToColumns = (items: HistoryEvent[]) => {
     const cols: HistoryEvent[][] = Array.from({ length: columnsCount }, () => []);
     items.forEach((item, index) => {
@@ -122,19 +139,16 @@ useEffect(() => {
     return cols;
   };
 
-  // Komponent pojedynczego zdjęcia ("Odbitki")
   const GalleryCard = ({ item }: { item: HistoryEvent }) => (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       whileHover={{ y: -5 }}
-      // break-inside-avoid to kluczowa klasa zapobiegająca przecinaniu kart w CSS Columns (Masonry)
-      className="break-inside-avoid mb-6 md:mb-8 bg-white p-3 md:p-4 pb-6 md:pb-8 rounded-sm shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-[#4c4a1e]/5 cursor-pointer group"
-      onClick={() => openLightbox(item)}
+      className="mb-6 md:mb-8 bg-white p-3 md:p-4 pb-6 md:pb-8 rounded-sm shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-[#4c4a1e]/5 cursor-pointer group w-full min-w-0"
+      onClick={() => handleOpenLightbox(item)}
     >
       <div className="relative w-full rounded-sm overflow-hidden bg-gray-100">
-        {/* ZMIANA: Zwykły tag img, który zawsze respektuje 100% naturalne proporcje pliku! */}
         <img 
             src={getImageUrl(item.img_url)} 
             alt={item.title} 
@@ -202,19 +216,16 @@ useEffect(() => {
               </div>
             ) : (
               <>
-                {/* ========================================================= */}
-                {/* SEKCJA 1: ZANIM SIĘ SPOTKALIŚMY (UKŁAD MASONRY) */}
-                {/* ========================================================= */}
                 {beforeWeMet.length > 0 && (
                     <div className="mb-32">
                         <div className="text-center mb-16">
                             <h2 className="font-script text-5xl md:text-6xl text-[#4c4a1e] mb-4 drop-shadow-sm">Zanim się spotkaliśmy...</h2>
                             <div className="h-[1px] w-24 bg-[#4c4a1e]/30 mx-auto"></div>
                         </div>
-                        {/* ZMIANA: Układ wierszowy od lewej do prawej */}
+
                         <div className="flex gap-6 md:gap-8 items-start w-full">
                             {distributeToColumns(beforeWeMet).map((column, colIndex) => (
-                                <div key={colIndex} className="flex flex-col flex-1 gap-0">
+                                <div key={colIndex} className="flex flex-col flex-1 gap-0 min-w-0">
                                     {column.map((item) => (
                                         <GalleryCard key={item.id} item={item} />
                                     ))}
@@ -224,9 +235,6 @@ useEffect(() => {
                     </div>
                 )}
 
-                {/* ========================================================= */}
-                {/* ŁĄCZNIK / SERCE */}
-                {/* ========================================================= */}
                 {beforeWeMet.length > 0 && sharedHistory.length > 0 && (
                     <motion.div 
                         initial={{ scale: 0, opacity: 0 }}
@@ -242,19 +250,16 @@ useEffect(() => {
                     </motion.div>
                 )}
 
-                {/* ========================================================= */}
-                {/* SEKCJA 2: NASZA WSPÓLNA DROGA (UKŁAD MASONRY) */}
-                {/* ========================================================= */}
                 {sharedHistory.length > 0 && (
                     <div>
                         <div className="text-center mb-16">
                             <h2 className="font-script text-5xl md:text-6xl text-[#C97B78] mb-4 drop-shadow-sm">Nasza Wspólna Droga</h2>
                             <div className="h-[1px] w-24 bg-[#C97B78]/30 mx-auto"></div>
                         </div>
-                        {/* ZMIANA: Układ wierszowy od lewej do prawej */}
+
                         <div className="flex gap-6 md:gap-8 items-start w-full">
                             {distributeToColumns(sharedHistory).map((column, colIndex) => (
-                                <div key={colIndex} className="flex flex-col flex-1 gap-0">
+                                <div key={colIndex} className="flex flex-col flex-1 gap-0 min-w-0">
                                     {column.map((item) => (
                                         <GalleryCard key={item.id} item={item} />
                                     ))}
@@ -271,13 +276,13 @@ useEffect(() => {
 
         <Footer />
         
-        {/* PEŁNOEKRANOWA GALERIA */}
         <Lightbox
             open={lightboxOpen}
-            close={() => setLightboxOpen(false)}
+            close={handleCloseLightbox}
             index={lightboxIndex}
             slides={slides}
             carousel={{ finite: false }}
+            plugins={[Zoom]} // <--- Uruchomienie pluginu Zoom!
         />
       </div>
     </RequireGuest>

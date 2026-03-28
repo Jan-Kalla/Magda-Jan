@@ -109,16 +109,17 @@ export default function GalleryPage() {
 
                   return (
                   <motion.div key={album.id} variants={itemVariants}>
-                    <AlbumCard 
+                  <AlbumCard 
                       album={album} 
                       onClick={(clickedAlbum) => {
-                        // Tworzymy listę kodów z uprawnieniami VIP
                         const allowedCodes = ["FC3818", "8DD06D"];
                         const isVip = guest?.code && allowedCodes.includes(guest.code);
 
                         if (clickedAlbum.id === "us" && isVip) {
                           router.push("/galeria/historia");
-                        } else if (clickedAlbum.id === "moments" && isVip) {
+                        } else if (clickedAlbum.id === "moments") {
+                          // ZMIANA: Skoro użytkownik widzi ten kafel (hasAccess go przepuściło), 
+                          // to znaczy, że ma poziom 'extended' i możemy go bezpiecznie wpuścić!
                           router.push("/galeria/momenty");
                         } else {
                           setSelectedAlbum(clickedAlbum);

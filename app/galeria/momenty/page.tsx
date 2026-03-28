@@ -15,7 +15,9 @@ import { useGuest } from "@/app/context/GuestContext";
 import { useRouter } from "next/navigation";
 import { ACCESS_WEIGHTS, AccessLevel } from "@/app/galeria/data";
 
+// IMPORTY PEŁNOEKRANOWEJ GALERII ORAZ PLUGINA ZOOM
 import Lightbox from "yet-another-react-lightbox";
+import Zoom from "yet-another-react-lightbox/plugins/zoom"; 
 import "yet-another-react-lightbox/styles.css";
 
 const supabase = createClient(
@@ -70,11 +72,62 @@ export default function MomentyPage() {
 
   const [columnsCount, setColumnsCount] = useState(3);
 
+  // === OBSŁUGA STRZAŁKI WSTECZ (HISTORY API) ===
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      const st = e.state;
+      if (st?.level === 'lightbox') {
+          setLightboxOpen(true);
+      } else if (st?.level === 'folder') {
+          setLightboxOpen(false);
+          setSelectedFolder(st.folder);
+      } else {
+          setLightboxOpen(false);
+          setSelectedFolder(null);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Funkcje otwierające, które symulują "przejście" do innej strony
+  const handleOpenFolder = (folderName: string) => {
+    setSelectedFolder(folderName);
+    window.history.pushState({ level: 'folder', folder: folderName }, '');
+  };
+
+  const handleCloseFolder = () => {
+    if (window.history.state?.level === 'folder') {
+      window.history.back(); // To wyzwoli popstate
+    } else {
+      setSelectedFolder(null);
+    }
+  };
+
+  const handleOpenLightbox = (item: MediaItem) => {
+    const currentMedia = selectedFolder ? groupedMedia[selectedFolder] || [] : [];
+    const index = currentMedia.findIndex(m => m.id === item.id);
+    if (index !== -1) {
+      setLightboxIndex(index);
+      setLightboxOpen(true);
+      window.history.pushState({ level: 'lightbox', folder: selectedFolder }, '');
+    }
+  };
+
+  const handleCloseLightbox = () => {
+    if (window.history.state?.level === 'lightbox') {
+      window.history.back(); // To wyzwoli popstate i zamknie tylko lightbox
+    } else {
+      setLightboxOpen(false);
+    }
+  };
+
+  // === WYMUSZANIE 2 KOLUMN NA MOBILE ===
   useEffect(() => {
     const updateCols = () => {
       if (window.innerWidth >= 1024) setColumnsCount(3);
-      else if (window.innerWidth >= 640) setColumnsCount(2);
-      else setColumnsCount(1);
+      else setColumnsCount(2); // NIGDY 1 KOLUMNA! Zawsze co najmniej 2.
     };
     updateCols();
     window.addEventListener("resize", updateCols);
@@ -82,6 +135,7 @@ export default function MomentyPage() {
   }, []);
 
   useEffect(() => {
+    const allowedCodes = ["FC3818", "8DD06D"];
     if (guestLoading) return;
     if (!guest) {
       router.replace("/");
@@ -91,14 +145,13 @@ export default function MomentyPage() {
     const userWeight = ACCESS_WEIGHTS[userLevel] || 1;
     const requiredWeight = ACCESS_WEIGHTS['extended'];
 
-    if (userWeight < requiredWeight) {
+    if (userWeight < requiredWeight && !allowedCodes.includes(guest.code)) {
       router.replace("/galeria");
     }
   }, [guest, guestLoading, router]);
 
-useEffect(() => {
+  useEffect(() => {
     const fetchMedia = async () => {
-      // ZMIANA: Pobieramy dane bez sortowania po created_at
       const { data, error } = await supabase
         .from("gallery_media")
         .select("*")
@@ -106,7 +159,6 @@ useEffect(() => {
 
       if (data) {
         const groups: Record<string, MediaItem[]> = {};
-        
         data.forEach((item) => {
           const parts = item.url.split('/');
           let folder = "Różne"; 
@@ -117,8 +169,6 @@ useEffect(() => {
           groups[folder].push(item as MediaItem);
         });
 
-        // ZMIANA: Magiczna pętla, która wchodzi do każdego folderu 
-        // i sortuje wszystkie jego zdjęcia alfabetycznie na podstawie nazwy pliku (URL)
         Object.keys(groups).forEach(folderName => {
             groups[folderName].sort((a, b) => a.url.localeCompare(b.url));
         });
@@ -128,30 +178,24 @@ useEffect(() => {
       setLoading(false);
     };
 
-    if (guest && ACCESS_WEIGHTS[(guest.access_level as AccessLevel) || 'basic'] >= ACCESS_WEIGHTS['extended']) {
+    const allowedCodes = ["FC3818", "8DD06D"];
+    if (guest && (ACCESS_WEIGHTS[(guest.access_level as AccessLevel) || 'basic'] >= ACCESS_WEIGHTS['extended'] || allowedCodes.includes(guest.code))) {
         fetchMedia();
     }
   }, [guest]);
+
   const getImageUrl = (pathOrUrl: string) => {
     if (pathOrUrl.startsWith("http") || pathOrUrl.startsWith("/")) return pathOrUrl;
     return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/gallery/${pathOrUrl}`;
   };
 
+  const allowedCodes = ["FC3818", "8DD06D"];
   const userWeight = guest ? ACCESS_WEIGHTS[(guest.access_level as AccessLevel) || 'basic'] : 0;
-  if (!guestLoading && userWeight < ACCESS_WEIGHTS['extended']) return null;
+  if (!guestLoading && guest && userWeight < ACCESS_WEIGHTS['extended'] && !allowedCodes.includes(guest.code)) return null;
 
   const currentMedia = selectedFolder ? groupedMedia[selectedFolder] || [] : [];
   const slides = currentMedia.map(m => ({ src: getImageUrl(m.url) }));
 
-  const openLightbox = (item: MediaItem) => {
-    const index = currentMedia.findIndex(m => m.id === item.id);
-    if (index !== -1) {
-        setLightboxIndex(index);
-        setLightboxOpen(true);
-    }
-  };
-
-  // ZMIANA: Funkcja rozdzielająca zdjęcia z lewej do prawej
   const distributeToColumns = (items: MediaItem[]) => {
     const cols: MediaItem[][] = Array.from({ length: columnsCount }, () => []);
     items.forEach((item, index) => {
@@ -177,7 +221,7 @@ useEffect(() => {
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -10 }}
-                            onClick={() => setSelectedFolder(null)}
+                            onClick={handleCloseFolder}
                             className="inline-flex items-center gap-2 text-[#4E0113]/70 hover:text-[#4E0113] transition-colors font-serif italic text-lg"
                         >
                             <ChevronLeftIcon className="w-5 h-5" /> Wróć do katalogów
@@ -200,7 +244,7 @@ useEffect(() => {
                 </AnimatePresence>
             </div>
 
-            <header className="text-center mb-16 md:mb-24">
+            <header className="text-center mb-12 md:mb-24">
               <motion.h1 
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -215,7 +259,6 @@ useEffect(() => {
                 transition={{ delay: 0.1 }}
                 className="font-sans font-light text-[#4c4a1e]/80 text-base md:text-lg max-w-2xl mx-auto"
               >
-                {/* ZMIANA 2: Użycie słownika opisów z wbudowanym zabezpieczeniem na wypadek braku wpisu */}
                 {selectedFolder 
                     ? (FOLDER_DESCRIPTIONS_DICTIONARY[selectedFolder] || "Wspomnienia z tego wyjątkowego czasu.") 
                     : "Rozszerzona biblioteka naszych podróży, imprez i chwil wartych zapamiętania. Wybierz katalog, aby zobaczyć więcej."}
@@ -229,7 +272,6 @@ useEffect(() => {
             ) : (
               <AnimatePresence mode="wait">
                 
-                {/* WIDOK 1: SIATKA KATALOGÓW */}
                 {!selectedFolder && (
                     <motion.div 
                         key="folders-view"
@@ -244,7 +286,7 @@ useEffect(() => {
                             return (
                                 <div 
                                     key={folderName}
-                                    onClick={() => setSelectedFolder(folderName)}
+                                    onClick={() => handleOpenFolder(folderName)}
                                     className="group cursor-pointer"
                                 >
                                     <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-md mb-4 bg-black/5 border border-[#4c4a1e]/10">
@@ -276,26 +318,25 @@ useEffect(() => {
                     </motion.div>
                 )}
 
-                {/* WIDOK 2: ZDJĘCIA W KONKRETNYM KATALOGU (MASONRY) */}
                 {selectedFolder && (
                     <motion.div
                         key="photos-view"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        // ZMIANA: Układ wierszowy od lewej do prawej
-                        className="flex gap-6 md:gap-8 items-start w-full"
+                        // ZMIANA: ciaśniejszy gap i min-w-0, żeby 2 kolumny na telefonie się nie rozpadły
+                        className="flex gap-2 sm:gap-6 md:gap-8 items-start w-full"
                     >
                         {distributeToColumns(currentMedia).map((column, colIndex) => (
-                            <div key={colIndex} className="flex flex-col flex-1 gap-0">
+                            <div key={colIndex} className="flex flex-col flex-1 gap-0 min-w-0">
                                 {column.map((item) => (
                                     <div 
                                         key={item.id}
-                                        onClick={() => openLightbox(item)}
-                                        className="mb-6 md:mb-8 bg-white p-3 rounded-sm shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-[#4c4a1e]/5 cursor-pointer group w-full"
+                                        onClick={() => handleOpenLightbox(item)}
+                                        // ZMIANA: mniejszy padding na mobile (p-1 vs p-3)
+                                        className="mb-3 sm:mb-6 md:mb-8 bg-white p-1 sm:p-3 rounded-sm shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-[#4c4a1e]/5 cursor-pointer group w-full"
                                     >
                                         <div className="relative w-full rounded-sm overflow-hidden bg-gray-100">
-                                            {/* ZMIANA: Zwykły tag img - perfekcyjne naturalne proporcje */}
                                             <img 
                                                 src={getImageUrl(item.url)} 
                                                 alt={item.caption || "Wspomnienie"} 
@@ -305,8 +346,8 @@ useEffect(() => {
                                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500" />
                                         </div>
                                         {item.caption && (
-                                            <div className="mt-3 text-center px-2 pb-2">
-                                                <p className="font-serif italic text-[#4c4a1e]/80 text-sm">
+                                            <div className="mt-2 text-center px-1 pb-1 sm:pb-2">
+                                                <p className="font-serif italic text-[#4c4a1e]/80 text-xs sm:text-sm">
                                                     {item.caption}
                                                 </p>
                                             </div>
@@ -326,12 +367,14 @@ useEffect(() => {
 
         <Footer />
         
+        {/* PEŁNOEKRANOWA GALERIA Z ZOOMEM I PODPIĘTYM ZAMYKANIEM */}
         <Lightbox
             open={lightboxOpen}
-            close={() => setLightboxOpen(false)}
+            close={handleCloseLightbox}
             index={lightboxIndex}
             slides={slides}
             carousel={{ finite: false }}
+            plugins={[Zoom]} // <--- Uruchomienie pluginu Zoom!
         />
       </div>
     </RequireGuest>
