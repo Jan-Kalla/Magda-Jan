@@ -17,7 +17,8 @@ import { ACCESS_WEIGHTS, AccessLevel } from "@/app/galeria/data";
 
 // IMPORTY PEŁNOEKRANOWEJ GALERII ORAZ PLUGINA ZOOM
 import Lightbox from "yet-another-react-lightbox";
-import Zoom from "yet-another-react-lightbox/plugins/zoom"; 
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import Video from "yet-another-react-lightbox/plugins/video"; 
 import "yet-another-react-lightbox/styles.css";
 
 const supabase = createClient(
@@ -47,7 +48,10 @@ const FOLDER_DESCRIPTIONS_DICTIONARY: Record<string, string> = {
   "swieta": "Magiczny czas spędzony w rodzinnym gronie.",
   "wesele_pszczyna": "Zabawa do białego rana na weselu znajomych.",
   "pobliskie_wypady_2022": "Dużo się działo.",
-  "mazury_2022": "Nasze pierwsze wspólne Mazury. Może było zimno, ale za to nie było ciepło. :P"
+  "pobliskie_wypady_2023": "Dużo się zmieniło, ekipy zaczęło przybywać.",
+  "mazury_2022": "Nasze pierwsze wspólne Mazury. Może było zimno, ale za to nie było ciepło. :P",
+  "mazury_2023": "Drugie pierwsze wspólne Mazury. Załoga większa, a i pogoda dużo cieplejsza.",
+
 };
 
 const formatFolderName = (name: string) => {
@@ -194,7 +198,21 @@ export default function MomentyPage() {
   if (!guestLoading && guest && userWeight < ACCESS_WEIGHTS['extended'] && !allowedCodes.includes(guest.code)) return null;
 
   const currentMedia = selectedFolder ? groupedMedia[selectedFolder] || [] : [];
-  const slides = currentMedia.map(m => ({ src: getImageUrl(m.url) }));
+  // ZMIANA: Adaptacja formatu slajdów pod wideo w Lightboxie
+  const slides = currentMedia.map(m => {
+    if (m.type === 'video_link') {
+        return {
+            type: "video" as const,
+            sources: [
+                {
+                    src: getImageUrl(m.url),
+                    type: "video/mp4",
+                }
+            ],
+        };
+    }
+    return { src: getImageUrl(m.url) };
+  });
 
   const distributeToColumns = (items: MediaItem[]) => {
     const cols: MediaItem[][] = Array.from({ length: columnsCount }, () => []);
@@ -337,12 +355,21 @@ export default function MomentyPage() {
                                         className="mb-3 sm:mb-6 md:mb-8 bg-white p-1 sm:p-3 rounded-sm shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-[#4c4a1e]/5 cursor-pointer group w-full"
                                     >
                                         <div className="relative w-full rounded-sm overflow-hidden bg-gray-100">
-                                            <img 
-                                                src={getImageUrl(item.url)} 
-                                                alt={item.caption || "Wspomnienie"} 
-                                                loading="lazy"
-                                                className="w-full h-auto block transition-transform duration-700 group-hover:scale-[1.02]" 
-                                            />
+                                          {/* ZMIANA: Renderowanie wideo w samym widoku Masonry */}
+                                            {item.type === 'video_link' ? (
+                                                <video 
+                                                    src={getImageUrl(item.url)} 
+                                                    autoPlay loop muted playsInline
+                                                    className="w-full h-auto block transition-transform duration-700 group-hover:scale-[1.02]" 
+                                                />
+                                            ) : (
+                                                <img 
+                                                    src={getImageUrl(item.url)} 
+                                                    alt={item.caption || "Wspomnienie"} 
+                                                    loading="lazy"
+                                                    className="w-full h-auto block transition-transform duration-700 group-hover:scale-[1.02]" 
+                                                />
+                                            )}
                                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500" />
                                         </div>
                                         {item.caption && (
@@ -374,7 +401,7 @@ export default function MomentyPage() {
             index={lightboxIndex}
             slides={slides}
             carousel={{ finite: false }}
-            plugins={[Zoom]} // <--- Uruchomienie pluginu Zoom!
+            plugins={[Zoom, Video]}// <--- Uruchomienie pluginu Zoom!
         />
       </div>
     </RequireGuest>
