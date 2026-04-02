@@ -7,11 +7,6 @@ const BLOCK_SIZE = 30;
 const NO_COLS = WIDTH / BLOCK_SIZE;
 const NO_ROWS = HEIGHT / BLOCK_SIZE;
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
 // --- Stan gry ---
 let field: (string | null)[][] = createEmptyField();
 let activePiece: Piece = randomPiece();
@@ -22,7 +17,6 @@ let scoreCallback: ((score: number) => void) | null = null;
 
 let isGameOver = false;
 let gameOverFrame = 0;
-// ZMIANA: Zwiększono zapowiedzi z 2 na 3
 let nextPieces: Piece[] = [randomPiece(), randomPiece(), randomPiece()]; 
 let isPaused = false;
 
@@ -31,6 +25,12 @@ let linesClearedTotal = 0;
 
 let pieceLockCb: (() => void) | null = null;
 let lineClearCb: ((count: number) => void) | null = null;
+
+// 🚨 TARCZA ABSOLUTNA: Radar Pamięci 🚨
+let monitoredScore = 0;
+let monitoredLevel = 1;
+let hasCheated = false;
+let actionsCount = 0;
 
 // --- Pomocnicze ---
 function createEmptyField(): (string | null)[][] {
@@ -54,16 +54,13 @@ function freezePiece(piece: Piece) {
     }
   });
 
-  if (pieceLockCb) {
-    pieceLockCb();
-  }
-
+  if (pieceLockCb) pieceLockCb();
   clearLines();
 }
 
 function spawnPiece() {
-  activePiece = nextPieces.shift()!; // weź pierwszy z kolejki
-  nextPieces.push(randomPiece());    // dołóż nowy na końcu
+  activePiece = nextPieces.shift()!; 
+  nextPieces.push(randomPiece());    
 
   if (hasCollision(activePiece.positions)) {
     if (gameOverCallback) gameOverCallback(score);
@@ -84,6 +81,43 @@ export function setGameOverCallback(cb: (score: number) => void) { gameOverCallb
 export function setScoreCallback(cb: (score: number) => void) { scoreCallback = cb; }
 export function setPieceLockCallback(cb: () => void) { pieceLockCb = cb; }
 export function setLineClearCallback(cb: (count: number) => void) { lineClearCb = cb; }
+
+// 🚨 FUNKCJE ANTY-CHEAT 🚨
+export function securityCheck() {
+  // Sprawdzamy przyrosty
+  const scoreJump = score - monitoredScore;
+  const levelJump = level - monitoredLevel;
+
+  // 1. Bezwzględna kontrola wyniku (pomysł użytkownika!)
+  // Maksymalny fizycznie możliwy zdobyty wynik na raz to usunięcie 4 linii: (1200 * level)
+  if (scoreJump > 2400 * monitoredLevel) {
+    hasCheated = true;
+    console.warn(`[Anti-Cheat] Niemożliwy skok wyniku: +${scoreJump}`);
+  }
+
+  // 2. Bezwzględna kontrola poziomu
+  // Level może rosnąć tylko o 1 na raz
+  if (levelJump > 1) {
+    hasCheated = true;
+    console.warn(`[Anti-Cheat] Niemożliwy skok levelu: +${levelJump}`);
+  }
+
+  // Aktualizujemy monitor do obecnego stanu
+  monitoredScore = score;
+  monitoredLevel = level;
+}
+
+export function verifyFairPlay(finalScore: number): boolean {
+  securityCheck(); // Ostatni check przed konkluzją
+
+  // Drugi poziom zabezpieczeń (Obrona przed skryptami/botami, co do której się zgodziliśmy)
+  // Jeśli ktoś ma ponad 500 punktów, ale wcisnął klawisz zaledwie 10 razy, to kłamie.
+  if (finalScore > 1000 && actionsCount < 20) {
+    return false;
+  }
+
+  return !hasCheated;
+}
 
 // --- Czyszczenie linii i punktacja ---
 function clearLines() {
@@ -113,21 +147,24 @@ function clearLines() {
   }
 }
 
-// --- Sterowanie ---
+// --- Sterowanie (Wzbogacone o zliczanie akcji) ---
 export function moveLeft() {
   if (isGameOver || isPaused) return;
+  actionsCount++;
   const moved = activePiece.positions.map((p) => ({ x: p.x - 1, y: p.y }));
   if (!hasCollision(moved)) activePiece.positions = moved;
 }
 
 export function moveRight() {
   if (isGameOver || isPaused) return;
+  actionsCount++;
   const moved = activePiece.positions.map((p) => ({ x: p.x + 1, y: p.y }));
   if (!hasCollision(moved)) activePiece.positions = moved;
 }
 
 export function softDrop() {
   if (isGameOver || isPaused) return;
+  actionsCount++;
   const moved = activePiece.positions.map((p) => ({ x: p.x, y: p.y + 1 }));
   if (!hasCollision(moved)) {
     activePiece.positions = moved;
@@ -140,6 +177,8 @@ export function softDrop() {
 export function rotate() {
   if (isGameOver || isPaused) return;
   if (activePiece.type === "O") return;
+  actionsCount++;
+  
   const center = activePiece.positions[activePiece.center];
   const rotated = activePiece.positions.map(({ x, y }) => {
     const dx = x - center.x;
@@ -153,6 +192,8 @@ export function rotate() {
 
 export function hardDrop() {
   if (isGameOver || isPaused) return;
+  actionsCount++;
+  
   let moved = activePiece.positions.map((p) => ({ x: p.x, y: p.y }));
   while (true) {
     const next = moved.map((p) => ({ x: p.x, y: p.y + 1 }));
@@ -170,7 +211,14 @@ export function tick() {
     gameOverFrame++;
     return;
   }
-  softDrop();
+  // Grawitacja uderza sama - nie nabija to sztucznie akcji klawiatury gracza
+  const moved = activePiece.positions.map((p) => ({ x: p.x, y: p.y + 1 }));
+  if (!hasCollision(moved)) {
+    activePiece.positions = moved;
+  } else {
+    freezePiece(activePiece);
+    spawnPiece();
+  }
 }
 
 export function restartGame() {
@@ -178,8 +226,13 @@ export function restartGame() {
   score = 0;
   isGameOver = false;
   gameOverFrame = 0;
+  
+  // ZMIANA: Resetujemy też tarczę anty-cheatową
+  monitoredScore = 0;
+  monitoredLevel = 1;
+  hasCheated = false;
+  actionsCount = 0;
 
-  // ZMIANA: Resetuje z uwzględnieniem 3 zapowiedzi
   nextPieces = [randomPiece(), randomPiece(), randomPiece()];
   activePiece = nextPieces.shift()!;
   nextPieces.push(randomPiece());
@@ -194,7 +247,6 @@ export function restartGame() {
 export function render(ctx: CanvasRenderingContext2D) {
   ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
-  // ZMIANA: Rysowanie idealnej siatki pomocniczej (kratki) bezpośrednio na Canvasie
   ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
   ctx.lineWidth = 1;
   
@@ -211,7 +263,6 @@ export function render(ctx: CanvasRenderingContext2D) {
     ctx.stroke();
   }
 
-  // pole gry
   for (let y = 0; y < NO_ROWS; y++) {
     for (let x = 0; x < NO_COLS; x++) {
       const color = field[y][x];
@@ -222,12 +273,10 @@ export function render(ctx: CanvasRenderingContext2D) {
     }
   }
 
-  // aktywny klocek
   if (!isGameOver) {
     renderPiece(activePiece, ctx, BLOCK_SIZE);
   }
 
-  // komunikat Game Over
   if (isGameOver) {
     const alpha = Math.min(1, gameOverFrame / 60); 
     ctx.globalAlpha = alpha;
@@ -243,7 +292,6 @@ export function render(ctx: CanvasRenderingContext2D) {
     ctx.fillText("Press Enter to restart", WIDTH / 2, HEIGHT / 2 + 40);
   }
 
-  // overlay pauzy
   if (isPaused && !isGameOver) {
     ctx.fillStyle = "rgba(0,0,0,0.5)";
     ctx.fillRect(0, 0, WIDTH, HEIGHT);

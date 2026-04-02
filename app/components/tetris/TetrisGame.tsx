@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   tick,
   render,
@@ -17,6 +17,8 @@ import {
   getLevel,
   setLevelCallback,
   setScoreCallback,
+  securityCheck,
+  verifyFairPlay, //
 } from "./gameLogic";
 import { useGuest } from "@/app/context/GuestContext";
 import { createClient } from "@supabase/supabase-js";
@@ -38,6 +40,8 @@ const ARR = 40;
 export default function TetrisGame({ mobileLayout }: { mobileLayout?: React.ReactNode }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const { guest } = useGuest();
+
+  const [cheaterCaught, setCheaterCaught] = useState(false);
 
   const keysDown = useRef<{ [key: string]: boolean }>({});
   const lastMoveTime = useRef(0);
@@ -98,6 +102,24 @@ export default function TetrisGame({ mobileLayout }: { mobileLayout?: React.Reac
 
       const currentLevel = getLevel();
 
+      // 🚨 TARCZA BEZWZGLĘDNA 🚨
+      const isLegit = verifyFairPlay(score);
+
+      if (!isLegit) {
+        setCheaterCaught(true); // Pokazuje czerwony ekran
+        await supabase
+          .from("tetris_scores")
+          .upsert({ 
+            guest_id: guest.id, 
+            score: 0, 
+            level: 0, 
+            is_cheater: true 
+          }, { onConflict: 'guest_id' });
+          
+        return; // Zakończenie procesu bez zapisu
+      }
+
+      // === NORMALNY ZAPIS UCZCIWEGO WYNIKU ===
       const { data: existing, error: fetchError } = await supabase
         .from("tetris_scores")
         .select("id, score, level")
@@ -113,34 +135,21 @@ export default function TetrisGame({ mobileLayout }: { mobileLayout?: React.Reac
           .from("tetris_scores")
           .insert({ guest_id: guest.id, score, level: currentLevel });
           
-        if (insertError) {
-          console.error("❌ BŁĄD TWORZENIA NOWEGO REKORDU:", insertError);
-        } else {
-          console.log("✅ Dodano nowy wynik do bazy!");
-        }
+        if (insertError) console.error("❌ BŁĄD TWORZENIA NOWEGO REKORDU:", insertError);
       } else {
         const improvedScore = score > (existing.score ?? 0);
         const improvedLevel = currentLevel > (existing.level ?? 0);
 
         if (improvedScore || improvedLevel) {
-          console.log(`Pobito rekord! Próba nadpisania w bazie: ${existing.score} -> ${score}`);
-          
           const { error: updateError } = await supabase
             .from("tetris_scores")
             .update({
               score: improvedScore ? score : existing.score,
               level: improvedLevel ? currentLevel : existing.level,
             })
-            // W KOŃCU! OTO PRAWDZIWA POPRAWKA NA GUEST_ID:
             .eq("guest_id", guest.id);
 
-          if (updateError) {
-             console.error("❌ SUPABASE ODRZUCIŁ AKTUALIZACJĘ:", updateError);
-          } else {
-             console.log("✅ Wynik pomyślnie nadpisany w bazie!");
-          }
-        } else {
-          console.log(`Słaby wynik (${score}). Stary rekord to ${existing.score}. Nie zapisuję.`);
+          if (updateError) console.error("❌ SUPABASE ODRZUCIŁ AKTUALIZACJĘ:", updateError);
         }
       }
 
@@ -240,6 +249,11 @@ export default function TetrisGame({ mobileLayout }: { mobileLayout?: React.Reac
         }
       }
 
+      // 🚨 BEZWZGLĘDNY MONITOR PAMIĘCI UŻYTKOWNIKA 🚨
+      // Funkcja działa 60 razy na sekundę. Jeśli haker wpisze wynik w konsolę,
+      // gra złapie go zanim w ogóle zdąży on wrócić do okienka gry!
+      securityCheck();
+
       render(ctx);
       animationIdRef.current = requestAnimationFrame(loop);
     };
@@ -253,7 +267,28 @@ export default function TetrisGame({ mobileLayout }: { mobileLayout?: React.Reac
   }, [guest]);
 
   return (
-    <div className="flex flex-col items-center">
+    // ZMIANA: Dodano klasę 'relative', aby absolutna nakładka trzymała się wymiarów gry
+    <div className="flex flex-col items-center relative">
+      
+      {/* 🚨 NAKŁADKA HAŃBY (Zasłania grę po wykryciu oszustwa) 🚨 */}
+      {cheaterCaught && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur-md rounded-lg p-6 text-center border-2 border-[#C05454] shadow-[0_0_50px_rgba(192,84,84,0.3)]">
+          <span className="text-6xl mb-4">🕵️‍♂️</span>
+          <h2 className="font-serif text-3xl text-[#C05454] font-bold mb-4 uppercase tracking-widest">
+            Mamy Cię, Hakerze!
+          </h2>
+          <p className="text-[#FDF9EC] font-sans text-sm md:text-base leading-relaxed mb-8 max-w-[250px]">
+            Myślałeś, że tak łatwo obejdziesz system? Nie z nami takie numery! Spróbuj swoich sił w uczciwej grze.
+          </p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="bg-[#C05454] text-[#FDF9EC] px-6 py-3 rounded-xl font-bold uppercase tracking-widest hover:bg-[#4E0113] transition-colors shadow-lg"
+          >
+            Odśwież ze wstydem
+          </button>
+        </div>
+      )}
+
       <canvas
         ref={canvasRef}
         width={WIDTH}
