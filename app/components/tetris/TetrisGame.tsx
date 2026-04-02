@@ -106,20 +106,36 @@ export default function TetrisGame({ mobileLayout }: { mobileLayout?: React.Reac
       const isLegit = verifyFairPlay(score);
 
       if (!isLegit) {
-        setCheaterCaught(true); // Pokazuje czerwony ekran
-        await supabase
+        setCheaterCaught(true);
+        
+        // ZMIANA: Zamiast zawodnego 'upsert', bezpiecznie weryfikujemy istnienie rekordu
+        const { data: existingCheater } = await supabase
           .from("tetris_scores")
-          .upsert({ 
-            guest_id: guest.id, 
-            score: 0, 
-            level: 0, 
-            is_cheater: true 
-          }, { onConflict: 'guest_id' });
+          .select("id")
+          .eq("guest_id", guest.id)
+          .maybeSingle();
+
+        if (existingCheater) {
+          // Gracz grał już wcześniej uczciwie, ale teraz oszukuje -> Aktualizujemy jego wiersz
+          const { error } = await supabase
+            .from("tetris_scores")
+            .update({ score: 0, level: 0, is_cheater: true })
+            .eq("guest_id", guest.id);
+            
+          if (error) console.error("Błąd podczas oznaczania oszusta (Update):", error);
+        } else {
+          // Gracz oszukuje przy pierwszej próbie zagrania -> Tworzymy nowy wiersz
+          const { error } = await supabase
+            .from("tetris_scores")
+            .insert({ guest_id: guest.id, score: 0, level: 0, is_cheater: true });
+            
+          if (error) console.error("Błąd podczas oznaczania oszusta (Insert):", error);
+        }
           
-        return; // Zakończenie procesu bez zapisu
+        return; // Zakończenie procesu bez zapisu uczciwego wyniku
       }
 
-      // === NORMALNY ZAPIS UCZCIWEGO WYNIKU ===
+      // === NORMALNY ZAPIS UCZCIWEGO WYNIKU (Poniżej bez zmian) ===
       const { data: existing, error: fetchError } = await supabase
         .from("tetris_scores")
         .select("id, score, level")
@@ -278,7 +294,7 @@ export default function TetrisGame({ mobileLayout }: { mobileLayout?: React.Reac
             Mamy Cię, Hakerze!
           </h2>
           <p className="text-[#FDF9EC] font-sans text-sm md:text-base leading-relaxed mb-8 max-w-[250px]">
-            Myślałeś, że tak łatwo obejdziesz system? Nie z nami takie numery! Spróbuj swoich sił w uczciwej grze.
+            Myślałeś, że tak łatwo obejdziesz system? Nie z Johnym takie numery! Spróbuj swoich sił w uczciwej grze.
           </p>
           <button 
             onClick={() => window.location.reload()}
