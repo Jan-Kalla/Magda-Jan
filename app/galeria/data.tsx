@@ -71,7 +71,7 @@ export const ALBUMS: Album[] = [
   {
     id: "memes",
     title: "Komnata Memów",
-    coverImage: "/fotki/raczki.jpg", // Tu daj jakiegoś klasycznego mema
+    coverImage: "/fotki/synu_.jpg", 
     icon: <FaceSmileIcon className="w-6 h-6" />,
     isLockedFuture: false,
     requiredLevel: "vip",

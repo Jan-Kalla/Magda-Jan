@@ -82,14 +82,12 @@ export function setScoreCallback(cb: (score: number) => void) { scoreCallback = 
 export function setPieceLockCallback(cb: () => void) { pieceLockCb = cb; }
 export function setLineClearCallback(cb: (count: number) => void) { lineClearCb = cb; }
 
-// 🚨 FUNKCJE ANTY-CHEAT 🚨
+// ANTY-CHEAT
 export function securityCheck() {
-  // Sprawdzamy przyrosty
   const scoreJump = score - monitoredScore;
   const levelJump = level - monitoredLevel;
 
   // 1. Bezwzględna kontrola wyniku (pomysł użytkownika!)
-  // Maksymalny fizycznie możliwy zdobyty wynik na raz to usunięcie 4 linii: (1200 * level)
   if (scoreJump > 2400 * monitoredLevel) {
     hasCheated = true;
     console.warn(`[Anti-Cheat] Niemożliwy skok wyniku: +${scoreJump}`);
@@ -102,16 +100,14 @@ export function securityCheck() {
     console.warn(`[Anti-Cheat] Niemożliwy skok levelu: +${levelJump}`);
   }
 
-  // Aktualizujemy monitor do obecnego stanu
   monitoredScore = score;
   monitoredLevel = level;
 }
 
 export function verifyFairPlay(finalScore: number): boolean {
-  securityCheck(); // Ostatni check przed konkluzją
+  securityCheck(); 
 
   // Drugi poziom zabezpieczeń (Obrona przed skryptami/botami, co do której się zgodziliśmy)
-  // Jeśli ktoś ma ponad 500 punktów, ale wcisnął klawisz zaledwie 10 razy, to kłamie.
   if (finalScore > 1000 && actionsCount < 20) {
     return false;
   }
