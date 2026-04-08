@@ -40,6 +40,8 @@ const FOLDER_NAMES_DICTIONARY: Record<string, string> = {
   "wesele_pszczyna": "Wesele w Pszczynie",
   "czestochowa": "Częstochowa",
   "blizsze_i_dalsze_wypady_2024": "Bliższe i dalsze wypady 2024",
+  "sylwek_2024": "Sylwester 2024",
+  "bialy_dunajec_2025": "Biały Dunajec 2025",
 };
 
 // ZMIANA 1: SŁOWNIK OPISÓW FOLDERÓW
@@ -55,6 +57,9 @@ const FOLDER_DESCRIPTIONS_DICTIONARY: Record<string, string> = {
   "mazury_2023": "Drugie pierwsze wspólne Mazury. Załoga większa, a i pogoda dużo cieplejsza.",
   "imprezy_2024": "Tego roku udało nam się dużo potańczyć.",
   "narty_2024": "Nasz pierwszy, wspólny, zagraniczny wyjazd na narty - Zillertal, Austria.",
+  "sylwek_2024": "To już drugi sylwek w Brennej Leśnicy Jana i pierwszy Magdy.", // <--- DODANE
+  "mazury_2025": "Nasza już czwarta wspólna żeglarska przygoda. Tym razem na aż dwa tygodnie i w trakcie zmieniała się nam ekipa.", // <--- DODANE
+  "bialy_dunajec_2025": "Wypad na obóz akademickich duszpastersw",
 
 };
 
