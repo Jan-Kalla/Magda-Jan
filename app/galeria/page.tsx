@@ -121,6 +121,9 @@ export default function GalleryPage() {
                           // ZMIANA: Skoro użytkownik widzi ten kafel (hasAccess go przepuściło), 
                           // to znaczy, że ma poziom 'extended' i możemy go bezpiecznie wpuścić!
                           router.push("/galeria/momenty");
+                          } else if (clickedAlbum.id === "memes") {
+                          // ZMIANA: Skoro użytkownik tu wszedł (jest VIPem), wpuszczamy go do memów!
+                          router.push("/galeria/memy");
                         } else {
                           setSelectedAlbum(clickedAlbum);
                         }
