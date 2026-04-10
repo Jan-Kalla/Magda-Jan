@@ -5,7 +5,6 @@ import { StarIcon as StarSolid, PencilSquareIcon } from "@heroicons/react/24/sol
 import { StarIcon as StarOutline } from "@heroicons/react/24/outline";
 import { useState } from "react";
 
-// Definicje typów, żeby TypeScript nie narzekał
 type MediaItem = { id: string; type: 'image' | 'video_link'; url: string; caption?: string; };
 type MemeRating = { id: string; media_id: string; guest_code: string; rating: number; };
 
@@ -15,6 +14,7 @@ interface MemeGridProps {
   getImageUrl: (url: string) => string;
   handleOpenLightbox: (item: MediaItem) => void;
   showRatings: boolean;
+  showCaptions?: boolean; // <--- DODANE: Flaga do włączania opisów
   ratings?: MemeRating[];
   guestCode?: string;
   onSubmitRating?: (mediaId: string, rating: number) => void;
@@ -22,12 +22,11 @@ interface MemeGridProps {
 
 export default function MemeGrid({
   items, columnsCount, getImageUrl, handleOpenLightbox, 
-  showRatings, ratings = [], guestCode, onSubmitRating
+  showRatings, showCaptions, ratings = [], guestCode, onSubmitRating
 }: MemeGridProps) {
   
   const [ratingPanelOpen, setRatingPanelOpen] = useState<string | null>(null);
 
-  // Funkcja rozdzielająca elementy na kolumny (dla efektu Masonry)
   const distributeToColumns = (itemsToDistribute: MediaItem[]) => {
     const cols: MediaItem[][] = Array.from({ length: columnsCount }, () => []);
     itemsToDistribute.forEach((item, index) => {
@@ -47,7 +46,6 @@ export default function MemeGrid({
         {distributeToColumns(items).map((column, colIndex) => (
             <div key={colIndex} className="flex flex-col flex-1 gap-0 min-w-0">
                 {column.map((item) => {
-                    // Logika ocen (tylko jeśli showRatings jest true)
                     const memeRatings = showRatings ? ratings.filter(r => r.media_id === item.id) : [];
                     const voteCount = memeRatings.length;
                     const avgRating = voteCount > 0 
@@ -81,7 +79,14 @@ export default function MemeGrid({
                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500" />
                             </div>
 
-                            {/* SEKCJA OCENIANIA - Renderowana tylko, gdy showRatings = true */}
+                            {/* DODANE: SEKCJA OPISÓW */}
+                            {showCaptions && item.caption && (
+                                <div className="mt-3 px-2 text-sm font-sans text-[#4c4a1e]/90 leading-relaxed italic">
+                                    {item.caption}
+                                </div>
+                            )}
+
+                            {/* SEKCJA OCENIANIA */}
                             {showRatings && (
                                 <div className="mt-2 px-1 flex flex-col gap-2">
                                     <div className="flex items-center justify-between text-sm flex-wrap gap-y-2">

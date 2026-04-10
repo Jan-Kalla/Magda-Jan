@@ -33,17 +33,20 @@ type MemeRating = { id: string; media_id: string; guest_code: string; rating: nu
 // === SŁOWNIKI FOLDERÓW ===
 const FOLDER_NAMES_DICTIONARY: Record<string, string> = {
   "memy_liceum_studia": "Liceum i Studia",
-  "madziowe_koszulki": "Which type of Madzia are you today?" // <--- NOWY FOLDER!
+  "madziowe_koszulki": "Which type of Madzia are you today?", // <--- NOWY FOLDER!
+  "wlasne_memy": "Nasze autorskie memy"
 };
 
 const FOLDER_ORDER = [
   "memy_liceum_studia",
-  "madziowe_koszulki"
+  "madziowe_koszulki",
+  "wlasne_memy"
 ];
 
 const FOLDER_DESCRIPTIONS_DICTIONARY: Record<string, string> = {
-  "memy_liceum_studia": "Oto olbrzymie archiwum memów i memicznych filmików, sięgające aż do początków naszego liceum! Niektóre z nich bardzo nas śmieszą, niektóre wywołują drobny uśmiech na twarzy, a jeszcze inne może kiedyś nas śmieszyły, ale z czasem z nich wyrośliśmy. Niemniej jednak zastanawiamy się, które z nich to wy docenicie najbardziej! Każdy z poniższych obrazków/filmików możecie ocenić w skali od 1 do 10, gdzie 1 to nieśmieszny syf, niewarty nawet jednego kilobajta na dysku, a 10 to dzieło wybitnie śmieszne lub poruszające z głębokim przekazem, czy też zwyczajnie fenomenalnie absurdalne. Nie martw się, twoje oceny są anonimowe, są nam potrzebne jedynie do stworzenia średniej.",
-  "madziowe_koszulki": "Legendarna koncepcyjna seria koszulek, którą Johny zrobił Magdzie na jej 19-ste urodziny. 19 twarzy Madzi, każda mówi coś innego - znajdź tę, która najlepiej pasuje do Twojego dzisiejszego nastroju!"
+  "memy_liceum_studia": "Oto olbrzymie archiwum memów i memicznych filmików, sięgające aż do początków naszego liceum! Niektóre z nich bardzo nas śmieszą, niektóre wywołują jedynie drobny uśmiech na twarzy, a jeszcze inne może kiedyś nas śmieszyły, ale z czasem z nich wyrośliśmy. Niemniej jednak zastanawiamy się, które z nich to wy docenicie najbardziej! Każdy z poniższych obrazków/filmików możecie ocenić w skali od 1 do 10, gdzie 1 to nieśmieszny syf, niewarty nawet jednego kilobajta na dysku, a 10 to dzieło wybitnie śmieszne lub poruszające z głębokim przekazem, czy też zwyczajnie fenomenalnie absurdalne. Nie martw się, twoje oceny są anonimowe, są nam potrzebne jedynie do stworzenia średniej. Pamiętaj też, aby włączyć dźwięk, bo przy niektówych filmikach ma on kluczowe znaczenie ;)",
+  "madziowe_koszulki": "Legendarna koncepcyjna seria koszulek, którą Johny zrobił Magdzie na jej 19-ste urodziny. 19 twarzy Madzi, każda mówi coś innego - znajdź tę, która najlepiej pasuje do Twojego dzisiejszego nastroju!",
+  "wlasne_memy": "Obrazkowy zbiór naszych własnych przemyśleń, spostrzeżeń, opinii i żartów na temat rzeczywistości."
 };
 
 const formatFolderName = (name: string) => {
@@ -230,7 +233,7 @@ export default function MemyPage() {
               >
                 {selectedFolder 
                     ? (FOLDER_DESCRIPTIONS_DICTIONARY[selectedFolder] || "Kolekcja memów.") 
-                    : "Witajcie w sekcji dla koneserów sztuki nowoczesnej. Wybierz folder i baw się dobrze."}
+                    : "Witajcie w sekcji dla koneserów sztuki nowoczesnej. Memy, to dość istotny element naszej wspólnej historii, więc postanowiliśmy podzielić je na pewne kategorie."}
               </motion.p>
             </header>
 
@@ -275,8 +278,8 @@ export default function MemyPage() {
                         columnsCount={columnsCount}
                         getImageUrl={getImageUrl}
                         handleOpenLightbox={handleOpenLightbox}
-                        // ZMIANA: Oceny są włączone TYLKO dla folderu z liceum!
                         showRatings={selectedFolder === "memy_liceum_studia"}
+                        showCaptions={selectedFolder === "wlasne_memy"} // <--- DODAJ TĘ LINIJKĘ
                         ratings={ratings}
                         guestCode={guest?.code}
                         onSubmitRating={submitRating}
