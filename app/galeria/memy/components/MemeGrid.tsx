@@ -104,7 +104,7 @@ export default function MemeGrid({
                                                 className="flex items-center gap-1 text-green-700 bg-green-50 hover:bg-green-100 px-1.5 py-0.5 rounded text-xs font-medium border border-green-200 transition-colors"
                                                 title="Zmień ocenę"
                                             >
-                                                <span>Twoja: {userVote.rating}</span>
+                                                <span>Twoja ocena: {userVote.rating}</span>
                                                 <PencilSquareIcon className="w-3 h-3" />
                                             </button>
                                         ) : (

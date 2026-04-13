@@ -19,7 +19,9 @@ import { ACCESS_WEIGHTS, AccessLevel } from "@/app/galeria/data";
 import Lightbox from "yet-another-react-lightbox";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import Video from "yet-another-react-lightbox/plugins/video"; 
+import Captions from "yet-another-react-lightbox/plugins/captions"; // <--- DODANE
 import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/captions.css"; // <--- DODANE
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -238,6 +240,7 @@ export default function MomentyPage() {
     if (m.type === 'video_link') {
         return {
             type: "video" as const,
+            description: m.caption, // <--- DODANE
             sources: [
                 {
                     src: getImageUrl(m.url),
@@ -246,7 +249,10 @@ export default function MomentyPage() {
             ],
         };
     }
-    return { src: getImageUrl(m.url) };
+    return { 
+        src: getImageUrl(m.url),
+        description: m.caption // <--- DODANE
+    };
   });
 
   const distributeToColumns = (items: MediaItem[]) => {
@@ -457,7 +463,7 @@ export default function MomentyPage() {
             index={lightboxIndex}
             slides={slides}
             carousel={{ finite: false }}
-            plugins={[Zoom, Video]}// <--- Uruchomienie pluginu Zoom!
+            plugins={[Zoom, Video, Captions]}// <--- Uruchomienie pluginu Zoom!
         />
       </div>
     </RequireGuest>

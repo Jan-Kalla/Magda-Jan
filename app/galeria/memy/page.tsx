@@ -17,7 +17,9 @@ import { ACCESS_WEIGHTS, AccessLevel } from "@/app/galeria/data";
 import Lightbox from "yet-another-react-lightbox";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import Video from "yet-another-react-lightbox/plugins/video";
+import Captions from "yet-another-react-lightbox/plugins/captions"; // <--- DODANE
 import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/captions.css"; // <--- DODANE
 
 // IMPORT NASZEGO NOWEGO KOMPONENTU!
 import MemeGrid from "./components/MemeGrid";
@@ -180,8 +182,8 @@ export default function MemyPage() {
 
   const currentMedia = selectedFolder ? groupedMedia[selectedFolder] || [] : [];
   const slides = currentMedia.map(m => m.type === 'video_link' 
-    ? { type: "video" as const, sources: [{ src: getImageUrl(m.url), type: "video/mp4" }] }
-    : { src: getImageUrl(m.url) }
+    ? { type: "video" as const, sources: [{ src: getImageUrl(m.url), type: "video/mp4" }], description: m.caption }
+    : { src: getImageUrl(m.url), description: m.caption }
   );
 
   return (
@@ -292,7 +294,7 @@ export default function MemyPage() {
 
         <Footer />
         
-        <Lightbox open={lightboxOpen} close={handleCloseLightbox} index={lightboxIndex} slides={slides} carousel={{ finite: false }} plugins={[Zoom, Video]} />
+        <Lightbox open={lightboxOpen} close={handleCloseLightbox} index={lightboxIndex} slides={slides} carousel={{ finite: false }} plugins={[Zoom, Video, Captions]} />
       </div>
     </RequireGuest>
   );
