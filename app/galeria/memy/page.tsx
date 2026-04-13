@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { ChevronLeftIcon, FolderIcon, StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { StarIcon as StarOutline } from "@heroicons/react/24/outline";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useGuest } from "@/app/context/GuestContext";
 import { useRouter } from "next/navigation";
@@ -47,7 +47,7 @@ const FOLDER_ORDER = [
 ];
 
 const FOLDER_DESCRIPTIONS_DICTIONARY: Record<string, string> = {
-  "memy_liceum_studia": "Oto olbrzymie archiwum memów i memicznych filmików, sięgające aż do początków naszego liceum! Niektóre z nich bardzo nas śmieszą, niektóre wywołują jedynie drobny uśmiech na twarzy, a jeszcze inne może kiedyś nas śmieszyły, ale z czasem z nich wyrośliśmy. Niemniej jednak zastanawiamy się, które z nich to wy docenicie najbardziej! Każdy z poniższych obrazków/filmików możecie ocenić w skali od 1 do 10, gdzie 1 to nieśmieszny syf, niewarty nawet jednego kilobajta na dysku, a 10 to dzieło wybitnie śmieszne lub poruszające z głębokim przekazem, czy też zwyczajnie fenomenalnie absurdalne. Nie martw się, twoje oceny są anonimowe, są nam potrzebne jedynie do stworzenia średniej. Pamiętaj też, aby włączyć dźwięk, bo przy niektówych filmikach ma on kluczowe znaczenie ;)",
+  "memy_liceum_studia": "Oto olbrzymie archiwum memów i memicznych filmików, sięgające aż do początków naszego liceum! Niektóre z nich bardzo nas śmieszą, niektóre wywołują jedynie drobny uśmiech na twarzy, a jeszcze inne może kiedyś nas śmieszyły, ale z czasem z nich wyrośliśmy. Niemniej jednak zastanawiamy się, które z nich to wy docenicie najbardziej! Każdy z poniższych obrazków/filmików możecie ocenić w skali od 1 do 10, gdzie 1 to nieśmieszny syf, niewarty nawet jednego kilobajta na dysku, a 10 to dzieło wybitnie śmieszne lub poruszające z głębokim przekazem, czy też zwyczajnie fenomenalnie absurdalne. Nie martw się, twoje oceny są anonimowe, są nam potrzebne jedynie do stworzenia średniej. Pamiętaj też, aby włączyć dźwięk, bo przy niektórych filmikach ma on kluczowe znaczenie ;)",
   "madziowe_koszulki": "Legendarna koncepcyjna seria koszulek, którą Johny zrobił Magdzie na jej 19-ste urodziny. 19 twarzy Madzi, każda mówi coś innego - znajdź tę, która najlepiej pasuje do Twojego dzisiejszego nastroju!",
   "wlasne_memy": "Obrazkowy zbiór naszych własnych przemyśleń, spostrzeżeń, opinii i żartów na temat rzeczywistości."
 };
@@ -157,7 +157,7 @@ export default function MemyPage() {
     }
   }, [guest]);
 
-  const submitRating = async (mediaId: string, ratingValue: number) => {
+  const submitRating = useCallback(async (mediaId: string, ratingValue: number) => {
     if (!guest) return;
     const { data, error } = await supabase
         .from("meme_ratings")
@@ -170,7 +170,7 @@ export default function MemyPage() {
             return [...filtered, data[0] as MemeRating];
         });
     }
-  };
+  }, [guest]);
 
   const getImageUrl = (pathOrUrl: string) => {
     if (pathOrUrl.startsWith("http") || pathOrUrl.startsWith("/")) return pathOrUrl;
@@ -182,6 +182,7 @@ export default function MemyPage() {
   if (!guestLoading && guest && userWeight < ACCESS_WEIGHTS['vip'] && !allowedCodes.includes(guest.code)) return null;
 
   const currentMedia = selectedFolder ? groupedMedia[selectedFolder] || [] : [];
+  const isMemesFolder = selectedFolder === "memy_liceum_studia";
   
   const slides = currentMedia.map(m => {
       const slideBase = {
@@ -192,15 +193,46 @@ export default function MemyPage() {
       if (m.type === 'video_link') {
           return {
               ...slideBase,
-              type: "video" as const,
-              sources: [{ src: getImageUrl(m.url), type: "video/mp4" }],
+              type: isMemesFolder ? "meme-video" : "video" as const, 
+              src: getImageUrl(m.url),
+              sources: [{ src: getImageUrl(m.url), type: "video/mp4" }], 
           };
       }
       return { 
           ...slideBase,
+          type: isMemesFolder ? "meme-image" : "image",
           src: getImageUrl(m.url) 
       };
   });
+
+  useEffect(() => {
+    if (!lightboxOpen || !isMemesFolder) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+      let ratingValue: number | null = null;
+
+      if (e.key >= '1' && e.key <= '9') {
+        ratingValue = parseInt(e.key, 10);
+      } else if (e.key === '0') {
+        ratingValue = 10;
+      }
+
+      if (ratingValue !== null) {
+        const currentSlide = slides[lightboxIndex] as any;
+        if (currentSlide && currentSlide.id) {
+          submitRating(currentSlide.id, ratingValue);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [lightboxOpen, lightboxIndex, slides, isMemesFolder, submitRating]);
 
   return (
     <RequireGuest>
@@ -296,7 +328,7 @@ export default function MemyPage() {
                         columnsCount={columnsCount}
                         getImageUrl={getImageUrl}
                         handleOpenLightbox={handleOpenLightbox}
-                        showRatings={selectedFolder === "memy_liceum_studia"}
+                        showRatings={isMemesFolder}
                         showCaptions={selectedFolder === "wlasne_memy"} 
                         ratings={ratings}
                         guestCode={guest?.code}
@@ -313,57 +345,112 @@ export default function MemyPage() {
         <Lightbox 
             open={lightboxOpen} 
             close={handleCloseLightbox} 
-            index={lightboxIndex} 
-            slides={slides} 
+            index={lightboxIndex}
+            on={{ view: ({ index: currentIndex }) => setLightboxIndex(currentIndex) }} 
+            slides={slides as any[]} 
             carousel={{ finite: false }} 
             plugins={[Zoom, Video, Captions]} 
             render={{
-                slideFooter: ({ slide }) => {
-                    // ROZWIĄZANIE BŁĘDU TYPESCRIPT: Rzutowanie na 'any', aby TS przestał krzyczeć o braku 'id'
-                    const slideId = (slide as any).id;
+                slide: ({ slide }) => {
+                    if (!isMemesFolder) return undefined; 
 
-                    if (selectedFolder !== "memy_liceum_studia" || !slideId) return null;
+                    const slideId = (slide as any).id;
+                    const sType = (slide as any).type;
+                    if (!slideId) return undefined;
 
                     const memeRatings = ratings.filter(r => r.media_id === slideId);
                     const voteCount = memeRatings.length;
-                    const avgRating = voteCount > 0 
-                        ? (memeRatings.reduce((sum, r) => sum + r.rating, 0) / voteCount).toFixed(1) 
-                        : null;
+                    const avgRating = voteCount > 0 ? (memeRatings.reduce((sum, r) => sum + r.rating, 0) / voteCount).toFixed(1) : null;
                     const userVote = guest ? memeRatings.find(r => r.guest_code === guest.code) : null;
 
                     return (
-                        <div className="flex flex-col items-center gap-3 pb-6 pt-2 bg-black/60 backdrop-blur-md px-4">
-                            <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-1.5 text-white font-bold text-lg">
-                                    {avgRating ? <StarSolid className="w-5 h-5 text-yellow-500" /> : <StarOutline className="w-5 h-5 text-white/30" />}
-                                    <span>{avgRating ? `${avgRating}/10` : 'Brak ocen'}</span>
-                                    <span className="text-white/50 font-normal text-sm ml-1">({voteCount})</span>
-                                </div>
-                                
-                                {userVote && (
-                                    <div className="flex items-center gap-1 text-green-400 bg-green-900/40 px-3 py-1 rounded-full text-sm font-medium border border-green-500/30">
-                                        Twoja ocena: {userVote.rating}
-                                    </div>
-                                )}
+                        <div className="relative flex items-center justify-center h-full w-full overflow-hidden">
+                            
+                            {/* ZMIANA: Podpowiedź o użyciu klawiatury. Ukryta na telefonach, widoczna na md+ */}
+                            <div className="hidden md:flex absolute top-4 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md px-5 py-2 rounded-full text-white/80 text-sm font-medium tracking-wide z-[100] border border-white/10 shadow-lg pointer-events-none">
+                                💡 Możesz użyć klawiszy 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 aby szybko ocenić mema (0 reprezentuje 10)
                             </div>
 
-                            <div className="flex flex-wrap gap-1.5 justify-center">
-                                {[1,2,3,4,5,6,7,8,9,10].map(num => (
-                                    <button
-                                        key={num}
-                                        onClick={(e) => {
-                                            e.stopPropagation(); 
-                                            submitRating(slideId as string, num);
-                                        }}
-                                        className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-sm rounded-lg transition-all border
-                                            ${userVote?.rating === num 
-                                                ? 'bg-[#C97B78] text-white border-[#C97B78] scale-110 shadow-lg' 
-                                                : 'bg-white/10 border-white/20 text-white hover:bg-white/30 hover:scale-105'
-                                            }`}
-                                    >
-                                        {num}
-                                    </button>
-                                ))}
+                            <div className="relative flex flex-col md:flex-row items-center justify-center gap-4 max-w-full max-h-full px-2 md:px-10 pb-20 md:pb-0">
+                                <div className="flex items-center justify-center min-w-0 min-h-0 max-h-full max-w-full">
+                                    {sType === "meme-video" ? (
+                                        <video 
+                                            controls autoPlay loop playsInline 
+                                            className="max-h-[85vh] max-w-full object-contain rounded-md shadow-lg"
+                                            src={(slide as any).src} 
+                                        />
+                                    ) : (
+                                        <img 
+                                            className="max-h-[85vh] max-w-full object-contain rounded-md shadow-lg"
+                                            src={(slide as any).src} 
+                                            alt={(slide as any).description || "Meme"}
+                                        />
+                                    )}
+                                </div>
+
+                                <div className="hidden md:flex flex-col items-center gap-2 p-3 py-6 bg-black/60 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl shrink-0 h-fit">
+                                    <div className="flex flex-col items-center gap-1 mb-2">
+                                        <div className="flex flex-col items-center gap-0.5 text-white font-bold text-sm lg:text-base drop-shadow-md">
+                                            {avgRating ? <StarSolid className="w-5 h-5 text-yellow-400" /> : <StarOutline className="w-5 h-5 text-white/50" />}
+                                            <span>{avgRating ? `${avgRating}/10` : 'Brak'}</span>
+                                            <span className="text-white/60 font-normal text-[10px] lg:text-xs">({voteCount})</span>
+                                        </div>
+                                        
+                                        {userVote && (
+                                            <div className="flex items-center gap-1 mt-1 text-green-400 bg-green-950/80 px-2 py-0.5 rounded-full text-[10px] lg:text-xs font-medium border border-green-500/50 shadow-lg whitespace-nowrap">
+                                                Twoja ocena: {userVote.rating}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="flex flex-col gap-1 lg:gap-1.5 w-full items-center">
+                                        {[1,2,3,4,5,6,7,8,9,10].map(num => (
+                                            <button
+                                                key={num}
+                                                onClick={(e) => { e.stopPropagation(); submitRating(slideId as string, num); }}
+                                                className={`w-8 h-8 lg:w-10 lg:h-10 flex items-center justify-center text-xs lg:text-sm font-semibold rounded-lg transition-all border
+                                                    ${userVote?.rating === num 
+                                                        ? 'bg-[#C97B78] text-white border-[#C97B78] scale-110 shadow-lg' 
+                                                        : 'bg-black/50 border-white/20 text-white hover:bg-white/20 hover:scale-105 backdrop-blur-md'
+                                                    }`}
+                                            >
+                                                {num}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex md:hidden absolute bottom-14 left-0 w-full flex-col items-center gap-2 pb-4 pt-8 bg-gradient-to-t from-black via-black/80 to-transparent z-[9999] pointer-events-auto">
+                                <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-1.5 text-white font-bold text-base sm:text-lg drop-shadow-md">
+                                        {avgRating ? <StarSolid className="w-5 h-5 text-yellow-400" /> : <StarOutline className="w-5 h-5 text-white/50" />}
+                                        <span>{avgRating ? `${avgRating}/10` : 'Brak'}</span>
+                                        <span className="text-white/60 font-normal text-xs sm:text-sm ml-1">({voteCount})</span>
+                                    </div>
+                                    
+                                    {userVote && (
+                                        <div className="flex items-center gap-1 text-green-400 bg-green-950/80 px-3 py-1 rounded-full text-xs sm:text-sm font-medium border border-green-500/50 shadow-lg whitespace-nowrap">
+                                            Twoja ocena: {userVote.rating}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center max-w-md mx-auto px-2 mt-1">
+                                    {[1,2,3,4,5,6,7,8,9,10].map(num => (
+                                        <button
+                                            key={num}
+                                            onClick={(e) => { e.stopPropagation(); submitRating(slideId as string, num); }}
+                                            className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-xs sm:text-sm font-semibold rounded-lg transition-all border
+                                                ${userVote?.rating === num 
+                                                    ? 'bg-[#C97B78] text-white border-[#C97B78] scale-110 shadow-lg' 
+                                                    : 'bg-black/50 border-white/20 text-white hover:bg-white/20 hover:scale-105 backdrop-blur-md'
+                                                }`}
+                                        >
+                                            {num}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     );
