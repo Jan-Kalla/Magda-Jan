@@ -7,7 +7,8 @@ import RequireGuest from "@/app/components/RequireGuest";
 import CustomCursor from "@/app/components/CustomCursor";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { ChevronLeftIcon, FolderIcon } from "@heroicons/react/24/solid";
+import { ChevronLeftIcon, FolderIcon, StarIcon as StarSolid } from "@heroicons/react/24/solid";
+import { StarIcon as StarOutline } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useGuest } from "@/app/context/GuestContext";
@@ -17,9 +18,9 @@ import { ACCESS_WEIGHTS, AccessLevel } from "@/app/galeria/data";
 import Lightbox from "yet-another-react-lightbox";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import Video from "yet-another-react-lightbox/plugins/video";
-import Captions from "yet-another-react-lightbox/plugins/captions"; // <--- DODANE
+import Captions from "yet-another-react-lightbox/plugins/captions"; 
 import "yet-another-react-lightbox/styles.css";
-import "yet-another-react-lightbox/plugins/captions.css"; // <--- DODANE
+import "yet-another-react-lightbox/plugins/captions.css"; 
 
 // IMPORT NASZEGO NOWEGO KOMPONENTU!
 import MemeGrid from "./components/MemeGrid";
@@ -35,7 +36,7 @@ type MemeRating = { id: string; media_id: string; guest_code: string; rating: nu
 // === SŁOWNIKI FOLDERÓW ===
 const FOLDER_NAMES_DICTIONARY: Record<string, string> = {
   "memy_liceum_studia": "Liceum i Studia",
-  "madziowe_koszulki": "Which type of Madzia are you today?", // <--- NOWY FOLDER!
+  "madziowe_koszulki": "Which type of Madzia are you today?", 
   "wlasne_memy": "Nasze autorskie memy"
 };
 
@@ -181,10 +182,25 @@ export default function MemyPage() {
   if (!guestLoading && guest && userWeight < ACCESS_WEIGHTS['vip'] && !allowedCodes.includes(guest.code)) return null;
 
   const currentMedia = selectedFolder ? groupedMedia[selectedFolder] || [] : [];
-  const slides = currentMedia.map(m => m.type === 'video_link' 
-    ? { type: "video" as const, sources: [{ src: getImageUrl(m.url), type: "video/mp4" }], description: m.caption }
-    : { src: getImageUrl(m.url), description: m.caption }
-  );
+  
+  const slides = currentMedia.map(m => {
+      const slideBase = {
+          id: m.id,
+          description: m.caption,
+      };
+
+      if (m.type === 'video_link') {
+          return {
+              ...slideBase,
+              type: "video" as const,
+              sources: [{ src: getImageUrl(m.url), type: "video/mp4" }],
+          };
+      }
+      return { 
+          ...slideBase,
+          src: getImageUrl(m.url) 
+      };
+  });
 
   return (
     <RequireGuest>
@@ -281,7 +297,7 @@ export default function MemyPage() {
                         getImageUrl={getImageUrl}
                         handleOpenLightbox={handleOpenLightbox}
                         showRatings={selectedFolder === "memy_liceum_studia"}
-                        showCaptions={selectedFolder === "wlasne_memy"} // <--- DODAJ TĘ LINIJKĘ
+                        showCaptions={selectedFolder === "wlasne_memy"} 
                         ratings={ratings}
                         guestCode={guest?.code}
                         onSubmitRating={submitRating}
@@ -294,7 +310,66 @@ export default function MemyPage() {
 
         <Footer />
         
-        <Lightbox open={lightboxOpen} close={handleCloseLightbox} index={lightboxIndex} slides={slides} carousel={{ finite: false }} plugins={[Zoom, Video, Captions]} />
+        <Lightbox 
+            open={lightboxOpen} 
+            close={handleCloseLightbox} 
+            index={lightboxIndex} 
+            slides={slides} 
+            carousel={{ finite: false }} 
+            plugins={[Zoom, Video, Captions]} 
+            render={{
+                slideFooter: ({ slide }) => {
+                    // ROZWIĄZANIE BŁĘDU TYPESCRIPT: Rzutowanie na 'any', aby TS przestał krzyczeć o braku 'id'
+                    const slideId = (slide as any).id;
+
+                    if (selectedFolder !== "memy_liceum_studia" || !slideId) return null;
+
+                    const memeRatings = ratings.filter(r => r.media_id === slideId);
+                    const voteCount = memeRatings.length;
+                    const avgRating = voteCount > 0 
+                        ? (memeRatings.reduce((sum, r) => sum + r.rating, 0) / voteCount).toFixed(1) 
+                        : null;
+                    const userVote = guest ? memeRatings.find(r => r.guest_code === guest.code) : null;
+
+                    return (
+                        <div className="flex flex-col items-center gap-3 pb-6 pt-2 bg-black/60 backdrop-blur-md px-4">
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-1.5 text-white font-bold text-lg">
+                                    {avgRating ? <StarSolid className="w-5 h-5 text-yellow-500" /> : <StarOutline className="w-5 h-5 text-white/30" />}
+                                    <span>{avgRating ? `${avgRating}/10` : 'Brak ocen'}</span>
+                                    <span className="text-white/50 font-normal text-sm ml-1">({voteCount})</span>
+                                </div>
+                                
+                                {userVote && (
+                                    <div className="flex items-center gap-1 text-green-400 bg-green-900/40 px-3 py-1 rounded-full text-sm font-medium border border-green-500/30">
+                                        Twoja ocena: {userVote.rating}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex flex-wrap gap-1.5 justify-center">
+                                {[1,2,3,4,5,6,7,8,9,10].map(num => (
+                                    <button
+                                        key={num}
+                                        onClick={(e) => {
+                                            e.stopPropagation(); 
+                                            submitRating(slideId as string, num);
+                                        }}
+                                        className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-sm rounded-lg transition-all border
+                                            ${userVote?.rating === num 
+                                                ? 'bg-[#C97B78] text-white border-[#C97B78] scale-110 shadow-lg' 
+                                                : 'bg-white/10 border-white/20 text-white hover:bg-white/30 hover:scale-105'
+                                            }`}
+                                    >
+                                        {num}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                }
+            }}
+        />
       </div>
     </RequireGuest>
   );
