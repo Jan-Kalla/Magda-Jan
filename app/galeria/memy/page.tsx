@@ -22,7 +22,6 @@ import Captions from "yet-another-react-lightbox/plugins/captions";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/captions.css"; 
 
-// IMPORT NASZEGO NOWEGO KOMPONENTU!
 import MemeGrid from "./components/MemeGrid";
 
 const supabase = createClient(
@@ -33,7 +32,6 @@ const supabase = createClient(
 type MediaItem = { id: string; type: 'image' | 'video_link'; url: string; subfolder?: string; caption?: string; };
 type MemeRating = { id: string; media_id: string; guest_code: string; rating: number; };
 
-// === SŁOWNIKI FOLDERÓW ===
 const FOLDER_NAMES_DICTIONARY: Record<string, string> = {
   "memy_liceum_studia": "Liceum i Studia",
   "madziowe_koszulki": "Which type of Madzia are you today?", 
@@ -75,25 +73,44 @@ export default function MemyPage() {
     if (selectedFolder) window.scrollTo({ top: 0, behavior: "smooth" });
   }, [selectedFolder]);
 
+  // ZABEZPIECZENIE HISTORII: Oczyszczanie "Ghost states" na starcie 
   useEffect(() => {
+    if (window.history.state?.level) {
+        window.history.replaceState({ ...window.history.state, level: undefined, folder: undefined }, '');
+    }
+
     const handlePopState = (e: PopStateEvent) => {
       const st = e.state;
-      if (st?.level === 'lightbox') setLightboxOpen(true);
-      else if (st?.level === 'folder') { setLightboxOpen(false); setSelectedFolder(st.folder); } 
-      else { setLightboxOpen(false); setSelectedFolder(null); }
+      if (st?.level === 'lightbox') {
+        if (st.folder) setSelectedFolder(st.folder);
+        setLightboxOpen(true);
+      } else if (st?.level === 'folder') {
+        setLightboxOpen(false);
+        setSelectedFolder(st.folder);
+      } else {
+        setLightboxOpen(false);
+        setSelectedFolder(null);
+      }
     };
+    
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  // Poprawione, kuloodporne funkcje nawigacji
   const handleOpenFolder = (folderName: string) => {
     setSelectedFolder(folderName);
-    window.history.pushState({ level: 'folder', folder: folderName }, '');
+    if (window.history.state?.level !== 'folder') {
+        window.history.pushState({ ...window.history.state, level: 'folder', folder: folderName }, '');
+    }
   };
 
   const handleCloseFolder = () => {
-    if (window.history.state?.level === 'folder') window.history.back();
-    else setSelectedFolder(null);
+    setLightboxOpen(false); // Wymuś błyskawiczne zamknięcie na poziomie Reacta
+    setSelectedFolder(null); 
+    if (window.history.state?.level === 'folder' || window.history.state?.level === 'lightbox') {
+        window.history.back();
+    }
   };
 
   const handleOpenLightbox = (item: MediaItem) => {
@@ -102,13 +119,17 @@ export default function MemyPage() {
     if (index !== -1) {
       setLightboxIndex(index);
       setLightboxOpen(true);
-      window.history.pushState({ level: 'lightbox', folder: selectedFolder }, '');
+      if (window.history.state?.level !== 'lightbox') {
+          window.history.pushState({ ...window.history.state, level: 'lightbox', folder: selectedFolder }, '');
+      }
     }
   };
 
   const handleCloseLightbox = () => {
-    if (window.history.state?.level === 'lightbox') window.history.back();
-    else setLightboxOpen(false);
+    setLightboxOpen(false); // Wymuś błyskawiczne zamknięcie
+    if (window.history.state?.level === 'lightbox') {
+        window.history.back();
+    }
   };
 
   useEffect(() => {
@@ -344,14 +365,14 @@ export default function MemyPage() {
         
         <Lightbox 
             open={lightboxOpen} 
-            close={handleCloseLightbox} 
+            close={handleCloseLightbox} // Używamy nowej, bezpieczniejszej funkcji zamykania
             index={lightboxIndex}
             on={{ view: ({ index: currentIndex }) => setLightboxIndex(currentIndex) }} 
             slides={slides as any[]} 
             carousel={{ finite: false }} 
             plugins={[Zoom, Video, Captions]} 
             render={{
-                slide: ({ slide }) => {
+                slide: ({ slide, offset }) => {
                     if (!isMemesFolder) return undefined; 
 
                     const slideId = (slide as any).id;
@@ -366,7 +387,6 @@ export default function MemyPage() {
                     return (
                         <div className="relative flex items-center justify-center h-full w-full overflow-hidden">
                             
-                            {/* ZMIANA: Podpowiedź o użyciu klawiatury. Ukryta na telefonach, widoczna na md+ */}
                             <div className="hidden md:flex absolute top-4 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md px-5 py-2 rounded-full text-white/80 text-sm font-medium tracking-wide z-[100] border border-white/10 shadow-lg pointer-events-none">
                                 💡 Możesz użyć klawiszy 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 aby szybko ocenić mema (0 reprezentuje 10)
                             </div>
@@ -375,9 +395,21 @@ export default function MemyPage() {
                                 <div className="flex items-center justify-center min-w-0 min-h-0 max-h-full max-w-full">
                                     {sType === "meme-video" ? (
                                         <video 
-                                            controls autoPlay loop playsInline 
+                                            controls 
+                                            loop 
+                                            playsInline 
                                             className="max-h-[85vh] max-w-full object-contain rounded-md shadow-lg"
-                                            src={(slide as any).src} 
+                                            src={(slide as any).src}
+                                            ref={(videoElement) => {
+                                                if (videoElement) {
+                                                    if (offset === 0) {
+                                                        videoElement.play().catch(() => {});
+                                                    } else {
+                                                        videoElement.pause();
+                                                        videoElement.currentTime = 0;
+                                                    }
+                                                }
+                                            }}
                                         />
                                     ) : (
                                         <img 
