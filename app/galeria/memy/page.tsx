@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { ChevronLeftIcon, FolderIcon, StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { StarIcon as StarOutline } from "@heroicons/react/24/outline";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useGuest } from "@/app/context/GuestContext";
 import { useRouter } from "next/navigation";
@@ -55,6 +55,44 @@ const formatFolderName = (name: string) => {
   return name.replace(/[_-]/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
+// ==========================================
+// NOWY, ODPORNY NA BŁĘDY KOMPONENT WIDEO
+// ==========================================
+function MemeVideoPlayer({ src, offset }: { src: string; offset: number }) {
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        if (offset === 0) {
+            const timer = setTimeout(() => {
+                const playPromise = video.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(() => { /* Ciche łapanie błędów przeglądarki przy autoodtwarzaniu */ });
+                }
+            }, 50);
+            return () => clearTimeout(timer);
+        } else {
+            video.pause();
+            video.currentTime = 0;
+        }
+    }, [offset]);
+
+    return (
+        <video 
+            ref={videoRef}
+            controls 
+            loop 
+            playsInline 
+            preload={offset === 0 ? "auto" : "metadata"}
+            className="max-h-[85vh] max-w-full object-contain rounded-md shadow-lg"
+            src={src}
+        />
+    );
+}
+// ==========================================
+
 export default function MemyPage() {
   const { guest, loading: guestLoading } = useGuest();
   const router = useRouter();
@@ -73,7 +111,6 @@ export default function MemyPage() {
     if (selectedFolder) window.scrollTo({ top: 0, behavior: "smooth" });
   }, [selectedFolder]);
 
-  // ZABEZPIECZENIE HISTORII: Oczyszczanie "Ghost states" na starcie 
   useEffect(() => {
     if (window.history.state?.level) {
         window.history.replaceState({ ...window.history.state, level: undefined, folder: undefined }, '');
@@ -97,7 +134,6 @@ export default function MemyPage() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Poprawione, kuloodporne funkcje nawigacji
   const handleOpenFolder = (folderName: string) => {
     setSelectedFolder(folderName);
     if (window.history.state?.level !== 'folder') {
@@ -106,7 +142,7 @@ export default function MemyPage() {
   };
 
   const handleCloseFolder = () => {
-    setLightboxOpen(false); // Wymuś błyskawiczne zamknięcie na poziomie Reacta
+    setLightboxOpen(false); 
     setSelectedFolder(null); 
     if (window.history.state?.level === 'folder' || window.history.state?.level === 'lightbox') {
         window.history.back();
@@ -126,7 +162,7 @@ export default function MemyPage() {
   };
 
   const handleCloseLightbox = () => {
-    setLightboxOpen(false); // Wymuś błyskawiczne zamknięcie
+    setLightboxOpen(false); 
     if (window.history.state?.level === 'lightbox') {
         window.history.back();
     }
@@ -365,7 +401,7 @@ export default function MemyPage() {
         
         <Lightbox 
             open={lightboxOpen} 
-            close={handleCloseLightbox} // Używamy nowej, bezpieczniejszej funkcji zamykania
+            close={handleCloseLightbox} 
             index={lightboxIndex}
             on={{ view: ({ index: currentIndex }) => setLightboxIndex(currentIndex) }} 
             slides={slides as any[]} 
@@ -394,23 +430,7 @@ export default function MemyPage() {
                             <div className="relative flex flex-col md:flex-row items-center justify-center gap-4 max-w-full max-h-full px-2 md:px-10 pb-20 md:pb-0">
                                 <div className="flex items-center justify-center min-w-0 min-h-0 max-h-full max-w-full">
                                     {sType === "meme-video" ? (
-                                        <video 
-                                            controls 
-                                            loop 
-                                            playsInline 
-                                            className="max-h-[85vh] max-w-full object-contain rounded-md shadow-lg"
-                                            src={(slide as any).src}
-                                            ref={(videoElement) => {
-                                                if (videoElement) {
-                                                    if (offset === 0) {
-                                                        videoElement.play().catch(() => {});
-                                                    } else {
-                                                        videoElement.pause();
-                                                        videoElement.currentTime = 0;
-                                                    }
-                                                }
-                                            }}
-                                        />
+                                        <MemeVideoPlayer src={(slide as any).src} offset={offset} />
                                     ) : (
                                         <img 
                                             className="max-h-[85vh] max-w-full object-contain rounded-md shadow-lg"
@@ -436,7 +456,8 @@ export default function MemyPage() {
                                     </div>
 
                                     <div className="flex flex-col gap-1 lg:gap-1.5 w-full items-center">
-                                        {[1,2,3,4,5,6,7,8,9,10].map(num => (
+                                        {/* ZMIANA: Przyciski są teraz generowane w odwrotnej kolejności (10 na górze, 1 na dole) */}
+                                        {[10,9,8,7,6,5,4,3,2,1].map(num => (
                                             <button
                                                 key={num}
                                                 onClick={(e) => { e.stopPropagation(); submitRating(slideId as string, num); }}
@@ -469,7 +490,8 @@ export default function MemyPage() {
                                 </div>
 
                                 <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center max-w-md mx-auto px-2 mt-1">
-                                    {[1,2,3,4,5,6,7,8,9,10].map(num => (
+                                    {/* ZMIANA: Tutaj również odwracamy kolejność przycisków na widoku mobilnym */}
+                                    {[10,9,8,7,6,5,4,3,2,1].map(num => (
                                         <button
                                             key={num}
                                             onClick={(e) => { e.stopPropagation(); submitRating(slideId as string, num); }}

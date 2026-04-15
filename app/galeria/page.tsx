@@ -124,6 +124,8 @@ export default function GalleryPage() {
                           } else if (clickedAlbum.id === "memes") {
                           // ZMIANA: Skoro użytkownik tu wszedł (jest VIPem), wpuszczamy go do memów!
                           router.push("/galeria/memy");
+                          } else if (clickedAlbum.id === "cringe") {
+                          router.push("/galeria/archiwum-x");
                         } else {
                           setSelectedAlbum(clickedAlbum);
                         }
