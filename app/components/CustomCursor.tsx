@@ -12,6 +12,9 @@ export default function CustomCursor() {
   const [isClicking, setIsClicking] = useState(false);
   const [isPulseLarge, setIsPulseLarge] = useState(false);
   
+  // NOWY STAN: Czy pełny ekran (Lightbox) jest otwarty?
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false); 
+  
   const [isTouch, setIsTouch] = useState(false);
   const isLargeRef = useRef(false);
   
@@ -29,6 +32,19 @@ export default function CustomCursor() {
 
     if (isDeviceTouch) return;
 
+    // --- DETEKCJA OTWARTEGO LIGHTBOXA ---
+    // Obserwujemy całe body. Kiedy biblioteka Lightboxa tworzy swój overlay (o klasie yarl__portal),
+    // my natychmiast to wykrywamy i aktualizujemy stan.
+    const observer = new MutationObserver(() => {
+      const lightboxExists = document.querySelector('.yarl__portal') !== null;
+      setIsLightboxOpen(lightboxExists);
+    });
+    
+    observer.observe(document.body, { childList: true, subtree: true });
+    // Początkowe sprawdzenie (na wypadek, gdyby komponent zamontował się, gdy lightbox już jest)
+    setIsLightboxOpen(document.querySelector('.yarl__portal') !== null);
+    // ------------------------------------
+
     const checkHoverState = (clientX: number, clientY: number, targetElement?: HTMLElement) => {
       const el = targetElement || (document.elementFromPoint(clientX, clientY) as HTMLElement);
       if (el) {
@@ -45,7 +61,13 @@ export default function CustomCursor() {
       checkHoverState(e.clientX, e.clientY, e.target as HTMLElement);
     };
 
-    // Logika samej animacji naciśnięcia
+    const handleMouseOut = (e: MouseEvent) => {
+      // Jeśli myszka wyjedzie poza okno przeglądarki (lub wejdzie w niewidzialny iframe)
+      if (!e.relatedTarget) {
+        setIsVisible(false);
+      }
+    };
+
     const handleMouseDown = () => setIsClicking(true);
     
     const handleMouseUp = (e: MouseEvent) => {
@@ -56,11 +78,14 @@ export default function CustomCursor() {
     };
 
     window.addEventListener("mousemove", moveCursor);
+    window.addEventListener("mouseout", handleMouseOut); // Dodany nasłuchiwacz wyjścia
     window.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("mouseup", handleMouseUp);
     
     return () => {
+      observer.disconnect(); // Odpinamy obserwatora przy czyszczeniu
       window.removeEventListener("mousemove", moveCursor);
+      window.removeEventListener("mouseout", handleMouseOut);
       window.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("mouseup", handleMouseUp);
     };
@@ -84,6 +109,11 @@ export default function CustomCursor() {
 
   if (isTouch) return null;
 
+  // MAGIA: Jeśli Lightbox jest otwarty, całkowicie dezaktywujemy ten komponent.
+  // Zniknie świnka i usunie się wymuszenie 'cursor: none', dzięki czemu 
+  // myszka zacznie zachowywać się w 100% standardowo!
+  if (isLightboxOpen) return null;
+
   return (
     <>
       <style jsx global>{`
@@ -96,10 +126,9 @@ export default function CustomCursor() {
 
       <motion.div
         className="fixed top-0 left-0 pointer-events-none z-[999999]"
-        style={{
-          x,
-          y,
-        }}
+        style={{ x, y }}
+        animate={{ opacity: isVisible ? 1 : 0 }}
+        transition={{ duration: 0.15 }}
       >
         <motion.div
           className="origin-top-left"

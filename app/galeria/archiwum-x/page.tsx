@@ -8,7 +8,7 @@ import CustomCursor from "@/app/components/CustomCursor";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { ChevronLeftIcon, PlayCircleIcon } from "@heroicons/react/24/solid";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useGuest } from "@/app/context/GuestContext";
 import { useRouter } from "next/navigation";
@@ -16,21 +16,92 @@ import { ACCESS_WEIGHTS, AccessLevel } from "@/app/galeria/data";
 
 import Lightbox from "yet-another-react-lightbox";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import Video from "yet-another-react-lightbox/plugins/video";
+import Captions from "yet-another-react-lightbox/plugins/captions";
 import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/captions.css";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// Rozszerzyliśmy typ o parsedFolder i actualUrl, które generujemy w locie
 type MediaItem = { 
   id: string; 
   type: 'image' | 'video_link' | 'youtube_link'; 
   url: string; 
   parsedFolder?: string; 
   actualUrl?: string;
+  driveId?: string; 
   caption?: string; 
+};
+
+// ZMODYFIKOWANY KOMPONENT KAFELKA WIDEO
+const MediaVideoTile = ({ item, onClick, delay }: { item: MediaItem, onClick: () => void, delay: number }) => {
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const [isLoaded, setIsLoaded] = useState(false);
+    const [hasError, setHasError] = useState(false);
+    const urlToUse = item.actualUrl || item.url;
+
+    return (
+        <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "200px" }}
+            transition={{ duration: 0.5, delay: delay * 0.05 }} 
+            onClick={onClick}
+            className="break-inside-avoid relative rounded-xl md:rounded-2xl overflow-hidden group cursor-pointer shadow-sm border border-[#4c4a1e]/10 bg-black/5"
+        >
+            {/* Próbujemy załadować natywne wideo bez blokującego CORS */}
+            {!hasError ? (
+                <video 
+                    ref={videoRef}
+                    src={`${urlToUse}#t=0.001`} 
+                    preload="metadata" 
+                    playsInline
+                    muted
+                    // USUNIĘTO crossOrigin="anonymous", aby umożliwić wyświetlenie opaque-video
+                    onLoadedData={() => setIsLoaded(true)}
+                    onError={() => setHasError(true)} // Jeśli Google zablokuje, aktywujemy fallback
+                    className={`w-full h-auto object-cover group-hover:scale-[1.03] transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    style={{ minHeight: '100px' }} 
+                />
+            ) : (
+                // FALLBACK: Jeśli wideo się nie załaduje, pobieramy zdjęcie z API Dysku Google (zachowuje proporcje!)
+                item.driveId && (
+                    <img 
+                        src={`https://drive.google.com/thumbnail?id=${item.driveId}&sz=w800`}
+                        onLoad={() => setIsLoaded(true)}
+                        className={`w-full h-auto object-cover group-hover:scale-[1.03] transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+                        alt={item.caption || "Wideo"}
+                    />
+                )
+            )}
+            
+            {/* Loader zniknie, gdy isLoaded = true */}
+            {!isLoaded && (
+                 <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                     <div className="w-8 h-8 border-[2px] border-[#4E0113]/20 border-t-[#4E0113]/80 rounded-full animate-spin"></div>
+                 </div>
+            )}
+
+            <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-500"></div>
+            
+            {isLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <PlayCircleIcon className="w-10 h-10 md:w-12 md:h-12 text-white/90 drop-shadow-md group-hover:scale-110 transition-transform" />
+                </div>
+            )}
+
+            {item.caption && (
+                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+                    <p className="font-serif text-white text-xs md:text-sm tracking-wide drop-shadow-md truncate">
+                        {item.caption}
+                    </p>
+                </div>
+            )}
+        </motion.div>
+    );
 };
 
 export default function ArchiwumXPage() {
@@ -42,7 +113,6 @@ export default function ArchiwumXPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  // 1. Ochrona dostępu (Archiwum X jako sekcja VIP/Extended)
   useEffect(() => {
     if (guestLoading) return;
     if (!guest) { router.replace("/"); return; }
@@ -55,36 +125,48 @@ export default function ArchiwumXPage() {
     }
   }, [guest, guestLoading, router]);
 
-  // 2. Pobieranie danych i rozdzielanie URL na folder i link
   useEffect(() => {
     const fetchMedia = async () => {
       const { data, error } = await supabase
         .from("gallery_media")
         .select("*")
-        .eq("album_id", "cringe")
-        .order("created_at", { ascending: false });
+        .eq("album_id", "cringe");
 
       if (data) {
-        const processedMedia = data.map(item => {
+        let processedMedia = data.map(item => {
             let folder = "Inne";
             let actualLink = item.url;
+            let extractedDriveId: string | undefined = undefined;
 
-            // Sprawdzamy, czy to link zew. zapisany z folderem (np. "2026/https://youtu.be/...")
             if (item.url.includes('/http')) {
                 const firstSlash = item.url.indexOf('/');
                 folder = item.url.substring(0, firstSlash);
                 actualLink = item.url.substring(firstSlash + 1);
-            } 
-            // Standardowy plik z bucketu (np. "2026/plik.jpg")
-            else if (item.url.includes('/') && !item.url.startsWith('http')) {
+            } else if (item.url.includes('/') && !item.url.startsWith('http')) {
                 folder = item.url.split('/')[0];
+            }
+
+            if (actualLink.includes('drive.google.com')) {
+                const match = actualLink.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                if (match && match[1]) {
+                    extractedDriveId = match[1];
+                    actualLink = `https://drive.google.com/uc?export=download&id=${match[1]}`; 
+                }
             }
 
             return { 
                 ...item, 
                 parsedFolder: folder, 
-                actualUrl: actualLink 
+                actualUrl: actualLink,
+                driveId: extractedDriveId
             };
+        });
+
+        processedMedia.sort((a, b) => {
+            const folderA = a.parsedFolder || "Inne";
+            const folderB = b.parsedFolder || "Inne";
+            if (folderA !== folderB) return folderA.localeCompare(folderB);
+            return (a.caption || "").localeCompare(b.caption || "");
         });
         
         setMedia(processedMedia as MediaItem[]);
@@ -100,15 +182,36 @@ export default function ArchiwumXPage() {
     return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/gallery/${pathOrUrl}`;
   };
 
-  const imageItems = media.filter(m => m.type === 'image');
-  const slides = imageItems.map(m => ({ src: getImageUrl(m.actualUrl || m.url) }));
+  const getYtId = (url: string) => {
+      return url.includes('youtu.be/') 
+        ? url.split('youtu.be/')[1].split('?')[0] 
+        : url.split('v=')[1]?.split('&')[0];
+  };
 
-  const folders = Array.from(new Set(media.map(m => m.parsedFolder || "Inne")))
-    .sort((a, b) => {
-      if (a === "Inne") return 1;
-      if (b === "Inne") return -1;
-      return b.localeCompare(a); 
-    });
+  const slides = media.map(m => {
+      const urlToUse = m.actualUrl || m.url;
+      
+      if (m.type === 'youtube_link') {
+          return { type: 'youtube-custom', id: m.id, url: urlToUse, description: m.caption };
+      }
+      if (m.type === 'video_link' && m.driveId) {
+          return { type: 'drive-custom', id: m.id, driveId: m.driveId, description: m.caption };
+      }
+      if (m.type === 'video_link') {
+          return { type: 'video', sources: [{ src: urlToUse, type: 'video/mp4' }], description: m.caption };
+      }
+      return { type: 'image', src: getImageUrl(urlToUse), description: m.caption };
+  });
+
+  const handleOpenLightbox = (id: string) => {
+      const idx = media.findIndex(m => m.id === id);
+      if (idx !== -1) {
+          setLightboxIndex(idx);
+          setLightboxOpen(true);
+      }
+  };
+
+  const folders = Array.from(new Set(media.map(m => m.parsedFolder || "Inne")));
 
   if (guestLoading || !guest) return null;
 
@@ -119,7 +222,7 @@ export default function ArchiwumXPage() {
         <Navbar />
 
         <main className="flex-grow pt-24 md:pt-32 pb-32 overflow-hidden text-[#4c4a1e]">
-          <PageWrapper className="max-w-[1400px] w-[95%] mx-auto px-4 md:px-8">
+          <PageWrapper className="max-w-[1600px] w-[95%] mx-auto px-4 md:px-8">
             
             <div className="mb-8">
                 <Link href="/galeria" className="inline-flex items-center gap-2 text-[#4E0113]/70 hover:text-[#4E0113] transition-colors font-serif italic text-lg">
@@ -146,77 +249,95 @@ export default function ArchiwumXPage() {
                 <div className="w-12 h-12 border-[3px] border-[#4c4a1e]/20 border-t-[#4E0113] rounded-full animate-spin"></div>
               </div>
             ) : (
-              <div className="flex flex-col gap-20">
-                {folders.map(folderName => {
+              <div className="flex flex-col gap-24">
+                {folders.map((folderName, sectionIndex) => {
                   const folderMedia = media.filter(m => (m.parsedFolder || "Inne") === folderName);
-                  const folderImages = folderMedia.filter(m => m.type === 'image');
-                  const folderVideos = folderMedia.filter(m => m.type !== 'image');
 
                   return (
-                    <motion.section 
-                      key={folderName}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                    >
-                      <div className="flex items-center gap-6 mb-10">
-                        <h2 className="font-serif text-3xl md:text-4xl text-[#4E0113] tracking-wider">
+                    <section key={folderName}>
+                      <div className="flex items-center gap-6 mb-8 md:mb-12">
+                        <h2 className="font-serif text-3xl md:text-5xl text-[#4E0113] tracking-wider font-light">
                           {folderName}
                         </h2>
                         <div className="h-[1px] flex-grow bg-[#4c4a1e]/15"></div>
                       </div>
 
-                      {folderVideos.length > 0 && (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                          {folderVideos.map(vid => {
-                            const urlToUse = vid.actualUrl || vid.url;
+                      <div className="columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-3 md:gap-6 space-y-3 md:space-y-6">
+                        {folderMedia.map((item, itemIndex) => {
+                          const urlToUse = item.actualUrl || item.url;
+                          const isVideo = item.type === 'video_link';
+                          const isYouTube = item.type === 'youtube_link';
 
-                            if (vid.type === 'youtube_link') {
-                              const ytId = urlToUse.includes('youtu.be/') 
-                                ? urlToUse.split('youtu.be/')[1].split('?')[0] 
-                                : urlToUse.split('v=')[1]?.split('&')[0];
-                              
+                          if (isYouTube) {
                               return (
-                                <div key={vid.id} className="bg-white p-4 rounded-3xl shadow-sm border border-[#4c4a1e]/10">
-                                  <div className="aspect-video rounded-2xl overflow-hidden bg-black shadow-inner">
-                                    <iframe 
-                                      className="w-full h-full"
-                                      src={`https://www.youtube.com/embed/${ytId}`} 
-                                      allowFullScreen
-                                    ></iframe>
-                                  </div>
-                                  {vid.caption && <p className="font-serif text-xl text-[#4E0113] mt-4 px-2">{vid.caption}</p>}
-                                </div>
+                                  <motion.div 
+                                      key={item.id} 
+                                      initial={{ opacity: 0, y: 10 }}
+                                      whileInView={{ opacity: 1, y: 0 }}
+                                      viewport={{ once: true, margin: "100px" }}
+                                      transition={{ duration: 0.5, delay: itemIndex * 0.05 }}
+                                      onClick={() => handleOpenLightbox(item.id)}
+                                      className="break-inside-avoid relative rounded-xl md:rounded-2xl overflow-hidden group cursor-pointer shadow-sm border border-[#4c4a1e]/10 bg-black/5"
+                                  >
+                                      <div className="relative w-full aspect-video bg-black">
+                                          <img 
+                                              src={`https://img.youtube.com/vi/${getYtId(urlToUse)}/hqdefault.jpg`} 
+                                              className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" 
+                                              alt="YouTube"
+                                          />
+                                          <div className="absolute inset-0 flex items-center justify-center">
+                                              <PlayCircleIcon className="w-12 h-12 text-white/80 group-hover:text-white transition-colors drop-shadow-lg group-hover:scale-110" />
+                                          </div>
+                                          {item.caption && (
+                                              <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+                                                  <p className="font-serif text-white text-xs md:text-sm tracking-wide drop-shadow-md truncate">
+                                                      {item.caption}
+                                                  </p>
+                                              </div>
+                                          )}
+                                      </div>
+                                  </motion.div>
                               );
-                            }
-                            return (
-                              <a key={vid.id} href={urlToUse} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 bg-white p-6 rounded-3xl border border-[#4c4a1e]/10 hover:border-[#4E0113]/30 transition-all group">
-                                <PlayCircleIcon className="w-12 h-12 text-[#4E0113]/40 group-hover:text-[#4E0113] transition-colors shrink-0" />
-                                <span className="font-serif text-lg text-[#4E0113]">{vid.caption || "Odtwórz nagranie"}</span>
-                              </a>
-                            );
-                          })}
-                        </div>
-                      )}
+                          }
 
-                      {folderImages.length > 0 && (
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                          {folderImages.map(img => {
-                            const idx = imageItems.findIndex(i => i.id === img.id);
-                            return (
-                              <div 
-                                key={img.id}
-                                onClick={() => { setLightboxIndex(idx); setLightboxOpen(true); }}
-                                className="relative aspect-square cursor-pointer rounded-2xl overflow-hidden group shadow-sm"
+                          if (isVideo) {
+                              return (
+                                  <MediaVideoTile 
+                                      key={item.id} 
+                                      item={item} 
+                                      onClick={() => handleOpenLightbox(item.id)} 
+                                      delay={itemIndex} 
+                                  />
+                              );
+                          }
+
+                          return (
+                              <motion.div 
+                                  key={item.id} 
+                                  initial={{ opacity: 0, y: 10 }}
+                                  whileInView={{ opacity: 1, y: 0 }}
+                                  viewport={{ once: true, margin: "100px" }}
+                                  transition={{ duration: 0.5, delay: itemIndex * 0.05 }}
+                                  onClick={() => handleOpenLightbox(item.id)}
+                                  className="break-inside-avoid relative rounded-xl md:rounded-2xl overflow-hidden group cursor-pointer shadow-sm border border-[#4c4a1e]/10 bg-black/5"
                               >
-                                <img src={getImageUrl(img.actualUrl || img.url)} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-700" alt="Archiwum" />
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </motion.section>
+                                  <img 
+                                      src={getImageUrl(urlToUse)} 
+                                      className="w-full h-auto object-cover group-hover:scale-[1.03] transition-transform duration-700" 
+                                      alt="Archiwum"
+                                  />
+                                  {item.caption && (
+                                      <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                          <p className="font-serif text-white text-xs md:text-sm tracking-wide drop-shadow-md truncate">
+                                              {item.caption}
+                                          </p>
+                                      </div>
+                                  )}
+                              </motion.div>
+                          );
+                        })}
+                      </div>
+                    </section>
                   );
                 })}
               </div>
@@ -230,8 +351,62 @@ export default function ArchiwumXPage() {
           open={lightboxOpen} 
           close={() => setLightboxOpen(false)} 
           index={lightboxIndex} 
-          slides={slides} 
-          plugins={[Zoom]} 
+          slides={slides as any[]} 
+          plugins={[Zoom, Video, Captions]} 
+          render={{
+            // DODANY PARAMETR OFFSET:
+            slide: ({ slide, offset }) => {
+                
+                if ((slide as any).type === 'youtube-custom') {
+                    const ytId = getYtId((slide as any).url);
+                    // RENDERUJEMY WIDEO TYLKO GDY UŻYTKOWNIK NA NIE PATRZY (offset === 0)
+                    if (offset === 0) {
+                        return (
+                            <div className="w-full h-full flex items-center justify-center p-2 md:p-8">
+                                <iframe 
+                                    className="w-full max-w-5xl aspect-video rounded-xl md:rounded-2xl shadow-2xl bg-black border-none" 
+                                    src={`https://www.youtube.com/embed/${ytId}?autoplay=1`} 
+                                    allow="autoplay; encrypted-media; fullscreen" 
+                                    allowFullScreen 
+                                />
+                            </div>
+                        );
+                    } else {
+                        // Jeśli wideo jest "w tle", pokazujemy tylko jego cichą okładkę
+                        return (
+                            <div className="w-full h-full flex items-center justify-center p-2 md:p-8">
+                                <img src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`} className="max-h-full max-w-full object-contain opacity-50" alt="thumbnail" />
+                            </div>
+                        );
+                    }
+                }
+                
+                if ((slide as any).type === 'drive-custom') {
+                    // RENDERUJEMY WIDEO Z DYSKU TYLKO GDY UŻYTKOWNIK NA NIE PATRZY (offset === 0)
+                    if (offset === 0) {
+                        return (
+                            <div className="w-full h-full flex items-center justify-center p-2 md:p-8">
+                                <iframe 
+                                    className="w-full h-[80vh] max-w-6xl rounded-xl md:rounded-2xl shadow-2xl bg-black border-none" 
+                                    src={`https://drive.google.com/file/d/${(slide as any).driveId}/preview`} 
+                                    allow="autoplay; fullscreen" 
+                                    allowFullScreen 
+                                />
+                            </div>
+                        );
+                    } else {
+                        // Jeśli slajd czeka w kolejce, nie pozwalamy mu zabierać transferu ani psuć layoutu
+                        return (
+                             <div className="w-full h-full flex items-center justify-center bg-black/20">
+                                 <div className="w-12 h-12 border-[3px] border-white/20 border-t-white/80 rounded-full animate-spin"></div>
+                             </div>
+                        );
+                    }
+                }
+
+                return undefined;
+            }
+          }}
         />
       </div>
     </RequireGuest>
