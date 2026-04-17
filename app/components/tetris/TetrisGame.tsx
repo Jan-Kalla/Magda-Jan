@@ -22,7 +22,6 @@ import {
 } from "./gameLogic";
 import { useGuest } from "@/app/context/GuestContext";
 import { createClient } from "@supabase/supabase-js";
-// @ts-expect-error
 import "./tetris-theme.css";
 import { sounds, playHitAlternating } from "./sounds";
 
