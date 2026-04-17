@@ -216,6 +216,28 @@ export default function ArchiwumXPage() {
   return (
     <RequireGuest>
       <div className="flex flex-col min-h-screen relative bg-[#FDF9EC]">
+        
+        {/* MAGIA CSS DLA LIGHTBOXA: Wymuszenie podpisów na górze ekranu */}
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            .yarl__slide_captions_container {
+              top: 0 !important;
+              bottom: auto !important;
+              background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, transparent 100%) !important;
+              padding-top: 1.5rem !important;
+              padding-bottom: 3.5rem !important;
+              pointer-events: none !important;
+            }
+            .yarl__slide_description {
+              font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif !important;
+              font-size: 1.15rem !important;
+              text-align: center !important;
+              text-shadow: 1px 1px 4px rgba(0,0,0,0.9) !important;
+              color: white !important;
+            }
+          `
+        }} />
+
         <CustomCursor />
         <Navbar />
 
@@ -351,17 +373,16 @@ export default function ArchiwumXPage() {
           index={lightboxIndex} 
           slides={slides as any[]} 
           plugins={[Zoom, Video, Captions]} 
+          carousel={{ padding: 0 }} 
           render={{
             slide: ({ slide, offset }) => {
-                // RENDEROWANIE YOUTUBE
                 if ((slide as any).type === 'youtube-custom') {
                     const ytId = getYtId((slide as any).url);
                     if (offset === 0) {
                         return (
-                            // POPRAWKA: Twarde pozycjonowanie absolute dla iframe na telefonach zapobiega ucinaniu 
-                            <div className="relative w-full h-full flex items-center justify-center md:p-8 overflow-hidden">
+                            <div className="w-full h-full flex items-center justify-center bg-black md:p-8">
                                 <iframe 
-                                    className="absolute inset-0 w-full h-full md:relative md:h-[85vh] max-w-6xl md:rounded-2xl shadow-2xl bg-black border-none" 
+                                    className="w-full h-full md:h-[85vh] max-w-6xl md:rounded-2xl shadow-2xl bg-black border-none" 
                                     src={`https://www.youtube.com/embed/${ytId}?autoplay=1&playsinline=1`} 
                                     allow="autoplay; encrypted-media; fullscreen" 
                                     allowFullScreen 
@@ -370,22 +391,20 @@ export default function ArchiwumXPage() {
                         );
                     } else {
                         return (
-                            <div className="relative w-full h-full flex items-center justify-center md:p-8">
-                                <img src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`} className="absolute inset-0 w-full h-full md:relative md:max-h-full md:max-w-full object-contain opacity-50" alt="thumbnail" />
+                            <div className="w-full h-full flex items-center justify-center bg-black/90 md:p-8">
+                                <img src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`} className="max-h-full max-w-full object-contain opacity-50" alt="thumbnail" />
                             </div>
                         );
                     }
                 }
                 
-                // RENDEROWANIE GOOGLE DRIVE
                 if ((slide as any).type === 'drive-custom') {
                     if (offset === 0) {
                         return (
-                            // POPRAWKA: absolute inset-0 wymusza na Google Drive bezwzględne trzymanie się rozmiarów ekranu, likwidując podwójne menu
-                            <div className="relative w-full h-full flex items-center justify-center md:p-8 overflow-hidden">
+                            <div className="w-full h-full flex items-center justify-center bg-black md:p-8">
                                 <iframe 
-                                    className="absolute inset-0 w-full h-full md:relative md:h-[85vh] max-w-6xl md:rounded-2xl shadow-2xl bg-black border-none" 
-                                    src={`https://drive.google.com/file/d/${(slide as any).driveId}/preview`} 
+                                    className="w-full h-full md:h-[85vh] max-w-6xl md:rounded-2xl shadow-2xl bg-black border-none" 
+                                    src={`https://drive.google.com/file/d/${(slide as any).driveId}/preview?autoplay=1`} 
                                     allow="autoplay; fullscreen" 
                                     allowFullScreen 
                                 />
@@ -393,10 +412,10 @@ export default function ArchiwumXPage() {
                         );
                     } else {
                         return (
-                             <div className="relative w-full h-full flex items-center justify-center md:p-8">
+                             <div className="w-full h-full flex items-center justify-center bg-black/90 md:p-8">
                                  <img 
                                     src={`https://drive.google.com/thumbnail?id=${(slide as any).driveId}&sz=w800`} 
-                                    className="absolute inset-0 w-full h-full md:relative md:max-h-full md:max-w-full object-contain opacity-50" 
+                                    className="max-h-full max-w-full object-contain opacity-50" 
                                     alt="thumbnail" 
                                  />
                              </div>
