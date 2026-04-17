@@ -36,7 +36,9 @@ type MediaItem = {
   caption?: string; 
 };
 
-// ZMODYFIKOWANY KOMPONENT KAFELKA WIDEO
+// =========================================================================
+// KAFELKI MASONRY
+// =========================================================================
 const MediaVideoTile = ({ item, onClick, delay }: { item: MediaItem, onClick: () => void, delay: number }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isLoaded, setIsLoaded] = useState(false);
@@ -52,7 +54,6 @@ const MediaVideoTile = ({ item, onClick, delay }: { item: MediaItem, onClick: ()
             onClick={onClick}
             className="break-inside-avoid relative rounded-xl md:rounded-2xl overflow-hidden group cursor-pointer shadow-sm border border-[#4c4a1e]/10 bg-black/5"
         >
-            {/* Próbujemy załadować natywne wideo bez blokującego CORS */}
             {!hasError ? (
                 <video 
                     ref={videoRef}
@@ -60,14 +61,12 @@ const MediaVideoTile = ({ item, onClick, delay }: { item: MediaItem, onClick: ()
                     preload="metadata" 
                     playsInline
                     muted
-                    // USUNIĘTO crossOrigin="anonymous", aby umożliwić wyświetlenie opaque-video
                     onLoadedData={() => setIsLoaded(true)}
-                    onError={() => setHasError(true)} // Jeśli Google zablokuje, aktywujemy fallback
+                    onError={() => setHasError(true)} 
                     className={`w-full h-auto object-cover group-hover:scale-[1.03] transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
                     style={{ minHeight: '100px' }} 
                 />
             ) : (
-                // FALLBACK: Jeśli wideo się nie załaduje, pobieramy zdjęcie z API Dysku Google (zachowuje proporcje!)
                 item.driveId && (
                     <img 
                         src={`https://drive.google.com/thumbnail?id=${item.driveId}&sz=w800`}
@@ -78,7 +77,6 @@ const MediaVideoTile = ({ item, onClick, delay }: { item: MediaItem, onClick: ()
                 )
             )}
             
-            {/* Loader zniknie, gdy isLoaded = true */}
             {!isLoaded && (
                  <div className="absolute inset-0 flex items-center justify-center bg-black/10">
                      <div className="w-8 h-8 border-[2px] border-[#4E0113]/20 border-t-[#4E0113]/80 rounded-full animate-spin"></div>
@@ -94,8 +92,8 @@ const MediaVideoTile = ({ item, onClick, delay }: { item: MediaItem, onClick: ()
             )}
 
             {item.caption && (
-                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
-                    <p className="font-serif text-white text-xs md:text-sm tracking-wide drop-shadow-md truncate">
+                <div className="absolute bottom-0 left-0 right-0 p-3 pt-10 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none">
+                    <p className="font-serif text-white text-xs md:text-sm tracking-wide drop-shadow-md break-words">
                         {item.caption}
                     </p>
                 </div>
@@ -250,7 +248,7 @@ export default function ArchiwumXPage() {
               </div>
             ) : (
               <div className="flex flex-col gap-24">
-                {folders.map((folderName, sectionIndex) => {
+                {folders.map((folderName) => {
                   const folderMedia = media.filter(m => (m.parsedFolder || "Inne") === folderName);
 
                   return (
@@ -289,8 +287,8 @@ export default function ArchiwumXPage() {
                                               <PlayCircleIcon className="w-12 h-12 text-white/80 group-hover:text-white transition-colors drop-shadow-lg group-hover:scale-110" />
                                           </div>
                                           {item.caption && (
-                                              <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
-                                                  <p className="font-serif text-white text-xs md:text-sm tracking-wide drop-shadow-md truncate">
+                                              <div className="absolute bottom-0 left-0 right-0 p-3 pt-10 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none">
+                                                  <p className="font-serif text-white text-xs md:text-sm tracking-wide drop-shadow-md break-words">
                                                       {item.caption}
                                                   </p>
                                               </div>
@@ -327,8 +325,8 @@ export default function ArchiwumXPage() {
                                       alt="Archiwum"
                                   />
                                   {item.caption && (
-                                      <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                          <p className="font-serif text-white text-xs md:text-sm tracking-wide drop-shadow-md truncate">
+                                      <div className="absolute bottom-0 left-0 right-0 p-3 pt-10 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                          <p className="font-serif text-white text-xs md:text-sm tracking-wide drop-shadow-md break-words">
                                               {item.caption}
                                           </p>
                                       </div>
@@ -354,40 +352,39 @@ export default function ArchiwumXPage() {
           slides={slides as any[]} 
           plugins={[Zoom, Video, Captions]} 
           render={{
-            // DODANY PARAMETR OFFSET:
             slide: ({ slide, offset }) => {
-                
+                // RENDEROWANIE YOUTUBE
                 if ((slide as any).type === 'youtube-custom') {
                     const ytId = getYtId((slide as any).url);
-                    // RENDERUJEMY WIDEO TYLKO GDY UŻYTKOWNIK NA NIE PATRZY (offset === 0)
                     if (offset === 0) {
                         return (
-                            <div className="w-full h-full flex items-center justify-center p-2 md:p-8">
+                            // POPRAWKA: Twarde pozycjonowanie absolute dla iframe na telefonach zapobiega ucinaniu 
+                            <div className="relative w-full h-full flex items-center justify-center md:p-8 overflow-hidden">
                                 <iframe 
-                                    className="w-full max-w-5xl aspect-video rounded-xl md:rounded-2xl shadow-2xl bg-black border-none" 
-                                    src={`https://www.youtube.com/embed/${ytId}?autoplay=1`} 
+                                    className="absolute inset-0 w-full h-full md:relative md:h-[85vh] max-w-6xl md:rounded-2xl shadow-2xl bg-black border-none" 
+                                    src={`https://www.youtube.com/embed/${ytId}?autoplay=1&playsinline=1`} 
                                     allow="autoplay; encrypted-media; fullscreen" 
                                     allowFullScreen 
                                 />
                             </div>
                         );
                     } else {
-                        // Jeśli wideo jest "w tle", pokazujemy tylko jego cichą okładkę
                         return (
-                            <div className="w-full h-full flex items-center justify-center p-2 md:p-8">
-                                <img src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`} className="max-h-full max-w-full object-contain opacity-50" alt="thumbnail" />
+                            <div className="relative w-full h-full flex items-center justify-center md:p-8">
+                                <img src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`} className="absolute inset-0 w-full h-full md:relative md:max-h-full md:max-w-full object-contain opacity-50" alt="thumbnail" />
                             </div>
                         );
                     }
                 }
                 
+                // RENDEROWANIE GOOGLE DRIVE
                 if ((slide as any).type === 'drive-custom') {
-                    // RENDERUJEMY WIDEO Z DYSKU TYLKO GDY UŻYTKOWNIK NA NIE PATRZY (offset === 0)
                     if (offset === 0) {
                         return (
-                            <div className="w-full h-full flex items-center justify-center p-2 md:p-8">
+                            // POPRAWKA: absolute inset-0 wymusza na Google Drive bezwzględne trzymanie się rozmiarów ekranu, likwidując podwójne menu
+                            <div className="relative w-full h-full flex items-center justify-center md:p-8 overflow-hidden">
                                 <iframe 
-                                    className="w-full h-[80vh] max-w-6xl rounded-xl md:rounded-2xl shadow-2xl bg-black border-none" 
+                                    className="absolute inset-0 w-full h-full md:relative md:h-[85vh] max-w-6xl md:rounded-2xl shadow-2xl bg-black border-none" 
                                     src={`https://drive.google.com/file/d/${(slide as any).driveId}/preview`} 
                                     allow="autoplay; fullscreen" 
                                     allowFullScreen 
@@ -395,10 +392,13 @@ export default function ArchiwumXPage() {
                             </div>
                         );
                     } else {
-                        // Jeśli slajd czeka w kolejce, nie pozwalamy mu zabierać transferu ani psuć layoutu
                         return (
-                             <div className="w-full h-full flex items-center justify-center bg-black/20">
-                                 <div className="w-12 h-12 border-[3px] border-white/20 border-t-white/80 rounded-full animate-spin"></div>
+                             <div className="relative w-full h-full flex items-center justify-center md:p-8">
+                                 <img 
+                                    src={`https://drive.google.com/thumbnail?id=${(slide as any).driveId}&sz=w800`} 
+                                    className="absolute inset-0 w-full h-full md:relative md:max-h-full md:max-w-full object-contain opacity-50" 
+                                    alt="thumbnail" 
+                                 />
                              </div>
                         );
                     }
