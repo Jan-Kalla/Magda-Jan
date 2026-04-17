@@ -6,6 +6,8 @@ export const sounds = {
   hit2: new Howl({ src: ["/sounds/tetris/hit2.wav"], volume: 0.5 }),
   line: new Howl({ src: ["/sounds/tetris/line.wav"], volume: 0.5 }),
   gameover: new Howl({ src: ["/sounds/tetris/gameover.wav"], volume: 0.7 }),
+  // ZMIANA: Dodajemy preładowany dźwięk ruchu (zero opóźnień!)
+  move: new Howl({ src: ["/sounds/tetris/hover.mp3"], volume: 0.4 }),
 };
 
 // Alternator uderzeń

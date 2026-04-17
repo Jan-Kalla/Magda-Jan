@@ -16,6 +16,7 @@ import TetrisLeaderboard from "./TetrisLeaderboard";
 import ScorePanel from "./ScorePanel";
 // ZMIANA: Importujemy togglePause bezpośrednio
 import { getIsGameOver, getIsPaused, togglePause } from "./gameLogic";
+import { sounds } from "./sounds";
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
@@ -55,23 +56,18 @@ export default function MobileControls() {
     window.dispatchEvent(new KeyboardEvent("keyup", { key, code, bubbles: true, cancelable: true }));
   };
 
-  const handleControlPress = (e: React.PointerEvent<HTMLButtonElement>, key: string, code: string = "") => {
+const handleControlPress = (e: React.PointerEvent<HTMLButtonElement>, key: string, code: string = "") => {
     e.preventDefault();
     e.stopPropagation(); 
 
-    const sound = new Audio('/sounds/tetris/hover.mp3');
-    (sound as any).preservesPitch = false;
-    (sound as any).webkitPreservesPitch = false;
-
-    if (key === "ArrowUp") {
-      sound.playbackRate = 0.75; 
-    } else if (key === "ArrowDown") {
-      sound.playbackRate = 1.5;  
-    } else {
-      sound.playbackRate = 1.0;  
-    }
-
-    sound.play().catch(() => {}); 
+    // ZMIANA: Używamy Howlera zamiast powolnego new Audio(). 
+    // Dźwięk odtworzy się bez absolutnie żadnego opóźnienia.
+    let rate = 1.0;
+    if (key === "ArrowUp") rate = 0.75;
+    else if (key === "ArrowDown") rate = 1.5;
+    
+    sounds.move.rate(rate);
+    sounds.move.play();
 
     simulateKeyDown(key, code);
   };

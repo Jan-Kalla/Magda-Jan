@@ -81,7 +81,7 @@ export const ALBUMS: Album[] = [
   {
     id: "cringe",
     title: "Archiwum X",
-    coverImage: "/fotki/Szwajcaria1.jpg", // Tu daj coś zamazanego lub tajemniczego
+    coverImage: "/fotki/creepy.jpg", // Tu daj coś zamazanego lub tajemniczego
     icon: <EyeSlashIcon className="w-6 h-6" />,
     isLockedFuture: false,
     requiredLevel: "vip",

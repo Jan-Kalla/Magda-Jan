@@ -22,6 +22,7 @@ import {
 } from "./gameLogic";
 import { useGuest } from "@/app/context/GuestContext";
 import { createClient } from "@supabase/supabase-js";
+// @ts-expect-error
 import "./tetris-theme.css";
 import { sounds, playHitAlternating } from "./sounds";
 
@@ -50,18 +51,13 @@ export default function TetrisGame({ mobileLayout }: { mobileLayout?: React.Reac
   const lastDropRef = useRef<number>(performance.now());
 
   const playControlSound = (key: string) => {
-    const sound = new Audio('/sounds/tetris/hover.mp3');
-    (sound as any).preservesPitch = false;
-    (sound as any).webkitPreservesPitch = false;
-
-    if (key === "ArrowUp") {
-      sound.playbackRate = 0.75;
-    } else if (key === "ArrowDown") {
-      sound.playbackRate = 1.5;
-    } else {
-      sound.playbackRate = 1.0;
-    }
-    sound.play().catch(() => {});
+    // ZMIANA: Płynne dźwięki Howlera dla graczy klawiaturowych
+    let rate = 1.0;
+    if (key === "ArrowUp") rate = 0.75;
+    else if (key === "ArrowDown") rate = 1.5;
+    
+    sounds.move.rate(rate);
+    sounds.move.play();
   };
 
   useEffect(() => {

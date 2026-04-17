@@ -157,7 +157,14 @@ export default function ArchiwumXPage() {
                 const match = actualLink.match(/\/d\/([a-zA-Z0-9_-]+)/);
                 if (match && match[1]) {
                     extractedDriveId = match[1];
-                    actualLink = `https://drive.google.com/uc?export=download&id=${match[1]}`; 
+                    // POPRAWKA: Rozróżniamy zdjęcia i filmy z Google Drive
+                    if (item.type === 'image') {
+                        // Dla zdjęć używamy bezpiecznego API miniatur
+                        actualLink = `https://drive.google.com/thumbnail?id=${match[1]}&sz=w2500`; 
+                    } else {
+                        // Dla filmów zostawiamy stary link
+                        actualLink = `https://drive.google.com/uc?export=download&id=${match[1]}`; 
+                    }
                 }
             }
 
@@ -275,6 +282,7 @@ export default function ArchiwumXPage() {
               <p className="font-sans font-light text-[#4c4a1e]/80 text-base md:text-lg max-w-3xl mx-auto leading-relaxed">
                 Miejsce na materiały specjalne, archiwalne nagrania i chwile, które wymagają 
                 osobnego potraktowania. Chronologiczny zapis naszej wspólnej drogi.
+                (Ze względu na wczytywanie z dysku Google, to w wersji mobilnej działa to niestety dość topornie)
               </p>
             </header>
 
