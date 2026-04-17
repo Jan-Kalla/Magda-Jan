@@ -110,6 +110,15 @@ export default function ArchiwumXPage() {
   const [loading, setLoading] = useState(true);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  
+  // Inteligentny detektor urządzeń mobilnych (ratuje przed blokadami Google Drive)
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    }
+  }, []);
 
   useEffect(() => {
     if (guestLoading) return;
@@ -217,23 +226,28 @@ export default function ArchiwumXPage() {
     <RequireGuest>
       <div className="flex flex-col min-h-screen relative bg-[#FDF9EC]">
         
-        {/* MAGIA CSS DLA LIGHTBOXA: Wymuszenie podpisów na górze ekranu */}
+        {/* CSS: Wymuszamy opisy na górze, by nigdy nie zasłaniały paska odtwarzacza na dole */}
         <style dangerouslySetInnerHTML={{
           __html: `
-            .yarl__slide_captions_container {
+            .yarl__container .yarl__slide_captions_container {
               top: 0 !important;
               bottom: auto !important;
-              background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, transparent 100%) !important;
+              background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%) !important;
               padding-top: 1.5rem !important;
               padding-bottom: 3.5rem !important;
               pointer-events: none !important;
+              display: flex !important;
+              align-items: flex-start !important;
+              justify-content: center !important;
+              z-index: 99999 !important;
             }
-            .yarl__slide_description {
+            .yarl__container .yarl__slide_description {
               font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif !important;
               font-size: 1.15rem !important;
               text-align: center !important;
               text-shadow: 1px 1px 4px rgba(0,0,0,0.9) !important;
               color: white !important;
+              margin: 0 !important;
             }
           `
         }} />
@@ -376,6 +390,7 @@ export default function ArchiwumXPage() {
           carousel={{ padding: 0 }} 
           render={{
             slide: ({ slide, offset }) => {
+                // RENDEROWANIE YOUTUBE
                 if ((slide as any).type === 'youtube-custom') {
                     const ytId = getYtId((slide as any).url);
                     if (offset === 0) {
@@ -398,13 +413,18 @@ export default function ArchiwumXPage() {
                     }
                 }
                 
+                // RENDEROWANIE GOOGLE DRIVE
                 if ((slide as any).type === 'drive-custom') {
                     if (offset === 0) {
+                        // Magiczna linijka - autoplay działa na PC, a na telefonie blokuje nieskończone ładowanie
+                        const autoplayParam = isTouchDevice ? '' : '?autoplay=1';
+                        
                         return (
+                            // Twój zaufany, stary layout, który gwarantuje ten ładny, czerwony pasek
                             <div className="w-full h-full flex items-center justify-center bg-black md:p-8">
                                 <iframe 
                                     className="w-full h-full md:h-[85vh] max-w-6xl md:rounded-2xl shadow-2xl bg-black border-none" 
-                                    src={`https://drive.google.com/file/d/${(slide as any).driveId}/preview?autoplay=1`} 
+                                    src={`https://drive.google.com/file/d/${(slide as any).driveId}/preview${autoplayParam}`} 
                                     allow="autoplay; fullscreen" 
                                     allowFullScreen 
                                 />
