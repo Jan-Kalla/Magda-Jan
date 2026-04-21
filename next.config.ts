@@ -5,7 +5,7 @@ images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'zotaypukvsxfjpytehwd.supabase.co',
+        hostname: 'lnbtkbhhthvebzflofaq.supabase.co',
         port: '',
         pathname: '/storage/v1/object/public/**',
       },

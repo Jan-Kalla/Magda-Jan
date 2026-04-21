@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -14,9 +14,8 @@ import TetrisGame from "./TetrisGame";
 import NextPieces from "./NextPieces";
 import TetrisLeaderboard from "./TetrisLeaderboard";
 import ScorePanel from "./ScorePanel";
-// ZMIANA: Importujemy togglePause bezpośrednio
 import { getIsGameOver, getIsPaused, togglePause } from "./gameLogic";
-import { sounds } from "./sounds";
+import { sounds } from "./sounds"; 
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
@@ -35,6 +34,9 @@ export default function MobileControls() {
   const [isPaused, setIsPaused] = useState(false);
   const [, setForceRender] = useState(0);
 
+  // ZMIANA: Dodajemy refa, żeby namierzyć dolny przycisk
+  const bottomButtonRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     let raf = 0;
     const update = () => {
@@ -46,6 +48,20 @@ export default function MobileControls() {
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  // ZMIANA: Efekt płynnego scrollowania do dolnego przycisku
+  useEffect(() => {
+    if (isMobile && bottomButtonRef.current) {
+      // Dajemy przeglądarce pół sekundy na ułożenie wszystkich elementów i zniknięcie pasków
+      const timer = setTimeout(() => {
+        bottomButtonRef.current?.scrollIntoView({ 
+          behavior: "smooth", 
+          block: "end" // Przewinie tak, aby dół przycisku był na dole ekranu
+        });
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isMobile]);
+
   if (!isMobile) return null;
 
   const simulateKeyDown = (key: string, code: string = "") => {
@@ -56,12 +72,10 @@ export default function MobileControls() {
     window.dispatchEvent(new KeyboardEvent("keyup", { key, code, bubbles: true, cancelable: true }));
   };
 
-const handleControlPress = (e: React.PointerEvent<HTMLButtonElement>, key: string, code: string = "") => {
+  const handleControlPress = (e: React.PointerEvent<HTMLButtonElement>, key: string, code: string = "") => {
     e.preventDefault();
     e.stopPropagation(); 
 
-    // ZMIANA: Używamy Howlera zamiast powolnego new Audio(). 
-    // Dźwięk odtworzy się bez absolutnie żadnego opóźnienia.
     let rate = 1.0;
     if (key === "ArrowUp") rate = 0.75;
     else if (key === "ArrowDown") rate = 1.5;
@@ -87,7 +101,6 @@ const handleControlPress = (e: React.PointerEvent<HTMLButtonElement>, key: strin
 
         <div className="absolute left-0 top-0 bottom-0 w-[5rem] sm:w-[6rem] flex flex-col justify-between items-stretch">
           
-          {/* ZMIANA: Niezawodne, bezpośrednie wywołanie togglePause() */}
           <button
             onClick={(e) => {
               e.preventDefault();
@@ -159,7 +172,8 @@ const handleControlPress = (e: React.PointerEvent<HTMLButtonElement>, key: strin
 
       </div>
 
-      <div className="mt-3 w-full px-4 max-w-[500px]">
+      {/* ZMIANA: Przypinamy refa do tego diva z dolnym przyciskiem */}
+      <div ref={bottomButtonRef} className="mt-3 w-full px-4 max-w-[500px]">
         <button
           onPointerDown={(e) => handleControlPress(e, " ", "Space")}
           onPointerUp={(e) => { e.preventDefault(); simulateKeyUp(" ", "Space"); }}
