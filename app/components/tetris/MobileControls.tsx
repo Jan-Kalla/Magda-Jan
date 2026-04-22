@@ -34,8 +34,10 @@ export default function MobileControls() {
   const [isPaused, setIsPaused] = useState(false);
   const [, setForceRender] = useState(0);
 
-  // ZMIANA: Dodajemy refa, żeby namierzyć dolny przycisk
   const bottomButtonRef = useRef<HTMLDivElement>(null);
+  
+  // ZMIANA: Dodajemy drugiego Refa, by namierzyć ranking na dole
+  const leaderboardRef = useRef<HTMLDivElement>(null); 
 
   useEffect(() => {
     let raf = 0;
@@ -48,19 +50,31 @@ export default function MobileControls() {
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  // ZMIANA: Efekt płynnego scrollowania do dolnego przycisku
+  // ZMIANA: Scrollowanie do dolnego przycisku (działa przy wejściu oraz po wciśnięciu Restart!)
   useEffect(() => {
-    if (isMobile && bottomButtonRef.current) {
-      // Dajemy przeglądarce pół sekundy na ułożenie wszystkich elementów i zniknięcie pasków
+    if (isMobile && bottomButtonRef.current && !isGameOver) {
       const timer = setTimeout(() => {
         bottomButtonRef.current?.scrollIntoView({ 
           behavior: "smooth", 
-          block: "end" // Przewinie tak, aby dół przycisku był na dole ekranu
+          block: "end" 
         });
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [isMobile]);
+  }, [isMobile, isGameOver]);
+
+  // ZMIANA: Płynny scroll do rankingu dokładnie 1 sekundę po Game Over
+  useEffect(() => {
+    if (isMobile && isGameOver && leaderboardRef.current) {
+      const timer = setTimeout(() => {
+        leaderboardRef.current?.scrollIntoView({ 
+          behavior: "smooth", 
+          block: "start" // Ustawia ranking tak, by nagłówek był na samej górze ekranu
+        });
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isMobile, isGameOver]);
 
   if (!isMobile) return null;
 
@@ -172,7 +186,6 @@ export default function MobileControls() {
 
       </div>
 
-      {/* ZMIANA: Przypinamy refa do tego diva z dolnym przyciskiem */}
       <div ref={bottomButtonRef} className="mt-3 w-full px-4 max-w-[500px]">
         <button
           onPointerDown={(e) => handleControlPress(e, " ", "Space")}
@@ -195,7 +208,8 @@ export default function MobileControls() {
         </button>
       )}
 
-      <div className="mt-6 w-full px-6 pb-12">
+      {/* ZMIANA: Przypięcie nowego refa do sekcji z rankingiem */}
+      <div ref={leaderboardRef} className="mt-6 w-full px-6 pb-12">
         <TetrisLeaderboard />
       </div>
 

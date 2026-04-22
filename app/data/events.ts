@@ -8,7 +8,7 @@ export const events = [
 { durationDays: 120, name: "trwa ciąża dzika europejskiego (dzik jest dziki, dzik jest zły!)",url:"" },
 { durationDays: 112, name: "trwa ciąża wielkiej białej polskiej (Rasa polskiej świni domowej o jednym z najszybszych temp wzrostu)",url:"" },
 { durationDays: 102, name: "Okres od powrotu Napoleona z Elby do klęski pod Waterloo",url:"" },
-{ durationDays: 90, name: "Pełen cykl Erytropoezy u człowieka()",url:"" },
+{ durationDays: 90, name: "Pełen cykl Erytropoezy u człowieka (proces powstawania czerwonych krwinek)",url:"" },
 { durationDays: 79, name: "Podróż Phileasa Fogga",url:"" },
 { durationDays: 65, name: "Okres inkubacji jaj pingwina cesarskiego",url:"" },
 { durationDays: 52, name: "ten potrzebny na dojrzewanie półtwardego sera gouda (Jong belegen)",url:"" },
