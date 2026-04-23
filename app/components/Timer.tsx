@@ -150,6 +150,7 @@ function Separator() {
 
 export default function Timer() {
   const [now, setNow] = useState(new Date());
+  const [eventImage, setEventImage] = useState<string | null>(null);
   const { isMuted } = useSound();
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -184,10 +185,33 @@ export default function Timer() {
     .filter((e) => e.durationDays >= days)
     .sort((a, b) => a.durationDays - b.durationDays)[0];
 
+  // AUTOMATYCZNE POBIERANIE ZDJĘCIA Z LINKU (META TAGI OPENGRAPH)
+  useEffect(() => {
+    if (!matchingEvent || !matchingEvent.url) {
+      setEventImage(null);
+      return;
+    }
+
+    let isMounted = true;
+    
+    // Zapytanie do darmowego API Microlink, które "odczytuje" obrazki z dowolnej strony internetowej
+    fetch(`https://api.microlink.io/?url=${encodeURIComponent(matchingEvent.url)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (isMounted && data.status === 'success' && data.data?.image?.url) {
+          setEventImage(data.data.image.url);
+        } else {
+          setEventImage(null);
+        }
+      })
+      .catch(() => setEventImage(null));
+
+    return () => { isMounted = false; };
+  }, [matchingEvent?.url]);
+
   return (
     <section
       ref={sectionRef}
-      // ZMIANA: Zastosowano min-h-[100svh] - zapobiega to "skakaniu" wysokości na mobilkach przy chowającym się pasku adresu!
       className="relative w-full min-h-[100svh] flex flex-col items-center justify-center px-4 py-24 md:py-32 text-center text-white overflow-hidden"
     >
       <div
@@ -228,15 +252,47 @@ export default function Timer() {
       </div>
 
       {matchingEvent && (
-        <motion.p 
+        <motion.div 
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           transition={{ duration: 1, delay: 0.5 }}
-          className="mt-16 font-serif text-lg md:text-xl text-[#FDF9EC] opacity-90 max-w-2xl leading-relaxed px-4 drop-shadow-md"
+          className="mt-16 flex flex-col items-center"
         >
-          Do naszego ślubu zostało już mniej czasu niż<br/>
-          <span className="font-medium italic">{matchingEvent.name}</span>
-        </motion.p>
+          <p className="font-serif text-lg md:text-xl text-[#FDF9EC] opacity-90 max-w-2xl leading-relaxed px-4 drop-shadow-md text-center mb-6">
+            Do naszego ślubu zostało już mniej czasu niż<br/>
+            <span className="font-medium italic">{matchingEvent.name}</span>
+          </p>
+          
+          {/* NOWE: Wyświetlanie automatycznie pobranego zdjęcia z linku */}
+          <AnimatePresence mode="wait">
+            {eventImage && (
+              <motion.div
+                key="link-image"
+                initial={{ opacity: 0, scale: 0.95, height: 0 }}
+                animate={{ opacity: 1, scale: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="w-full max-w-[280px] md:max-w-[360px] rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.3)] border border-white/20 mb-6 bg-white/5"
+              >
+                <img 
+                  src={eventImage} 
+                  alt="Podgląd wydarzenia" 
+                  className="w-full h-32 md:h-48 object-cover hover:scale-105 transition-transform duration-700" 
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
+          {matchingEvent.url && matchingEvent.url.length > 0 && (
+            <a 
+              href={matchingEvent.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-xs md:text-sm font-sans uppercase tracking-widest text-[#FDF9EC] opacity-90 hover:opacity-100 border border-[#FDF9EC]/40 hover:border-[#FDF9EC]/90 hover:bg-[#FDF9EC]/10 px-8 py-3 rounded-full transition-all duration-300 shadow-lg"
+            >
+              Dowiedz się więcej
+            </a>
+          )}
+        </motion.div>
       )}
     </section>
   );

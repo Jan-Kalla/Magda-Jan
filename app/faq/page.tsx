@@ -54,6 +54,11 @@ const faqData = [
     question: "Kiedy i gdzie pojawią się zdjęcia i film ze ślubu i wesela?",
     answer: "Jest to czas bliżej nieokreślony i przede wszystkim od nas niezależny, dlatego prosimy uzbroić się w cierpliwość. Wszystkie zdjęcia będą dostępne w zakładce 'Galeria' lecz filmu w całości udostępniać nie będziemy (kiedy już się pojawi, to zaprosimy na prywatne seanse😉)"
   },
+  {
+    id: 8,
+    question: "Czy jest jakiś dress code?",
+    answer: "Generalnie to raczej nie. Choć wiadomo - wesele, to wesele, niech będzie swobodnie ale jednak formalnie."
+  },
 ];
 
 export default function FaqPage() {
