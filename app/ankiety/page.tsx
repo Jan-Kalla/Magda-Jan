@@ -74,6 +74,8 @@ export default function MealSurveyPage() {
     children,
     childrenChoices,
     handleChildChoice,
+    childrenRsvp,            // <--- TO DODANO
+    handleChildRsvpChange,   // <--- TO DODANO
     handleSubmit,
     loading,
     message,
@@ -228,6 +230,8 @@ export default function MealSurveyPage() {
                           childrenDishes={childrenDishes}
                           childrenChoices={childrenChoices}
                           handleChildChoice={handleChildChoice}
+                          childrenRsvp={childrenRsvp}                  
+                          handleChildRsvpChange={handleChildRsvpChange} 
                         />
                       </motion.div>
 

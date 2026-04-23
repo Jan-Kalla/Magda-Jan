@@ -8,6 +8,8 @@ export default function ChildrenChoices({
   childrenDishes = [],
   childrenChoices,
   handleChildChoice,
+  childrenRsvp,           // Odbieramy nowe właściwości
+  handleChildRsvpChange,  // Odbieramy nowe właściwości
 }: any) {
   if (!children || children.length === 0) return null;
 
@@ -16,7 +18,6 @@ export default function ChildrenChoices({
     return (
       <label
         key={dish.name}
-        // ZMIANA: Dodano sm:min-h-[200px] md:min-h-[240px]
         className={`relative flex flex-col sm:flex-row items-stretch border rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 sm:min-h-[200px] md:min-h-[240px] ${
           isSelected
             ? "border-[#4c4a1e] bg-white/60 shadow-xl scale-[1.01]"
@@ -32,9 +33,7 @@ export default function ChildrenChoices({
           className="hidden"
         />
         
-        {/* ZDJĘCIE */}
         {dish.img && (
-          // ZMIANA: Zwiększono rozmiary zdjęcia
           <div className="relative w-full sm:w-48 md:w-56 flex-shrink-0 h-56 sm:h-auto">
             <img 
               src={dish.img} 
@@ -49,7 +48,6 @@ export default function ChildrenChoices({
           </div>
         )}
         
-        {/* TEKST */}
         <div className="p-6 md:p-10 flex items-center flex-1">
           <span className="font-serif text-lg md:text-2xl text-[#4c4a1e] text-center sm:text-left leading-relaxed">
             {dish.name}
@@ -63,15 +61,17 @@ export default function ChildrenChoices({
 
   return (
     <div className="mt-16">
+      <p className="font-serif italic text-lg md:text-xl text-[#4c4a1e]/80 text-center tracking-wide mb-4 px-4">
+        Dajcie znać czy pociechy będą z nami!
+      </p>
       <h2 className="font-serif text-3xl md:text-4xl font-light text-[#4c4a1e] mb-4 text-center uppercase tracking-[0.1em] border-t border-[#4c4a1e]/20 pt-10">
         Menu dla najmłodszych
       </h2>
       
       <p className="font-serif italic text-lg md:text-xl text-[#4c4a1e]/80 text-center tracking-wide mb-4 px-4">
-        Do każdego dania ze specjalnego menu dziecięcego zostanie również przypisany delikatny rosół drobiowy z makaronem, jako pierwsze danie
+        Do każdego dania ze specjalnego menu dziecięcego zostanie przypisany delikatny rosół drobiowy z makaronem.
       </p>
 
-      {/* NOWY PRZYCISK OPISU */}
       <div className="flex justify-center mb-8">
         <button
           type="button"
@@ -82,7 +82,6 @@ export default function ChildrenChoices({
         </button>
       </div>
 
-      {/* ROZWIJANA KARTA Z DŁUŻSZYM OPISEM */}
       <AnimatePresence>
         {isDescriptionOpen && (
           <motion.div
@@ -104,27 +103,71 @@ export default function ChildrenChoices({
         )}
       </AnimatePresence>
 
-      {children.map((child: any) => (
-        <div key={child.id} className="mb-12 bg-white/20 p-6 md:p-8 rounded-2xl border border-white/40">
-          <h3 className="font-serif text-2xl md:text-3xl text-[#4c4a1e] mb-6 pb-2 border-b border-[#4c4a1e]/20 inline-block">
-            {child.first_name} {child.last_name}
-          </h3>
+      {children.map((child: any) => {
+        // Sprawdzamy decyzję dla danego dziecka
+        const isAttending = childrenRsvp && childrenRsvp[child.id] === 'confirmed';
+        const isDeclined = childrenRsvp && childrenRsvp[child.id] === 'declined';
 
-          <h4 className="font-sans font-light uppercase tracking-widest text-[#4c4a1e]/80 text-sm mb-4 mt-4">
-            Dania standardowe
-          </h4>
-          <div className="space-y-4 mb-10">
-            {standardDishes.map((dish: any) => renderDishOption(dish, child.id))}
-          </div>
+        return (
+          <div key={child.id} className="mb-12 bg-white/20 p-6 md:p-8 rounded-2xl border border-white/40">
+            <h3 className="font-serif text-2xl md:text-3xl text-[#4c4a1e] mb-6 pb-2 border-b border-[#4c4a1e]/20 inline-block">
+              {child.first_name} {child.last_name}
+            </h3>
 
-          <h4 className="font-sans font-light uppercase tracking-widest text-[#4c4a1e]/80 text-sm mb-4">
-            Specjalne Menu Dziecięce
-          </h4>
-          <div className="space-y-4">
-            {childrenDishes.map((dish: any) => renderDishOption(dish, child.id))}
+            {/* ZMIANA: PRZYCISKI RSVP DLA DZIECKA */}
+            <div className="mb-8 flex flex-col sm:flex-row gap-4 w-full">
+               <button
+                  type="button"
+                  onClick={() => handleChildRsvpChange(child.id, 'confirmed')}
+                  className={`flex-1 px-4 py-4 rounded-xl font-sans uppercase tracking-widest text-sm transition-all ${
+                    isAttending
+                      ? "bg-[#4c4a1e] text-[#FDF9EC] shadow-lg scale-[1.02] border border-[#4c4a1e]"
+                      : "bg-white/40 text-[#4c4a1e] border border-[#4c4a1e]/20 hover:bg-white/60"
+                  }`}
+               >
+                  Będzie z nami na weselu
+               </button>
+               <button
+                  type="button"
+                  onClick={() => handleChildRsvpChange(child.id, 'declined')}
+                  className={`flex-1 px-4 py-4 rounded-xl font-sans uppercase tracking-widest text-sm transition-all ${
+                    isDeclined
+                      ? "bg-white/20 text-[#4c4a1e] opacity-80 shadow-inner scale-[0.98] border border-[#4c4a1e]/30"
+                      : "bg-white/40 text-[#4c4a1e] border border-[#4c4a1e]/20 hover:bg-white/60"
+                  }`}
+               >
+                  Niestety nie będzie obecny/a
+               </button>
+            </div>
+
+            {/* ZMIANA: Posiłki pokazują się tylko jeśli kliknięto "Będzie na weselu" */}
+            <AnimatePresence>
+              {isAttending && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden"
+                >
+                  <h4 className="font-sans font-light uppercase tracking-widest text-[#4c4a1e]/80 text-sm mb-4 mt-8">
+                    Dania standardowe
+                  </h4>
+                  <div className="space-y-4 mb-10">
+                    {standardDishes.map((dish: any) => renderDishOption(dish, child.id))}
+                  </div>
+
+                  <h4 className="font-sans font-light uppercase tracking-widest text-[#4c4a1e]/80 text-sm mb-4">
+                    Specjalne Menu Dziecięce
+                  </h4>
+                  <div className="space-y-4">
+                    {childrenDishes.map((dish: any) => renderDishOption(dish, child.id))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

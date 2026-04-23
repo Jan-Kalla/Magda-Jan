@@ -1,4 +1,3 @@
-// app/ankieta/hooks/useMealSurvey.ts
 "use client";
 
 import { useState, useEffect } from "react";
@@ -14,21 +13,39 @@ export function useMealSurvey() {
   const { guest } = useGuest();
   const [mainCourse, setMainCourse] = useState("");
   const [children, setChildren] = useState<any[]>([]);
+  
   const [childrenChoices, setChildrenChoices] = useState<Record<number, string>>({});
+  const [childrenRsvp, setChildrenRsvp] = useState<Record<number, string>>({});
+  
   const [results, setResults] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [plusOne, setPlusOne] = useState<{ firstName: string; lastName: string } | null>(null);
 
   useEffect(() => {
     const fetchChildren = async () => {
       if (!guest) return;
       const { data, error } = await supabase
         .from("relations")
-        .select("child:child_id (id, first_name, last_name)")
+        .select("child:child_id (id, first_name, last_name, rsvp_decision_made, rsvp_status)")
         .eq("parent_id", guest.id);
 
-      if (!error && data) setChildren(data.map((row) => row.child));
+      if (!error && data) {
+        // POPRAWKA: Definiujemy (row: any) i sprawdzamy, czy Supabase nie ubrało dziecka w tablicę
+        const fetchedChildren = data.map((row: any) => {
+            return Array.isArray(row.child) ? row.child[0] : row.child;
+        }).filter(Boolean); // filter(Boolean) usunie ewentualne puste wyniki
+        
+        setChildren(fetchedChildren);
+
+        const rsvpMap: Record<number, string> = {};
+        // POPRAWKA: Definiujemy (c: any), aby uciszyć nadgorliwego TypeScripta
+        fetchedChildren.forEach((c: any) => {
+           if (c && c.rsvp_decision_made && c.rsvp_status) {
+               rsvpMap[c.id] = c.rsvp_status;
+           }
+        });
+        setChildrenRsvp(rsvpMap);
+      }
     };
     fetchChildren();
   }, [guest]);
@@ -41,7 +58,7 @@ export function useMealSurvey() {
         .from("meal_choices")
         .select("main_course")
         .eq("guest_id", guest.id)
-        .single();
+        .maybeSingle();
 
       if (parentChoice) setMainCourse(parentChoice.main_course);
 
@@ -65,6 +82,10 @@ export function useMealSurvey() {
     setChildrenChoices((prev) => ({ ...prev, [childId]: dish }));
   };
 
+  const handleChildRsvpChange = (childId: number, status: string) => {
+    setChildrenRsvp((prev) => ({ ...prev, [childId]: status }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!guest) {
@@ -76,19 +97,33 @@ export function useMealSurvey() {
 
     const records = [
       { guest_id: guest.id, main_course: mainCourse },
-      ...children.map((child) => ({
-        guest_id: child.id,
-        main_course: childrenChoices[child.id] || null,
-      })),
+      ...children
+        .filter(child => childrenRsvp[child.id]) 
+        .map((child) => ({
+          guest_id: child.id,
+          main_course: childrenRsvp[child.id] === 'confirmed' ? (childrenChoices[child.id] || null) : null,
+        })),
     ];
 
-    const { error } = await supabase.from("meal_choices").upsert(records, { onConflict: "guest_id" });
+    const { error: mealError } = await supabase.from("meal_choices").upsert(records, { onConflict: "guest_id" });
 
-    if (error) {
-      console.error(error);
+    const updatePromises = children.map(child => {
+      if (childrenRsvp[child.id]) {
+        return supabase.from("guests").update({
+          rsvp_decision_made: true,
+          rsvp_status: childrenRsvp[child.id]
+        }).eq("id", child.id);
+      }
+      return Promise.resolve();
+    });
+
+    await Promise.all(updatePromises);
+
+    if (mealError) {
+      console.error(mealError);
       setMessage("Wystąpił błąd podczas zapisywania.");
     } else {
-      setMessage("Wybór został pomyślnie zapisany.");
+      setMessage("Twój wybór i informacje o obecności zostały pomyślnie zapisane!");
       if (guest.id === 1 || guest.id === 2) fetchResults();
     }
 
@@ -101,7 +136,9 @@ export function useMealSurvey() {
 
     const counts: Record<string, number> = {};
     data.forEach((row) => {
-      counts[row.main_course] = (counts[row.main_course] || 0) + 1;
+      if (row.main_course) {
+        counts[row.main_course] = (counts[row.main_course] || 0) + 1;
+      }
     });
     setResults(counts);
   };
@@ -117,6 +154,8 @@ export function useMealSurvey() {
     children,
     childrenChoices,
     handleChildChoice,
+    childrenRsvp,           
+    handleChildRsvpChange,  
     handleSubmit,
     loading,
     message,
