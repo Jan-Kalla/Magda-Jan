@@ -1,12 +1,24 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import AnimatedText from "./AnimatedText";
 import { CalendarDaysIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon, ChevronRightIcon, PauseIcon, PlayIcon } from "@heroicons/react/24/solid";
+import { useEffect, useRef, useState } from "react";
 import { useSound } from "@/app/context/SoundContext";
 
 export default function ChurchSection() {
   const { playSound } = useSound();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  
+  // Stan pauzy
+  const [isPaused, setIsPaused] = useState(false);
+  const isPausedRef = useRef(false);
+
+  // Refy do kontrolowania płynnego przewijania
+  const directionRef = useRef<1 | -1>(1); 
+  const speedMultiplierRef = useRef<number>(1); 
+  const exactScrollRef = useRef<number>(0); 
 
   const eventDetails = {
     title: "Ślub Magdy i Johnego",
@@ -66,35 +78,116 @@ export default function ChurchSection() {
     "/fotki/kosciol7.jpg"
   ];
 
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    let animationId: number;
+    const baseSpeed = 0.5;
+    exactScrollRef.current = el.scrollLeft;
+
+    const step = () => {
+      const halfWidth = el.scrollWidth / 2;
+      const isManuallyMoving = speedMultiplierRef.current > 1;
+
+      // Poruszamy się tylko jeśli NIE jest zapauzowane LUB jeśli użytkownik trzyma strzałkę
+      if (!isPausedRef.current || isManuallyMoving) {
+        exactScrollRef.current += baseSpeed * directionRef.current * speedMultiplierRef.current;
+
+        if (exactScrollRef.current >= halfWidth) {
+          exactScrollRef.current -= halfWidth;
+        } else if (exactScrollRef.current <= 0) {
+          exactScrollRef.current += halfWidth;
+        }
+
+        el.scrollLeft = exactScrollRef.current;
+      }
+
+      animationId = requestAnimationFrame(step);
+    };
+
+    animationId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animationId);
+  }, []);
+
+  const handlePointerDown = (direction: 1 | -1) => {
+    directionRef.current = direction;
+    speedMultiplierRef.current = 5;
+  };
+
+  const handlePointerUp = () => {
+    speedMultiplierRef.current = 1;
+  };
+
+  const togglePause = () => {
+    playSound("click");
+    const newPaused = !isPaused;
+    setIsPaused(newPaused);
+    isPausedRef.current = newPaused;
+  };
+
   return (
     <section className="relative z-10 px-6 lg:px-8 pt-[150px] lg:pt-[300px] pb-20 flex flex-col lg:flex-row items-center lg:items-stretch gap-10 lg:gap-16 text-[#F6f4e5]">
       
-      {/* --- MESH GRADIENT --- */}
       <div className="absolute top-[10%] right-[-10%] w-[40%] h-[300px] bg-[#A46C6E] blur-[120px] rounded-full mix-blend-multiply opacity-40 pointer-events-none" />
       <div className="absolute top-[20%] left-[-10%] w-[40%] h-[250px] bg-[#FFFDF9] blur-[120px] rounded-full opacity-30 pointer-events-none" />
 
-      {/* LEWA KOLUMNA - ZDJĘCIA */}
-      <div className="relative w-full lg:flex-[1.2] h-[300px] sm:h-[400px] lg:h-[600px] overflow-hidden rounded-xl shadow-2xl z-10 bg-black/10 backdrop-blur-sm">
-        <motion.div
-          className="flex h-full w-max"
-          animate={{ x: ["0%", "-50%"] }} 
-          transition={{ ease: "linear", duration: 120, repeat: Infinity }}
+      {/* LEWA KOLUMNA - GALERIA Z PAUZĄ */}
+      <div 
+        className="relative w-full lg:flex-[1.2] h-[300px] sm:h-[400px] lg:h-[600px] overflow-hidden rounded-xl shadow-2xl z-10 bg-black/10 backdrop-blur-sm group select-none"
+      >
+        {/* LEWA STRZAŁKA */}
+        <button
+          onPointerDown={() => handlePointerDown(-1)}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerUp}
+          className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/70 active:bg-black/90 active:scale-95 text-white p-2 md:p-3 rounded-full backdrop-blur-md opacity-80 md:opacity-0 group-hover:opacity-100 transition-all duration-200 touch-none"
+        >
+          <ChevronLeftIcon className="w-6 h-6 md:w-8 md:h-8 pointer-events-none" />
+        </button>
+
+        {/* PRZYCISK PAUZY (Centrum Dół) */}
+        <button
+          onClick={togglePause}
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 bg-black/40 hover:bg-black/70 active:bg-black/90 active:scale-95 text-white p-3 rounded-full backdrop-blur-md opacity-80 md:opacity-0 group-hover:opacity-100 transition-all duration-200 touch-none flex items-center justify-center"
+        >
+          {isPaused ? (
+            <PlayIcon className="w-6 h-6 md:w-7 md:h-7" />
+          ) : (
+            <PauseIcon className="w-6 h-6 md:w-7 md:h-7" />
+          )}
+        </button>
+
+        {/* KONTENER ZE ZDJĘCIAMI */}
+        <div
+          ref={scrollRef}
+          className="flex h-full w-full overflow-hidden pointer-events-none"
         >
           {[...churchImages, ...churchImages].map((src, i) => (
             <div key={i} className="relative h-full w-auto flex-shrink-0">
               <img
                 src={src}
                 alt="Kościół Apostołów Piotra i Pawła"
-                className="h-full w-auto object-contain"
+                className="h-full w-auto object-contain px-0.5 pointer-events-none"
+                draggable={false}
               />
             </div>
           ))}
-        </motion.div>
+        </div>
+
+        {/* PRAWA STRZAŁKA */}
+        <button
+          onPointerDown={() => handlePointerDown(1)}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerUp}
+          className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/70 active:bg-black/90 active:scale-95 text-white p-2 md:p-3 rounded-full backdrop-blur-md opacity-80 md:opacity-0 group-hover:opacity-100 transition-all duration-200 touch-none"
+        >
+          <ChevronRightIcon className="w-6 h-6 md:w-8 md:h-8 pointer-events-none" />
+        </button>
       </div>
 
       {/* PRAWA KOLUMNA - TEKST */}
       <div className="w-full lg:flex-[1] flex flex-col items-center lg:items-start text-center lg:text-left relative z-10 pt-2">
-        
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -108,7 +201,6 @@ export default function ChurchSection() {
               delay={0.2} 
               mode="line" 
           />
-          
           <AnimatedText 
               text={"rodzinny kościół Pana\u00A0Młodego"} 
               className="font-serif italic font-light text-lg md:text-xl opacity-80 text-[#F6f4e5]" 
@@ -118,7 +210,6 @@ export default function ChurchSection() {
         </motion.div>
 
         <div className="mt-4 md:mt-12 flex flex-col items-center lg:items-start w-full">
-          {/* ZMIANA: "font-normal" odpali wersję Regular (400), a na spanach daliśmy "font-medium" (500) dla wariantu Medium */}
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -177,7 +268,6 @@ export default function ChurchSection() {
           />
         </div>
       </div>
-
     </section>
   );
 }
