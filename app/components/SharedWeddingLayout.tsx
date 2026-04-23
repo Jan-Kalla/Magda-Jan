@@ -16,6 +16,8 @@ import { useEffect, useState } from "react";
 import CustomCursor from "./CustomCursor";
 import ProfilesSection from "./ProfilesSection";
 import { usePathname } from "next/navigation";
+import VisitTracker from "@/app/components/VisitTracker";
+import AdminStats from "@/app/components/AdminStats";
 
 export default function SharedWeddingLayout({ 
   showNavbar = true, 
@@ -102,9 +104,12 @@ export default function SharedWeddingLayout({
 
   const isAppLoading = !isMounted || loading || !ready || !bgImageLoaded || !heroImageLoaded;
 
+
   return (
     <>
       <CustomCursor />
+
+      <VisitTracker />
 
       <AnimatePresence>
         {isAppLoading && (
@@ -376,6 +381,8 @@ export default function SharedWeddingLayout({
                   <div className="relative z-10">
                     <ChurchSection />
                     <MapSection />
+                    <AdminStats />
+                    
                     <Footer />
                   </div>
                 </div>

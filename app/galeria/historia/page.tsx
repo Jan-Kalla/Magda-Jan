@@ -37,14 +37,13 @@ export default function HistoriaPage() {
   const { guest, loading: guestLoading } = useGuest();
   const router = useRouter();
 
-  const [beforeWeMet, setBeforeWeMet] = useState<HistoryEvent[]>([]);
+  const [magdaHistory, setMagdaHistory] = useState<HistoryEvent[]>([]);
+  const [janHistory, setJanHistory] = useState<HistoryEvent[]>([]);
   const [sharedHistory, setSharedHistory] = useState<HistoryEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-
-  const [columnsCount, setColumnsCount] = useState(3);
 
   // === OBSŁUGA STRZAŁKI WSTECZ ===
   useEffect(() => {
@@ -61,40 +60,36 @@ export default function HistoriaPage() {
   }, []);
 
   useEffect(() => {
-    const allowedCodes = ["FC3818", "8DD06D"];
-    if (!guestLoading && guest && !allowedCodes.includes(guest.code)) {
-      router.replace("/galeria");
+    if (guestLoading) return;
+    if (!guest) {
+      router.replace("/");
     }
   }, [guest, guestLoading, router]);
 
   useEffect(() => {
-    const updateCols = () => {
-      if (window.innerWidth >= 1024) setColumnsCount(3);
-      else if (window.innerWidth >= 640) setColumnsCount(2);
-      else setColumnsCount(1); 
-    };
-    updateCols();
-    window.addEventListener("resize", updateCols);
-    return () => window.removeEventListener("resize", updateCols);
-  }, []);
-
-  useEffect(() => {
-    const allowedCodes = ["FC3818", "8DD06D"];
-    if (!guest || !allowedCodes.includes(guest.code)) return;
+    if (!guest) return;
 
     const fetchHistory = async () => {
       const { data, error } = await supabase
         .from("history_events")
-        .select("*")
-        .order("year", { ascending: true }); 
+        .select("*");
 
       if (data) {
-        const combinedEarly = data
-            .filter(item => item.person === 'magda' || item.person === 'jan')
-            .sort((a, b) => parseInt(a.year) - parseInt(b.year));
+        const magda = data
+            .filter(item => item.person === 'magda')
+            .sort((a, b) => a.img_url.localeCompare(b.img_url)); 
+
+        const jan = data
+            .filter(item => item.person === 'jan')
+            .sort((a, b) => a.img_url.localeCompare(b.img_url)); 
+
+        const shared = data
+            .filter(item => item.person === 'shared')
+            .sort((a, b) => parseInt(a.year) - parseInt(b.year)); 
         
-        setBeforeWeMet(combinedEarly);
-        setSharedHistory(data.filter(item => item.person === 'shared'));
+        setMagdaHistory(magda);
+        setJanHistory(jan);
+        setSharedHistory(shared);
       }
       setLoading(false);
     };
@@ -107,13 +102,11 @@ export default function HistoriaPage() {
     return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/gallery/${pathOrUrl}`;
   };
 
-  const allowedCodes = ["FC3818", "8DD06D"];
-  if (!guestLoading && guest && !allowedCodes.includes(guest.code)) return null; 
+  if (guestLoading || !guest) return null; 
 
-  const allMedia = [...beforeWeMet, ...sharedHistory];
+  const allMedia = [...magdaHistory, ...janHistory, ...sharedHistory];
   const slides = allMedia.map(m => ({ src: getImageUrl(m.img_url) }));
 
-  // NOWE FUNKCJE OTWIERANIA/ZAMYKANIA
   const handleOpenLightbox = (item: HistoryEvent) => {
     const index = allMedia.findIndex(m => m.id === item.id);
     if (index !== -1) {
@@ -131,21 +124,14 @@ export default function HistoriaPage() {
     }
   };
 
-  const distributeToColumns = (items: HistoryEvent[]) => {
-    const cols: HistoryEvent[][] = Array.from({ length: columnsCount }, () => []);
-    items.forEach((item, index) => {
-      cols[index % columnsCount].push(item);
-    });
-    return cols;
-  };
-
   const GalleryCard = ({ item }: { item: HistoryEvent }) => (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       whileHover={{ y: -5 }}
-      className="mb-6 md:mb-8 bg-white p-3 md:p-4 pb-6 md:pb-8 rounded-sm shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-[#4c4a1e]/5 cursor-pointer group w-full min-w-0"
+      // ZMIANA: Usunięto break-inside-avoid i mb-8, bo CSS Grid sam pilnuje odstępów przez gap
+      className="bg-white p-3 md:p-4 pb-6 md:pb-8 rounded-sm shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-[#4c4a1e]/5 cursor-pointer group w-full"
       onClick={() => handleOpenLightbox(item)}
     >
       <div className="relative w-full rounded-sm overflow-hidden bg-gray-100">
@@ -216,26 +202,47 @@ export default function HistoriaPage() {
               </div>
             ) : (
               <>
-                {beforeWeMet.length > 0 && (
+                {/* === ZANIM SIĘ SPOTKALIŚMY === */}
+                {(magdaHistory.length > 0 || janHistory.length > 0) && (
                     <div className="mb-32">
                         <div className="text-center mb-16">
                             <h2 className="font-script text-5xl md:text-6xl text-[#4c4a1e] mb-4 drop-shadow-sm">Zanim się spotkaliśmy...</h2>
                             <div className="h-[1px] w-24 bg-[#4c4a1e]/30 mx-auto"></div>
                         </div>
 
-                        <div className="flex gap-6 md:gap-8 items-start w-full">
-                            {distributeToColumns(beforeWeMet).map((column, colIndex) => (
-                                <div key={colIndex} className="flex flex-col flex-1 gap-0 min-w-0">
-                                    {column.map((item) => (
-                                        <GalleryCard key={item.id} item={item} />
-                                    ))}
-                                </div>
-                            ))}
-                        </div>
+                        {/* SEKCJA MAGDY */}
+                        {magdaHistory.length > 0 && (
+                          <div className="mb-20">
+                              <h3 className="font-serif text-3xl md:text-4xl text-[#C97B78] italic tracking-wider mb-8 md:mb-12 border-b border-[#C97B78]/20 pb-4 inline-block">
+                                Magda
+                              </h3>
+                              {/* ZMIANA: Niezawodny CSS Grid ładujący zdjęcia wierszami (od lewej do prawej) */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 items-start w-full">
+                                  {magdaHistory.map((item) => (
+                                      <GalleryCard key={item.id} item={item} />
+                                  ))}
+                              </div>
+                          </div>
+                        )}
+
+                        {/* SEKCJA JANA */}
+                        {janHistory.length > 0 && (
+                          <div className="mb-20">
+                              <h3 className="font-serif text-3xl md:text-4xl text-[#4E0113] italic tracking-wider mb-8 md:mb-12 border-b border-[#4E0113]/20 pb-4 inline-block">
+                                Jan
+                              </h3>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 items-start w-full">
+                                  {janHistory.map((item) => (
+                                      <GalleryCard key={item.id} item={item} />
+                                  ))}
+                              </div>
+                          </div>
+                        )}
                     </div>
                 )}
 
-                {beforeWeMet.length > 0 && sharedHistory.length > 0 && (
+                {/* SERDUSZKO ODDZIELAJĄCE */}
+                {(magdaHistory.length > 0 || janHistory.length > 0) && sharedHistory.length > 0 && (
                     <motion.div 
                         initial={{ scale: 0, opacity: 0 }}
                         whileInView={{ scale: 1, opacity: 1 }}
@@ -250,6 +257,7 @@ export default function HistoriaPage() {
                     </motion.div>
                 )}
 
+                {/* === NASZA WSPÓLNA DROGA === */}
                 {sharedHistory.length > 0 && (
                     <div>
                         <div className="text-center mb-16">
@@ -257,13 +265,9 @@ export default function HistoriaPage() {
                             <div className="h-[1px] w-24 bg-[#C97B78]/30 mx-auto"></div>
                         </div>
 
-                        <div className="flex gap-6 md:gap-8 items-start w-full">
-                            {distributeToColumns(sharedHistory).map((column, colIndex) => (
-                                <div key={colIndex} className="flex flex-col flex-1 gap-0 min-w-0">
-                                    {column.map((item) => (
-                                        <GalleryCard key={item.id} item={item} />
-                                    ))}
-                                </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 items-start w-full">
+                            {sharedHistory.map((item) => (
+                                <GalleryCard key={item.id} item={item} />
                             ))}
                         </div>
                     </div>
@@ -282,7 +286,7 @@ export default function HistoriaPage() {
             index={lightboxIndex}
             slides={slides}
             carousel={{ finite: false }}
-            plugins={[Zoom]} // <--- Uruchomienie pluginu Zoom!
+            plugins={[Zoom]}
         />
       </div>
     </RequireGuest>

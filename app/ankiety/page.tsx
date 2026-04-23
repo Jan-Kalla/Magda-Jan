@@ -210,7 +210,7 @@ export default function MealSurveyPage() {
                         className="font-serif italic text-lg md:text-xl text-[#4c4a1e]/80 text-center tracking-wide mb-12"
                         variants={fadeUp}
                       >
-                        Prosimy o ostateczny wybór najpóźniej do <strong className="font-bold text-[#4c4a1e]">10 lipca</strong>
+                        Prosimy o ostateczny wybór najpóźniej do <strong className="font-bold text-[#4c4a1e]">3 lipca</strong>
                       </motion.p>
 
                       <motion.div variants={fadeInLeft}>

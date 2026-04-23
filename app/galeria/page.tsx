@@ -112,10 +112,7 @@ export default function GalleryPage() {
                   <AlbumCard 
                       album={album} 
                       onClick={(clickedAlbum) => {
-                        const allowedCodes = ["FC3818", "8DD06D"];
-                        const isVip = guest?.code && allowedCodes.includes(guest.code);
-
-                        if (clickedAlbum.id === "us" && isVip) {
+                        if (clickedAlbum.id === "us" ) {
                           router.push("/galeria/historia");
                         } else if (clickedAlbum.id === "moments") {
                           // ZMIANA: Skoro użytkownik widzi ten kafel (hasAccess go przepuściło), 

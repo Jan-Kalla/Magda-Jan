@@ -36,8 +36,11 @@ export default function MobileControls() {
 
   const bottomButtonRef = useRef<HTMLDivElement>(null);
   
-  // ZMIANA: Dodajemy drugiego Refa, by namierzyć ranking na dole
-  const leaderboardRef = useRef<HTMLDivElement>(null); 
+  // ZMIANA: Ref będzie wskazywał teraz na element H2 (Nagłówek) wewnątrz Leaderboardu
+  const leaderboardHeaderRef = useRef<HTMLHeadingElement>(null); 
+  
+  // ZMIANA: Pamiętamy, czy zrobiliśmy już wielki scroll do rankingu
+  const [hasScrolledToLeaderboard, setHasScrolledToLeaderboard] = useState(false);
 
   useEffect(() => {
     let raf = 0;
@@ -50,7 +53,7 @@ export default function MobileControls() {
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  // ZMIANA: Scrollowanie do dolnego przycisku (działa przy wejściu oraz po wciśnięciu Restart!)
+  // Scroll do przycisków startowych na telefonie (na starcie i po restarcie gry)
   useEffect(() => {
     if (isMobile && bottomButtonRef.current && !isGameOver) {
       const timer = setTimeout(() => {
@@ -63,18 +66,19 @@ export default function MobileControls() {
     }
   }, [isMobile, isGameOver]);
 
-  // ZMIANA: Płynny scroll do rankingu dokładnie 1 sekundę po Game Over
+  // ZMIANA: Jednorazowy scroll celujący idealnie w nagłówek
   useEffect(() => {
-    if (isMobile && isGameOver && leaderboardRef.current) {
+    if (isMobile && isGameOver && leaderboardHeaderRef.current && !hasScrolledToLeaderboard) {
       const timer = setTimeout(() => {
-        leaderboardRef.current?.scrollIntoView({ 
+        leaderboardHeaderRef.current?.scrollIntoView({ 
           behavior: "smooth", 
-          block: "start" // Ustawia ranking tak, by nagłówek był na samej górze ekranu
+          block: "start" // Góra ekranu zatrzyma się na napisie "Ranking Tetris" (plus mały margines ze scroll-mt)
         });
+        setHasScrolledToLeaderboard(true); // Oznaczamy, że akcja została wykonana
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [isMobile, isGameOver]);
+  }, [isMobile, isGameOver, hasScrolledToLeaderboard]);
 
   if (!isMobile) return null;
 
@@ -208,9 +212,9 @@ export default function MobileControls() {
         </button>
       )}
 
-      {/* ZMIANA: Przypięcie nowego refa do sekcji z rankingiem */}
-      <div ref={leaderboardRef} className="mt-6 w-full px-6 pb-12">
-        <TetrisLeaderboard />
+      {/* Przekazujemy refa z dopasowaniem do wnętrza komponentu */}
+      <div className="mt-6 w-full px-6 pb-12">
+        <TetrisLeaderboard ref={leaderboardHeaderRef} />
       </div>
 
     </div>

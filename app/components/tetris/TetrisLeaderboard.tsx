@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -9,7 +9,7 @@ const supabase = createClient(
 
 const medalIcons = ["🥇", "🥈", "🥉"];
 
-export default function TetrisLeaderboard() {
+const TetrisLeaderboard = forwardRef<HTMLHeadingElement>((props, ref) => {
   const [scores, setScores] = useState<any[]>([]);
 
   const fetchScores = async () => {
@@ -24,7 +24,6 @@ export default function TetrisLeaderboard() {
   useEffect(() => {
     fetchScores();
 
-    // nasłuchuj eventu z TetrisGame
     const handler = () => {
       fetchScores();
     };
@@ -37,7 +36,11 @@ export default function TetrisLeaderboard() {
 
   return (
     <div className="panel-card w-full max-w-none mx-auto mt-2 px-10 py-6">
-      <h2 className="text-xl font-extrabold mb-6 text-white text-center tracking-wide">
+      {/* ZMIANA: scroll-mt-28 gwarantuje, że zatrzyma się 112px niżej, omijając Navbar! */}
+      <h2 
+        ref={ref} 
+        className="text-xl font-extrabold mb-6 text-white text-center tracking-wide scroll-mt-28"
+      >
         Ranking Tetris
       </h2>
       <div className="flex flex-col gap-2 w-full">
@@ -62,15 +65,25 @@ export default function TetrisLeaderboard() {
               {row.guest?.first_name} {row.guest?.last_name}
             </div>
             
-            {/* ZMIANA: Dodano flex-col na telefonach (spycha level pod score) oraz flex-row na większych ekranach */}
-            <div className="flex flex-col sm:flex-row items-end sm:items-center sm:gap-4 text-white text-sm shrink-0">
-              <span>Score: {row.score}</span>
-              <span>Level: {row.level}</span>
+            <div className="flex flex-col items-end md:flex-row md:items-center gap-1 md:gap-4 shrink-0">
+              <span className="text-white/80 font-mono text-sm uppercase tracking-wider">
+                Lvl {row.level}
+              </span>
+              <span className="text-white font-mono font-bold text-base bg-black/40 px-2 py-0.5 rounded border border-white/10">
+                {row.score}
+              </span>
             </div>
-            
           </div>
         ))}
+        {scores.length === 0 && (
+          <div className="text-center text-white/50 italic py-4">
+            Brak wyników. Bądź pierwszy!
+          </div>
+        )}
       </div>
     </div>
   );
-}
+});
+
+TetrisLeaderboard.displayName = 'TetrisLeaderboard';
+export default TetrisLeaderboard;
