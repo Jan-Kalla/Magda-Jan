@@ -2,8 +2,11 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { events } from "../data/events";
+// ZMIANA: Importujemy obie listy wydarzeń
+import { events, specialEvents } from "../data/events";
 import { useSound } from "@/app/context/SoundContext";
+// ZMIANA: Importujemy hooka dostępu do danych gościa
+import { useGuest } from "@/app/context/GuestContext";
 
 // --- POJEDYNCZA CYFRA ---
 interface FlipDigitProps {
@@ -149,6 +152,8 @@ function Separator() {
 }
 
 export default function Timer() {
+  // ZMIANA: Wyciągamy guest z kontekstu użytkownika
+  const { guest } = useGuest();
   const [now, setNow] = useState(new Date());
   const [eventImage, setEventImage] = useState<string | null>(null);
   const { isMuted } = useSound();
@@ -181,11 +186,15 @@ export default function Timer() {
   const minutes = Math.max(Math.floor((diff / (1000 * 60)) % 60), 0);
   const seconds = Math.max(Math.floor((diff / 1000) % 60), 0);
 
-  const matchingEvent = events
+  // ZMIANA: Wybieramy listę eventów na podstawie kodu logowania użytkownika
+  const specialCodes = ["484FD4", "077AB5", "FD6E2A"];
+  const activeEvents = guest && specialCodes.includes(guest.code) ? specialEvents : events;
+
+  // Filtrujemy względem wybranej powyżej listy
+  const matchingEvent = activeEvents
     .filter((e) => e.durationDays >= days)
     .sort((a, b) => a.durationDays - b.durationDays)[0];
 
-  // AUTOMATYCZNE POBIERANIE ZDJĘCIA Z LINKU (META TAGI OPENGRAPH)
   useEffect(() => {
     if (!matchingEvent || !matchingEvent.url) {
       setEventImage(null);
@@ -194,7 +203,6 @@ export default function Timer() {
 
     let isMounted = true;
     
-    // Zapytanie do darmowego API Microlink, które "odczytuje" obrazki z dowolnej strony internetowej
     fetch(`https://api.microlink.io/?url=${encodeURIComponent(matchingEvent.url)}`)
       .then(res => res.json())
       .then(data => {
@@ -263,7 +271,6 @@ export default function Timer() {
             <span className="font-medium italic">{matchingEvent.name}</span>
           </p>
           
-          {/* NOWE: Wyświetlanie automatycznie pobranego zdjęcia z linku */}
           <AnimatePresence mode="wait">
             {eventImage && (
               <motion.div
