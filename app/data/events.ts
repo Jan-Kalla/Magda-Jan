@@ -33,14 +33,15 @@ export const events = [
 ];
 
 export const specialEvents = [
-  { durationDays: 67, name: "trwało Powstanie Warszawskie, wymierzone wojskowo przeciwko Niemcom", url: "https://pl.wikipedia.org/wiki/Powstanie_warszawskie" },
+  { durationDays: 68, name: "trwały nieprzerwane, dokonywane noc w noc dywanowe naloty bombowe Luftwaffe na Londyn w ramach operacji »Blitz« (zanim pogoda wymusiła pierwszą dobę przerwy)", url: "https://pl.wikipedia.org/wiki/Blitz_(naloty)" },
+  { durationDays: 53, name: "minęły od mianowania Adolfa Hitlera kanclerzem (30 stycznia 1933) do uchwalenia »ustawy o pełnomocnictwach«, która całkowicie zniszczyła Republikę Weimarską i dała mu dyktatorską władzę", url: "https://pl.wikipedia.org/wiki/Ustawa_o_pe%C5%82nomocnictwach" },
   { durationDays: 49, name: "trwał areszt Benito Mussoliniego po jego obaleniu w 1943 r., zanim został brawurowo odbity przez niemieckich komandosów z hotelu na Gran Sasso", url: "https://pl.wikipedia.org/wiki/Operacja_Eiche" },
   { durationDays: 46, name: "trwała błyskawiczna Kampania Francuska (Fall Gelb), która zakończyła się upadkiem III Republiki Francuskiej", url: "https://pl.wikipedia.org/wiki/Kampania_francuska_1940" },
   { durationDays: 41, name: "trwało bezpośrednie dowodzenie feldmarszałka Erwina Rommela obroną Normandii, przerwane ciężkimi ranami po ostrzelaniu jego samochodu przez alianckie myśliwce", url: "https://pl.wikipedia.org/wiki/Erwin_Rommel" },
   { durationDays: 39, name: "trwała Operacja Husky – inwazja aliantów na Sycylię, która ostatecznie obaliła reżim Benito Mussoliniego we Włoszech", url: "https://pl.wikipedia.org/wiki/Operacja_Husky" },
   { durationDays: 36, name: "trwała Kampania Wrześniowa (Fall Weiss), rozpoczynająca II wojnę światową na skutek agresji hitlerowskich Niemiec", url: "https://pl.wikipedia.org/wiki/Kampania_wrze%C5%9Bniowa" },
   { durationDays: 28, name: "trwało krwawo stłumione przez SS Powstanie w getcie warszawskim", url: "https://pl.wikipedia.org/wiki/Powstanie_w_getcie_warszawskim" },
-  { durationDays: 23, name: "trwał urząd Karla Dönitza jako prezydenta Rzeszy – namaszczony przez Hitlera admirał dowodził tzw. rządem we Flensburgu aż do aresztowania", url: "https://pl.wikipedia.org/wiki/Rz%C4%85d_we_Flensburgu" },
+  { durationDays: 23, name: "trwał urząd Karla Dönitza jako prezydenta Rzeszy – namaszczony przez Hitlera admirał dowodził tzw. rządem we Flensburgu aż do aresztowania", url: "https://polskieradio24.pl/artykul/2738419,rzad-karla-donitza-czyli-ostatnie-tchnienie-iii-rzeszy" },
   { durationDays: 16, name: "trwała Operacja Berlińska, decydująca bitwa o stolicę III Rzeszy prowadząca do samobójstwa Adolfa Hitlera", url: "https://pl.wikipedia.org/wiki/Operacja_berli%C5%84ska" },
   { durationDays: 15, name: "ukrywał się Heinrich Himmler pod fałszywym nazwiskiem, po tym jak po kapitulacji Rzeszy próbował wtopić się w tłum uciekinierów", url: "https://pl.wikipedia.org/wiki/Heinrich_Himmler" },
   { durationDays: 14, name: "trwało oczekiwanie Hermanna Göringa na egzekucję po usłyszeniu wyroku w Norymberdze – ostatecznie uniknął szubienicy połykając ukrytą fiolkę z cyjankiem", url: "https://pl.wikipedia.org/wiki/Hermann_G%C3%B6ring" },
@@ -55,10 +56,10 @@ export const specialEvents = [
   { durationDays: 3, name: "trwał pokazowy proces w Weronie, po którym na rozkaz Mussoliniego rozstrzelano jego własnego zięcia, Galeazzo Ciano, za zdradę reżimu", url: "https://pl.wikipedia.org/wiki/Proces_w_Weronie" },
   { durationDays: 2.5, name: "trwał Marsz na Rzym, na skutek którego Benito Mussolini zdobył władzę i zapoczątkował erę faszyzmu we Włoszech", url: "https://pl.wikipedia.org/wiki/Marsz_na_Rzym" },
   { durationDays: 2, name: "trwała »Noc kryształowa« (Kristallnacht), zapoczątkowująca fizyczny pogrom ludności żydowskiej w nazistowskich Niemczech", url: "https://pl.wikipedia.org/wiki/Noc_kryszta%C5%82owa" },
-  { durationDays: 1.6, name: "trwało małżeństwo Adolfa Hitlera i Evy Braun, którzy wzięli cichy ślub w berlińskim bunkrze na niespełna 40 godzin przed wspólnym samobójstwem", url: "https://pl.wikipedia.org/wiki/Eva_Braun" },
-  { durationDays: 1.5, name: "trwał Pucz Monachijski (tzw. pucz piwniany), czyli nieudana próba zamachu stanu Hitlera i Ludendorffa z 1923 roku", url: "https://pl.wikipedia.org/wiki/Pucz_monachijski" },
+  { durationDays: 1.7, name: "trwało małżeństwo Adolfa Hitlera i Evy Braun, którzy wzięli cichy ślub w berlińskim bunkrze na niespełna 40 godzin przed wspólnym samobójstwem", url: "https://pl.wikipedia.org/wiki/Eva_Braun" },
+  { durationDays: 1.3, name: "trwał Pucz Monachijski (tzw. pucz piwniany), czyli nieudana próba zamachu stanu Hitlera i Ludendorffa z 1923 roku", url: "https://pl.wikipedia.org/wiki/Pucz_monachijski" },
   { durationDays: 1, name: "pełnił funkcję Kanclerza III Rzeszy Joseph Goebbels – urząd objął tuż po śmierci Hitlera, po czym otruł swoje dzieci i wraz z żoną popełnił samobójstwo", url: "https://pl.wikipedia.org/wiki/Joseph_Goebbels" },
   { durationDays: 0.5, name: "trwała operacja Eiche – uwolnienie Benito Mussoliniego z niewoli na Gran Sasso przez spadochroniarzy gen. Studenta i Otto Skorzenego", url: "https://pl.wikipedia.org/wiki/Operacja_Eiche" },
   { durationDays: 0.21, name: "trwał samotny, potajemny lot Rudolfa Hessa (zastępcy Hitlera) myśliwcem do Szkocji w rzekomej misji pokojowej, po którym został uwięziony na resztę życia", url: "https://pl.wikipedia.org/wiki/Rudolf_Hess" },
-  { durationDays: 0.2, name: "trwała prowokacja gliwicka z 31 sierpnia 1939 r. – mistyfikacja niemieckiego SD mająca posłużyć jako bezpośredni pretekst do agresji na Polskę", url: "https://pl.wikipedia.org/wiki/Prowokacja_gliwicka" },
+  { durationDays: 0.1, name: "trwała prowokacja gliwicka z 31 sierpnia 1939 r. – mistyfikacja niemieckiego SD mająca posłużyć jako bezpośredni pretekst do agresji na Polskę", url: "https://pl.wikipedia.org/wiki/Prowokacja_gliwicka" },
 ];
